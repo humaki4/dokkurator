@@ -110,3 +110,5 @@ Dokkurator is currently in an early development phase and contribution processes
 Contribution guidelines, public APIs and release processes will be documented as the project matures.
 
 For now, architectural decisions and open questions are intentionally documented in the repository to make the development process transparent.
+.
+.
