@@ -1,0 +1,30 @@
+{
+  "name": "dokkurator",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nx run-many -t build",
+    "test": "nx run-many -t test",
+    "typecheck": "nx run-many -t typecheck",
+    "lint": "nx run-many -t lint",
+    "check": "nx run-many -t typecheck,lint,test",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "smoke": "nx run @dokkurator/cli:build && pnpm --filter @dokkurator/cli start"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.3",
+    "eslint": "^10.10.0",
+    "nx": "^23.2.1",
+    "prettier": "^3.9.8",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.70.0",
+    "vitest": "^5.0.1"
+  },
+  "packageManager": "pnpm@10.32.1",
+  "engines": {
+    "node": ">=22.13.0 <23 || >=24.0.0",
+    "pnpm": ">=10 <11"
+  }
+}
