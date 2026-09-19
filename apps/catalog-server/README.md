@@ -3,6 +3,9 @@
 Fastify service for the Dokkurator catalog. The service currently exposes only
 its prepared OpenAPI contract; catalog routes will be added later.
 
+Features live in `src/features/<feature>/index.ts` and are discovered through
+`@fastify/autoload`. Tests are colocated with the source they cover.
+
 ## Development
 
 Copy `.env.example` to `.env` when local values should differ from the defaults,

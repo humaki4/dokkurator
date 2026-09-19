@@ -10,10 +10,18 @@ const app = await buildApp();
 
 try {
   await app.ready();
+  const response = await app.inject({ method: "GET", url: "/openapi.json" });
+
+  if (response.statusCode !== 200) {
+    throw new Error(
+      `Failed to generate OpenAPI document: ${response.statusCode}`,
+    );
+  }
+
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(
     outputPath,
-    `${JSON.stringify(app.swagger(), null, 2)}\n`,
+    `${JSON.stringify(response.json(), null, 2)}\n`,
     "utf8",
   );
 } finally {
