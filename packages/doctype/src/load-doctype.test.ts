@@ -9,6 +9,7 @@ import type {
   SourceDocument,
   SourceEntry,
 } from "./source-adapter.js";
+import { SourceNotFoundError } from "./source-adapter.js";
 
 test("loads all DocType files through the source adapter without parsing", async () => {
   const documents = new Map<string, SourceDocument>([
@@ -38,6 +39,27 @@ test("loads all DocType files through the source adapter without parsing", async
     rules: documents.get("decision/rules.yml"),
   });
   expect(source.read).toHaveBeenCalledTimes(3);
+});
+
+test("loads a DocType without optional template and rules", async () => {
+  const definition = document(
+    "decision/definition.yml",
+    "name: decision\nmetadata:\n  type: object\n",
+  );
+  const source: SourceAdapter = {
+    list: vi.fn(),
+    read: vi.fn(async (id) => {
+      if (id === definition.id) return definition;
+      throw new SourceNotFoundError(id);
+    }),
+  };
+
+  await expect(loadDocType(source, "decision")).resolves.toEqual({
+    directory: "decision",
+    definition,
+    template: undefined,
+    rules: undefined,
+  });
 });
 
 test("loads every DocType from the default directory", async () => {

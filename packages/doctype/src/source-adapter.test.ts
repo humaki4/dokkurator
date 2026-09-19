@@ -2,7 +2,7 @@ import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, expect, test } from "vitest";
-import { FileSystemSource } from "./source-adapter.js";
+import { FileSystemSource, SourceNotFoundError } from "./source-adapter.js";
 
 const temporaryDirectories: string[] = [];
 
@@ -65,5 +65,18 @@ test("rejects paths outside the configured source root", async () => {
 
   await expect(source.read("../outside.md")).rejects.toThrow(
     "Source path escapes its root",
+  );
+});
+
+test("reports a missing source with a portable error", async () => {
+  const root = await mkdtemp(join(tmpdir(), "dokkurator-source-"));
+  temporaryDirectories.push(root);
+  const source = new FileSystemSource({ root });
+
+  await expect(source.read("missing.md")).rejects.toEqual(
+    expect.objectContaining<Partial<SourceNotFoundError>>({
+      name: "SourceNotFoundError",
+      sourceId: "missing.md",
+    }),
   );
 });

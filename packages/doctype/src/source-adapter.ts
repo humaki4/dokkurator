@@ -30,6 +30,16 @@ export interface SourceAdapter {
   read(id: SourceId): Promise<SourceDocument>;
 }
 
+export class SourceNotFoundError extends Error {
+  constructor(
+    readonly sourceId: SourceId,
+    options?: ErrorOptions,
+  ) {
+    super(`Source not found: ${sourceId}`, options);
+    this.name = "SourceNotFoundError";
+  }
+}
+
 export interface FileSystemSourceOptions {
   root: string;
 }
@@ -54,10 +64,20 @@ export class FileSystemSource implements SourceAdapter {
     const path = this.resolveId(id);
     const normalizedId = this.toSourceId(path);
 
+    let content: string;
+    try {
+      content = await readFile(path, "utf8");
+    } catch (error) {
+      if (isFileNotFoundError(error)) {
+        throw new SourceNotFoundError(normalizedId, { cause: error });
+      }
+      throw error;
+    }
+
     return {
       id: normalizedId,
       path: normalizedId,
-      content: await readFile(path, "utf8"),
+      content,
       source: {
         kind: "filesystem",
         path: normalizedId,
@@ -103,4 +123,8 @@ export class FileSystemSource implements SourceAdapter {
   private toSourceId(path: string): SourceId {
     return relative(this.root, path).split(sep).join("/");
   }
+}
+
+function isFileNotFoundError(error: unknown): error is NodeJS.ErrnoException {
+  return error instanceof Error && "code" in error && error.code === "ENOENT";
 }

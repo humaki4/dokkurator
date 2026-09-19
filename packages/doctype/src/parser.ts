@@ -59,15 +59,13 @@ export function parseDocType(source: LoadedDocType): ParsedDocType {
     validateDefinition,
     "Invalid DocType definition",
   );
-  const ruleFile = parseAndValidate(
-    source.rules,
-    validateRules,
-    "Invalid DocType rules",
-  );
+  const ruleFile = source.rules
+    ? parseAndValidate(source.rules, validateRules, "Invalid DocType rules")
+    : undefined;
 
   return {
     ...definition,
-    rules: ruleFile.rules,
+    rules: ruleFile?.rules ?? [],
   };
 }
 

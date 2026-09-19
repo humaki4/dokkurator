@@ -81,24 +81,42 @@ rules:
       "rules.yml: Invalid DocType rules",
     );
   });
+
+  test("normalizes missing rules to an empty list", () => {
+    const source = loadedDocType({ rules: undefined });
+
+    expect(parseDocType(source).rules).toEqual([]);
+  });
 });
 
-function loadedDocType(
-  overrides: Partial<Record<"definition" | "rules" | "template", string>>,
-): LoadedDocType {
+function loadedDocType(overrides: {
+  definition?: string;
+  rules?: string | undefined;
+  template?: string | undefined;
+}): LoadedDocType {
   const directory = "_dokkurator/.doctypes/example";
-  return {
+  const result: LoadedDocType = {
     directory,
     definition: document(
       `${directory}/definition.yml`,
       overrides.definition ?? "name: example\nmetadata:\n  type: object\n",
     ),
-    rules: document(`${directory}/rules.yml`, overrides.rules ?? "rules: []\n"),
-    template: document(
+  };
+
+  if (!("rules" in overrides) || overrides.rules !== undefined) {
+    result.rules = document(
+      `${directory}/rules.yml`,
+      overrides.rules ?? "rules: []\n",
+    );
+  }
+  if (!("template" in overrides) || overrides.template !== undefined) {
+    result.template = document(
       `${directory}/template.md`,
       overrides.template ?? "# Example\n",
-    ),
-  };
+    );
+  }
+
+  return result;
 }
 
 function document(path: string, content: string): SourceDocument {

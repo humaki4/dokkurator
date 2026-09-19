@@ -3,6 +3,7 @@ import type {
   SourceDocument,
   SourceId,
 } from "./source-adapter.js";
+import { SourceNotFoundError } from "./source-adapter.js";
 
 export * from "./source-adapter.js";
 export * from "./parser.js";
@@ -25,8 +26,8 @@ export interface DocType {
 export interface LoadedDocType {
   directory: SourceId;
   definition: SourceDocument;
-  template: SourceDocument;
-  rules: SourceDocument;
+  template?: SourceDocument;
+  rules?: SourceDocument;
 }
 
 export async function loadDocType(
@@ -37,8 +38,8 @@ export async function loadDocType(
     `${directory.replace(/\/+$/, "")}/${fileName}`;
   const [definition, template, rules] = await Promise.all([
     source.read(sourceId("definition.yml")),
-    source.read(sourceId("template.md")),
-    source.read(sourceId("rules.yml")),
+    readOptionalSource(source, sourceId("template.md")),
+    readOptionalSource(source, sourceId("rules.yml")),
   ]);
 
   return {
@@ -47,6 +48,18 @@ export async function loadDocType(
     template,
     rules,
   };
+}
+
+async function readOptionalSource(
+  source: SourceAdapter,
+  id: SourceId,
+): Promise<SourceDocument | undefined> {
+  try {
+    return await source.read(id);
+  } catch (error) {
+    if (error instanceof SourceNotFoundError) return undefined;
+    throw error;
+  }
 }
 
 export async function loadDocTypes(
