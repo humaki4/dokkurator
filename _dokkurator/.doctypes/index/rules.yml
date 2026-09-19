@@ -1,0 +1,5 @@
+rules:
+  - name: section-is-recommended
+    field: section
+    severity: warning
+

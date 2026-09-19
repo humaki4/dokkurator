@@ -1,0 +1,22 @@
+name: concept
+description: Explains the product vision, terminology, and scope.
+metadata:
+  type: object
+  required:
+    - title
+    - status
+  properties:
+    title:
+      type: string
+    status:
+      type: string
+      enum: [draft, accepted]
+    audience:
+      type: array
+      items:
+        type: string
+    tags:
+      type: array
+      items:
+        type: string
+

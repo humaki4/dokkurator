@@ -1,0 +1,5 @@
+rules:
+  - name: component-is-required
+    field: component
+    severity: warning
+
