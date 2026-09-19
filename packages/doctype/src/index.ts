@@ -1,5 +1,10 @@
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import type {
+  SourceAdapter,
+  SourceDocument,
+  SourceId,
+} from "./source-adapter.js";
+
+export * from "./source-adapter.js";
 
 export interface DocType {
   name: string;
@@ -7,22 +12,26 @@ export interface DocType {
 }
 
 export interface LoadedDocType {
-  directory: string;
-  definition: string;
-  template: string;
-  rules: string;
+  directory: SourceId;
+  definition: SourceDocument;
+  template: SourceDocument;
+  rules: SourceDocument;
 }
 
-export async function loadDocType(directory: string): Promise<LoadedDocType> {
-  const absoluteDirectory = resolve(directory);
+export async function loadDocType(
+  source: SourceAdapter,
+  directory: SourceId,
+): Promise<LoadedDocType> {
+  const sourceId = (fileName: string): SourceId =>
+    `${directory.replace(/\/+$/, "")}/${fileName}`;
   const [definition, template, rules] = await Promise.all([
-    readFile(resolve(absoluteDirectory, "definition.yml"), "utf8"),
-    readFile(resolve(absoluteDirectory, "template.md"), "utf8"),
-    readFile(resolve(absoluteDirectory, "rules.yml"), "utf8"),
+    source.read(sourceId("definition.yml")),
+    source.read(sourceId("template.md")),
+    source.read(sourceId("rules.yml")),
   ]);
 
   return {
-    directory: absoluteDirectory,
+    directory,
     definition,
     template,
     rules,
