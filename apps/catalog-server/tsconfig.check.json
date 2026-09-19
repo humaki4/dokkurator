@@ -5,10 +5,5 @@
     "noEmit": true,
     "types": ["node", "vitest/globals"]
   },
-  "include": [
-    "src/**/*.ts",
-    "scripts/**/*.ts",
-    "test/**/*.ts",
-    "vite.config.ts"
-  ]
+  "include": ["src/**/*.ts", "scripts/**/*.ts", "vite.config.ts"]
 }

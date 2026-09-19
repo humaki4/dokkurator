@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { loadConfig } from "../src/config.js";
+import { loadConfig } from "./config.js";
 
 describe("server configuration", () => {
   test("uses local defaults", () => {
