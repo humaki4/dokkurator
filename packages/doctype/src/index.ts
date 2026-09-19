@@ -5,6 +5,7 @@ import type {
 } from "./source-adapter.js";
 
 export * from "./source-adapter.js";
+export * from "./parser.js";
 
 export const DEFAULT_DOCTYPES_DIRECTORY = "_dokkurator/.doctypes";
 

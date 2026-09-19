@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import { DEFAULT_DOCTYPES_DIRECTORY, loadDocTypes } from "./index.js";
+import { parseDocTypes } from "./parser.js";
 import { FileSystemSource } from "./source-adapter.js";
 
 export interface CommandOutput {
@@ -49,6 +50,21 @@ export function createCommand(
         doctypesDirectory: options.doctypesDirectory,
       });
       writeOut(`${JSON.stringify(docTypes, null, 2)}\n`);
+    });
+
+  command
+    .command("parse")
+    .description("Parse and validate all document type definitions and rules")
+    .action(async () => {
+      const options = command.opts<{
+        root: string;
+        doctypesDirectory: string;
+      }>();
+      const source = new FileSystemSource({ root: options.root });
+      const loadedDocTypes = await loadDocTypes(source, {
+        doctypesDirectory: options.doctypesDirectory,
+      });
+      writeOut(`${JSON.stringify(parseDocTypes(loadedDocTypes), null, 2)}\n`);
     });
 
   return command;

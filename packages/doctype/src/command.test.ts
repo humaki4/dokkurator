@@ -90,6 +90,41 @@ test("reads from a configured DocType directory", async () => {
   ]);
 });
 
+test("parse prints validated DocTypes and ignores their templates", async () => {
+  const root = await mkdtemp(join(tmpdir(), "dokkurator-doctype-cli-"));
+  temporaryDirectories.push(root);
+  const directory = join(root, "_dokkurator", ".doctypes", "concept");
+  await mkdir(directory, { recursive: true });
+  await Promise.all([
+    writeFile(
+      join(directory, "definition.yml"),
+      "name: concept\nmetadata:\n  type: object\n",
+    ),
+    writeFile(join(directory, "template.md"), "ignored: ["),
+    writeFile(join(directory, "rules.yml"), "rules: []\n"),
+  ]);
+
+  let stdout = "";
+  const command = createCommand(
+    {
+      writeOut: (text) => {
+        stdout += text;
+      },
+    },
+    { cwd: root },
+  );
+
+  await command.parseAsync(["node", "dokkurator-doctype", "parse"]);
+
+  expect(JSON.parse(stdout)).toEqual([
+    {
+      name: "concept",
+      metadata: { type: "object" },
+      rules: [],
+    },
+  ]);
+});
+
 test("provides standard help for the read command", () => {
   const command = createCommand();
 
