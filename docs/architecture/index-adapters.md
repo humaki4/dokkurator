@@ -1,3 +1,11 @@
+---
+doctype: architecture
+title: Index Adapters
+status: draft
+component: index-adapters
+tags: [storage, adapters]
+---
+
 # Index Adapters
 
 `Index Adapters` persist and query the derived Knowledge model.

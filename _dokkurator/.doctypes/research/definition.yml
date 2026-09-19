@@ -1,0 +1,24 @@
+name: research
+description: Captures exploratory notes and external references.
+metadata:
+  type: object
+  required:
+    - title
+    - status
+  properties:
+    title:
+      type: string
+    status:
+      type: string
+      enum: [in-progress, complete]
+    topic:
+      type: string
+    tags:
+      type: array
+      items:
+        type: string
+    sources:
+      type: array
+      items:
+        type: string
+

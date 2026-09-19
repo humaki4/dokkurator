@@ -1,3 +1,11 @@
+---
+doctype: architecture
+title: Explorer UI
+status: draft
+component: explorer-ui
+tags: [frontend]
+---
+
 # Explorer UI
 
 `Explorer UI` is the browser-based interface for searching, navigating and inspecting indexed documentation.

@@ -1,3 +1,12 @@
+---
+doctype: research
+title: Open Knowledge Format research
+status: in-progress
+topic: open-knowledge-format
+tags: [knowledge, interoperability]
+sources:
+  - https://github.com/google/open-knowledge
+---
 
 # Open Knowledge Format (OKF): Ökosystem, Adoption und Relevanz für Dokkurator
 

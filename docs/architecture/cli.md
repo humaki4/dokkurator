@@ -1,3 +1,11 @@
+---
+doctype: architecture
+title: CLI architecture
+status: draft
+component: cli
+tags: [cli]
+---
+
 # CLI architecture
 
 The CLI operates directly on accessible sources.

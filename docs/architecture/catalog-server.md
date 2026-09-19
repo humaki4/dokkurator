@@ -1,3 +1,11 @@
+---
+doctype: architecture
+title: Catalog Server
+status: draft
+component: catalog-server
+tags: [server, api]
+---
+
 # Catalog Server
 
 `Catalog Server` provides centralized access to distributed documentation sources.

@@ -1,3 +1,11 @@
+---
+doctype: concept
+title: Core Concepts
+status: draft
+audience: [contributors, users]
+tags: [concepts]
+---
+
 # Core Concepts
 
 Dokkurator is built around three main concepts: DocType, Validator, and Knowledge.

@@ -1,0 +1,15 @@
+name: index
+description: Provides navigation to a related group of documents.
+metadata:
+  type: object
+  required:
+    - title
+  properties:
+    title:
+      type: string
+    status:
+      type: string
+      enum: [draft, accepted]
+    section:
+      type: string
+

@@ -1,3 +1,11 @@
+---
+doctype: architecture
+title: DocType
+status: draft
+component: doctype
+tags: [markdown, metadata]
+---
+
 # DocType
 
 `DocType` is the core library for loading, parsing and representing document type definitions and for parsing documents according to those definitions.
@@ -27,6 +35,18 @@ The library has no dependency on Git providers, databases or the Catalog Server.
 ### DocType loading and parsing
 
 DocType definitions describe the expected structure and metadata of a document type.
+Each DocType is stored in its own directory:
+
+```text
+decision/
+├── definition.yml  # required
+├── rules.yml       # optional
+└── template.md     # optional
+```
+
+`definition.yml` contains the DocType definition and its metadata schema.
+When `rules.yml` is absent, the normalized DocType contains an empty rule list.
+`template.md` is reserved for document templates and is not parsed yet.
 
 The library is responsible for:
 
@@ -39,21 +59,22 @@ The library is responsible for:
 Conceptually:
 
 ```text
-doctype.yaml
+DocType directory
     ↓
-load
+load through SourceAdapter
     ↓
-parse
+parse definition.yml and optional rules.yml
     ↓
-validate definition
+validate against JSON Schema
     ↓
-NormalizedDocType
+ParsedDocType
 ```
 
 Example API:
 
 ```ts
-const docType = await loadDocType("./doctypes/decision.yaml");
+const loaded = await loadDocType(source, "_dokkurator/.doctypes/decision");
+const docType = parseDocType(loaded);
 ```
 
 ### Document parsing
@@ -95,11 +116,16 @@ DocType parsing transforms a configuration file into a normalized definition:
 ```ts
 type ParsedDocType = {
   name: string;
+  description?: string;
   metadata: MetadataDefinition;
   structure?: StructureDefinition;
-  rules?: RuleDefinition[];
+  rules: RuleDefinition[];
 };
 ```
+
+`rules` is always present in the normalized model. It is an empty array when
+the DocType has no `rules.yml` file. The optional template is deliberately not
+part of `ParsedDocType` until template processing is implemented.
 
 Document parsing consumes this definition together with source content:
 

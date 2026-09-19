@@ -1,3 +1,11 @@
+---
+doctype: concept
+title: Problem Statement
+status: draft
+audience: [contributors, users]
+tags: [product]
+---
+
 # Problem Statement
 
 Documentation is often distributed across many repositories and maintained by different teams or individuals.
