@@ -14,11 +14,11 @@ afterEach(async () => {
   );
 });
 
-test("read prints unparsed DocType source documents as JSON", async () => {
+test("read prints every unparsed DocType from the default directory", async () => {
   const root = await mkdtemp(join(tmpdir(), "dokkurator-doctype-cli-"));
   temporaryDirectories.push(root);
-  const directory = join(root, "concept");
-  await mkdir(directory);
+  const directory = join(root, "_dokkurator", ".doctypes", "concept");
+  await mkdir(directory, { recursive: true });
 
   await Promise.all([
     writeFile(join(directory, "definition.yml"), "name: concept\n"),
@@ -40,25 +40,60 @@ test("read prints unparsed DocType source documents as JSON", async () => {
     { cwd: root },
   );
 
-  await command.parseAsync(["node", "dokkurator-doctype", "read", "concept"]);
+  await command.parseAsync(["node", "dokkurator-doctype", "read"]);
 
   expect(stderr).toBe("");
-  const output = JSON.parse(stdout) as {
+  const output = JSON.parse(stdout) as Array<{
     directory: string;
     definition: { content: string };
     template: { content: string };
     rules: { content: string };
-  };
-  expect(output.directory).toBe("concept");
-  expect(output.definition.content).toBe("name: concept\n");
-  expect(output.template.content).toBe("# {{ title }}\n");
-  expect(output.rules.content).toBe("rules: []\n");
+  }>;
+  expect(output).toHaveLength(1);
+  expect(output[0]?.directory).toBe("_dokkurator/.doctypes/concept");
+  expect(output[0]?.definition.content).toBe("name: concept\n");
+  expect(output[0]?.template.content).toBe("# {{ title }}\n");
+  expect(output[0]?.rules.content).toBe("rules: []\n");
+});
+
+test("reads from a configured DocType directory", async () => {
+  const root = await mkdtemp(join(tmpdir(), "dokkurator-doctype-cli-"));
+  temporaryDirectories.push(root);
+  const directory = join(root, "custom", "decision");
+  await mkdir(directory, { recursive: true });
+  await Promise.all([
+    writeFile(join(directory, "definition.yml"), "name: decision\n"),
+    writeFile(join(directory, "template.md"), "# Decision\n"),
+    writeFile(join(directory, "rules.yml"), "rules: []\n"),
+  ]);
+
+  let stdout = "";
+  const command = createCommand({
+    writeOut: (text) => {
+      stdout += text;
+    },
+  });
+
+  await command.parseAsync([
+    "node",
+    "dokkurator-doctype",
+    "--root",
+    root,
+    "--doctypes-directory",
+    "custom",
+    "read",
+  ]);
+
+  const output = JSON.parse(stdout) as Array<{ directory: string }>;
+  expect(output.map(({ directory: path }) => path)).toEqual([
+    "custom/decision",
+  ]);
 });
 
 test("provides standard help for the read command", () => {
   const command = createCommand();
 
   expect(command.commands[0]?.helpInformation()).toContain(
-    "Usage: dokkurator-doctype read [options] <directory>",
+    "Usage: dokkurator-doctype read [options]",
   );
 });

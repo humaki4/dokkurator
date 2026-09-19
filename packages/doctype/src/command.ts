@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { loadDocType } from "./index.js";
+import { DEFAULT_DOCTYPES_DIRECTORY, loadDocTypes } from "./index.js";
 import { FileSystemSource } from "./source-adapter.js";
 
 export interface CommandOutput {
@@ -9,6 +9,7 @@ export interface CommandOutput {
 
 export interface CommandEnvironment {
   cwd?: string;
+  doctypesDirectory?: string;
 }
 
 export function createCommand(
@@ -26,22 +27,28 @@ export function createCommand(
       "root directory exposed by the source adapter",
       environment.cwd ?? process.cwd(),
     )
+    .option(
+      "--doctypes-directory <directory>",
+      "DocType directory relative to the source root",
+      environment.doctypesDirectory ?? DEFAULT_DOCTYPES_DIRECTORY,
+    )
     .showHelpAfterError();
 
   command.configureOutput({ ...output, writeOut });
 
   command
     .command("read")
-    .description("Read a document type directory without parsing it")
-    .argument(
-      "<directory>",
-      "document type directory relative to the source root",
-    )
-    .action(async (directory: string) => {
-      const options = command.opts<{ root: string }>();
+    .description("Read all document types without parsing them")
+    .action(async () => {
+      const options = command.opts<{
+        root: string;
+        doctypesDirectory: string;
+      }>();
       const source = new FileSystemSource({ root: options.root });
-      const docType = await loadDocType(source, directory);
-      writeOut(`${JSON.stringify(docType, null, 2)}\n`);
+      const docTypes = await loadDocTypes(source, {
+        doctypesDirectory: options.doctypesDirectory,
+      });
+      writeOut(`${JSON.stringify(docTypes, null, 2)}\n`);
     });
 
   return command;
