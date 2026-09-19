@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "neverConnectToCloud": true,
+  "plugins": ["nx/plugins/package-json"],
   "namedInputs": {
     "default": [
       "{projectRoot}/**/*",

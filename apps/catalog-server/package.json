@@ -1,0 +1,30 @@
+{
+  "name": "@dokkurator/catalog-server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/server.js",
+  "types": "./dist/server.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite-node --watch src/server.ts",
+    "generate:openapi": "vite-node scripts/generate-openapi.ts",
+    "start": "node dist/server.js",
+    "typecheck": "tsc -p tsconfig.check.json",
+    "test": "vitest run",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@fastify/autoload": "^6.3.1",
+    "@fastify/swagger": "^9.5.2",
+    "dotenv": "^17.2.2",
+    "fastify": "^5.6.0"
+  },
+  "devDependencies": {
+    "vite": "^7.1.5",
+    "vite-node": "^3.2.4"
+  }
+}
