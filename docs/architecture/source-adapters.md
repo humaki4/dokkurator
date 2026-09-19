@@ -1,3 +1,11 @@
+---
+doctype: architecture
+title: Source Adapters
+status: draft
+component: source-adapters
+tags: [sources, adapters]
+---
+
 # Source Adapters
 
 `Source Adapters` provide documents and source metadata to Dokkurator without exposing filesystem, Git or provider-specific APIs to the core libraries.

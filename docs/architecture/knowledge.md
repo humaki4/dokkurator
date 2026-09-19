@@ -1,3 +1,11 @@
+---
+doctype: architecture
+title: Knowledge
+status: draft
+component: knowledge
+tags: [index, search]
+---
+
 # Knowledge
 
 `Knowledge` builds and queries the derived knowledge model created from parsed documents.

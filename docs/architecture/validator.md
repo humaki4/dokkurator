@@ -1,3 +1,11 @@
+---
+doctype: architecture
+title: Validator
+status: draft
+component: validator
+tags: [validation]
+---
+
 # Validator
 
 `Validator` executes validation rules against parsed documents.

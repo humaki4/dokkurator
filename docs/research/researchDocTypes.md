@@ -1,3 +1,12 @@
+---
+doctype: research
+title: Fachliche Dokumenttypen und Anwendungsfälle
+status: in-progress
+topic: document-types
+tags: [doctypes, standards]
+sources: []
+---
+
 # Research: Fachliche Dokumenttypen und Anwendungsfälle
 
 ## Softwarearchitektur

@@ -1,6 +1,9 @@
 ---
+doctype: concept
 title: Glossary
-status: concept
+status: draft
+audience: [contributors, users]
+tags: [terminology]
 ---
 
 # Glossary

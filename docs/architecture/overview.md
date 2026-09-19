@@ -1,3 +1,11 @@
+---
+doctype: architecture
+title: Architecture Overview
+status: draft
+component: dokkurator
+tags: [overview]
+---
+
 # Architecture Overview
 
 ## Purpose

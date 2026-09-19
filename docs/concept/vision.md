@@ -1,3 +1,11 @@
+---
+doctype: concept
+title: Vision
+status: draft
+audience: [contributors, users]
+tags: [product]
+---
+
 # Vision
 
 Documentation is often distributed across repositories, inconsistently structured, and difficult to search, validate, or reuse.

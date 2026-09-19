@@ -1,3 +1,11 @@
+---
+doctype: architecture
+title: DocType
+status: draft
+component: doctype
+tags: [markdown, metadata]
+---
+
 # DocType
 
 `DocType` is the core library for loading, parsing and representing document type definitions and for parsing documents according to those definitions.

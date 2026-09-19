@@ -1,3 +1,11 @@
+---
+doctype: concept
+title: Scope
+status: draft
+audience: [contributors, users]
+tags: [product]
+---
+
 # Scope
 
 Dokkurator focuses on adding structure, validation, and discoverability to documentation stored in open formats.

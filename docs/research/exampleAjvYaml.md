@@ -1,3 +1,12 @@
+---
+doctype: research
+title: AJV YAML example
+status: in-progress
+topic: schema-validation
+tags: [ajv, yaml]
+sources: []
+---
+
 ```js
 const Ajv = require("ajv");
 const YAML = require("yaml");
