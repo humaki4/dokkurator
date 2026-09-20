@@ -5,8 +5,8 @@ import type {
   SourceAdapter,
   SourceDocument,
   SourceEntry,
-} from "../source-adapters/index.js";
-import { SourceNotFoundError } from "../source-adapters/index.js";
+} from "@dokkurator/source-adapters";
+import { SourceNotFoundError } from "@dokkurator/source-adapters";
 
 test("loads all DocType files through the source adapter without parsing", async () => {
   const documents = new Map<string, SourceDocument>([
@@ -94,7 +94,7 @@ function document(path: string, content: string): SourceDocument {
     id: path,
     path,
     content,
-    source: { kind: "filesystem", path },
+    source: { sourceId: "test", kind: "filesystem", path },
   };
 }
 

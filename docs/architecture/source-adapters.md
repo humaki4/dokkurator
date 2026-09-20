@@ -10,6 +10,10 @@ tags: [sources, adapters]
 
 `Source Adapters` provide documents and source metadata to Dokkurator without exposing filesystem, Git or provider-specific APIs to the core libraries.
 
+They are implemented in the workspace-internal
+`@dokkurator/source-adapters` package. The package is not published, but it is
+an explicit Nx project and dependency boundary for the other core libraries.
+
 They normalize different sources into a common input model for DocType, Validator and Knowledge.
 
 ## Technology
@@ -62,6 +66,7 @@ Common metadata should stay independent of the concrete provider.
 
 ```ts
 type SourceMetadata = {
+  sourceId: string;
   kind: "filesystem" | "git" | "gitlab" | "github";
 
   repository?: string;
@@ -88,6 +93,11 @@ type SourceMetadata = {
   };
 };
 ```
+
+`sourceId` identifies the configured source independently of a file path. It
+can be supplied explicitly. Local adapters otherwise derive it from the
+resolved root directory or the Git remote, falling back to the repository
+root.
 
 Repository-wide and file-specific Git revisions are deliberately distinct.
 Provider implementations map their output to these Dokkurator-owned types and

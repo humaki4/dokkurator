@@ -10,18 +10,16 @@ The package provides two complete workflows:
 - `loadDocuments` discovers, reads, and parses Markdown documents and their
   YAML Frontmatter without validating document content.
 
-Both workflows access files through a `SourceAdapter`. The included
-`FileSystemSource` reads a local directory, while `GitSource` reads a local Git
-working tree and adds normalized Git metadata.
+Both workflows access files through the `SourceAdapter` contract from the
+internal `@dokkurator/source-adapters` package. Its `FileSystemSource` reads a
+local directory, while `GitSource` reads a local Git working tree and adds
+normalized Git metadata.
 
 ## Usage
 
 ```ts
-import {
-  FileSystemSource,
-  loadDocTypes,
-  loadDocuments,
-} from "@dokkurator/doctype";
+import { loadDocTypes, loadDocuments } from "@dokkurator/doctype";
+import { FileSystemSource } from "@dokkurator/source-adapters";
 
 const source = new FileSystemSource({ root: process.cwd() });
 
@@ -88,7 +86,6 @@ The package root is the supported integration boundary. It exports:
 - `loadDocType`, `loadDocTypes`
 - `loadDocument`, `loadDocuments`
 - `ParsedDocType`, `ParsedDocument`, and their supporting types
-- `SourceAdapter`, source models, `FileSystemSource`, and `GitSource`
 - parse error types and default directory constants
 
 Raw reading and parser helpers are internal implementation details.

@@ -21,9 +21,11 @@ import { readFile } from "node:fs/promises";
 
 export interface GitSourceOptions {
   readonly root: string;
+  readonly sourceId?: string;
 }
 
 interface RepositoryContext {
+  readonly sourceId: string;
   readonly root: string;
   readonly sourcePrefix: string;
   readonly repository?: string;
@@ -41,10 +43,12 @@ interface LastCommit {
 export class GitSource implements SourceAdapter {
   readonly root: string;
   private readonly git: SimpleGit;
+  private readonly configuredSourceId?: string;
   private readonly metadataCache = new Map<SourceId, SourceMetadata>();
 
   constructor(options: GitSourceOptions) {
     this.root = resolve(options.root);
+    this.configuredSourceId = options.sourceId;
     this.git = simpleGit({ baseDir: this.root, maxConcurrentProcesses: 6 });
   }
 
@@ -140,6 +144,11 @@ export class GitSource implements SourceAdapter {
     const remote = remotes.find(({ name }) => name === "origin") ?? remotes[0];
 
     return {
+      sourceId:
+        this.configuredSourceId ??
+        remote?.refs.fetch ??
+        remote?.refs.push ??
+        repositoryRoot,
       root: repositoryRoot,
       sourcePrefix,
       repository: remote?.refs.fetch || remote?.refs.push || undefined,
@@ -166,6 +175,7 @@ export class GitSource implements SourceAdapter {
     };
 
     return {
+      sourceId: context.sourceId,
       kind: "git",
       path: id,
       repository: context.repository,

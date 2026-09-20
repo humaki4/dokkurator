@@ -2,8 +2,8 @@ import { expect, test, vi } from "vitest";
 import type {
   SourceAdapter,
   SourceDocument,
-} from "../source-adapters/index.js";
-import { SourceNotFoundError } from "../source-adapters/index.js";
+} from "@dokkurator/source-adapters";
+import { SourceNotFoundError } from "@dokkurator/source-adapters";
 import { loadDocType, loadDocTypes } from "./index.js";
 
 test("loadDocType reads, parses, and validates a DocType", async () => {
@@ -22,7 +22,11 @@ test("loadDocTypes exposes the complete workflow at the public boundary", async 
     {
       id: "types/concept/definition.yml",
       path: "types/concept/definition.yml",
-      source: { kind: "filesystem", path: "types/concept/definition.yml" },
+      source: {
+        sourceId: "test",
+        kind: "filesystem",
+        path: "types/concept/definition.yml",
+      },
     },
   ]);
 
@@ -62,6 +66,6 @@ function document(path: string, content: string): SourceDocument {
     id: path,
     path,
     content,
-    source: { kind: "filesystem", path },
+    source: { sourceId: "test", kind: "filesystem", path },
   };
 }

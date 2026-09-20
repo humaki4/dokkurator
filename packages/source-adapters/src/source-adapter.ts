@@ -25,6 +25,7 @@ export interface GitSourceMetadata {
 }
 
 export interface SourceMetadata {
+  readonly sourceId: string;
   readonly kind: "filesystem" | "git" | "gitlab" | "github";
   readonly path: string;
   readonly repository?: string;

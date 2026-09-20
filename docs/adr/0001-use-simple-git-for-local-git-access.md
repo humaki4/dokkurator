@@ -14,10 +14,11 @@ tags: [git, source-adapters, dependencies]
 Dokkurator loads DocTypes and documents through a `SourceAdapter`. In addition
 to plain directories, the CLI must recognize local Git working trees and expose
 repository and per-file Git metadata. Core loading and parsing code must remain
-independent of the concrete adapter because source adapters are expected to move
-into a separate library later.
+independent of the concrete adapter.
 
-The local adapter needs to:
+The adapters live in the internal `@dokkurator/source-adapters` package so that
+core libraries depend only on their public source contract. The local adapter
+needs to:
 
 - detect a Git working tree and find its repository root;
 - enumerate tracked and untracked, but non-ignored, files;
@@ -28,9 +29,10 @@ The local adapter needs to:
 ## Decision
 
 Use `simple-git` as the implementation dependency of the local `GitSource`.
-The CLI uses it to determine whether the supplied directory belongs to a Git
-working tree and selects either `GitSource` or `FileSystemSource`. Core loading
-functions continue to receive only the `SourceAdapter` interface.
+The source-adapter package uses it to determine whether the supplied directory
+belongs to a Git working tree and selects either `GitSource` or
+`FileSystemSource`. Core loading functions continue to receive only the
+`SourceAdapter` interface.
 
 `simple-git` delegates to the locally installed Git executable. This matches the
 semantics developers already observe in the same checkout, including Git
@@ -39,8 +41,8 @@ typed asynchronous API for common operations and permits narrowly scoped raw
 Git commands where no suitable high-level operation exists.
 
 The adapter maps Git output to Dokkurator-owned metadata types. No `simple-git`
-type crosses the public `SourceAdapter` boundary. This keeps a later extraction
-of the adapters, or replacement of the Git implementation, localized.
+type crosses the public `SourceAdapter` boundary. This keeps replacement of the
+Git implementation localized.
 
 ## Alternatives considered
 

@@ -127,6 +127,9 @@ importers:
 
   packages/doctype:
     dependencies:
+      '@dokkurator/source-adapters':
+        specifier: workspace:*
+        version: link:../source-adapters
       '@types/mdast':
         specifier: ^4.0.4
         version: 4.0.4
@@ -145,9 +148,6 @@ importers:
       remark-parse:
         specifier: ^11.0.0
         version: 11.0.0
-      simple-git:
-        specifier: ^3.36.0
-        version: 3.36.0
       unified:
         specifier: ^11.0.5
         version: 11.0.5
@@ -157,12 +157,28 @@ importers:
       yaml:
         specifier: ^2.9.1
         version: 2.9.1
+    devDependencies:
+      simple-git:
+        specifier: ^3.36.0
+        version: 3.36.0
 
   packages/knowledge:
     dependencies:
       '@dokkurator/doctype':
         specifier: workspace:*
         version: link:../doctype
+      '@dokkurator/source-adapters':
+        specifier: workspace:*
+        version: link:../source-adapters
+      commander:
+        specifier: ^15.0.0
+        version: 15.0.0
+
+  packages/source-adapters:
+    dependencies:
+      simple-git:
+        specifier: ^3.36.0
+        version: 3.36.0
 
   packages/validator:
     dependencies:

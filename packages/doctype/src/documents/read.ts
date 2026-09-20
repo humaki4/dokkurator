@@ -2,7 +2,7 @@ import type {
   SourceAdapter,
   SourceDocument,
   SourceId,
-} from "../source-adapters/index.js";
+} from "@dokkurator/source-adapters";
 import {
   DEFAULT_DOCUMENTS_DIRECTORY,
   DEFAULT_EXCLUDED_DOCUMENT_DIRECTORIES,

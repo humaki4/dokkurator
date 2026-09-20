@@ -11,7 +11,7 @@ import type {
   SourceAdapter,
   SourceDocument,
   SourceEntry,
-} from "../source-adapters/index.js";
+} from "@dokkurator/source-adapters";
 
 describe("document loading", () => {
   test("loads one document through the source adapter", async () => {
@@ -231,11 +231,16 @@ See [the source][source].
     const source: SourceDocument = {
       ...document("docs/example.md", "# Example\n"),
       source: {
+        sourceId: "group/project",
         kind: "git",
         path: "docs/example.md",
         repository: "group/project",
-        revision: "abc123",
-        branch: "main",
+        git: {
+          root: "/work/project",
+          fileRevision: "abc123",
+          branch: "main",
+          status: "clean",
+        },
       },
     };
 
@@ -257,7 +262,7 @@ function document(path: string, content: string): SourceDocument {
     id: path,
     path,
     content,
-    source: { kind: "filesystem", path },
+    source: { sourceId: "test", kind: "filesystem", path },
   };
 }
 

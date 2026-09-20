@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import type { SourceDocument } from "../source-adapters/index.js";
+import type { SourceDocument } from "@dokkurator/source-adapters";
 import { DocTypeParseError, parseDocType } from "./parse.js";
 import type { LoadedDocType } from "./types.js";
 
@@ -124,6 +124,6 @@ function document(path: string, content: string): SourceDocument {
     id: path,
     path,
     content,
-    source: { kind: "filesystem", path },
+    source: { sourceId: "test", kind: "filesystem", path },
   };
 }
