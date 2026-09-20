@@ -11,7 +11,8 @@ The package provides two complete workflows:
   YAML Frontmatter without validating document content.
 
 Both workflows access files through a `SourceAdapter`. The included
-`FileSystemSource` reads a local repository.
+`FileSystemSource` reads a local directory, while `GitSource` reads a local Git
+working tree and adds normalized Git metadata.
 
 ## Usage
 
@@ -74,7 +75,7 @@ for validating documents.
 - `references`: Markdown link references with identifier, label, text, reference
   kind, and position.
 - `source`: normalized source information such as path, repository, revision,
-  branch, timestamps, and author.
+  branch, working-tree status, commit timestamp, and author.
 
 Missing or structurally invalid Frontmatter does not make a Markdown document
 unparseable. Only malformed YAML produces a `DocumentParseError`; semantic
@@ -87,7 +88,7 @@ The package root is the supported integration boundary. It exports:
 - `loadDocType`, `loadDocTypes`
 - `loadDocument`, `loadDocuments`
 - `ParsedDocType`, `ParsedDocument`, and their supporting types
-- `SourceAdapter`, source models, and `FileSystemSource`
+- `SourceAdapter`, source models, `FileSystemSource`, and `GitSource`
 - parse error types and default directory constants
 
 Raw reading and parser helpers are internal implementation details.

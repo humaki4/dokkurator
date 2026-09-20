@@ -2,7 +2,8 @@ import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, expect, test } from "vitest";
-import { FileSystemSource, SourceNotFoundError } from "./source-adapter.js";
+import { FileSystemSource } from "./file-system-source.js";
+import { SourceNotFoundError } from "./source-adapter.js";
 
 const temporaryDirectories: string[] = [];
 

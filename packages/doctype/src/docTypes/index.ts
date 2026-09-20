@@ -1,4 +1,4 @@
-import type { SourceAdapter, SourceId } from "../source-adapter.js";
+import type { SourceAdapter, SourceId } from "../source-adapters/index.js";
 import { parseDocType, parseDocTypes } from "./parse.js";
 import { readDocType, readDocTypes } from "./read.js";
 import type { DocTypeConfig, ParsedDocType } from "./types.js";

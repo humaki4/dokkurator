@@ -1,53 +1,16 @@
 import { readdir, readFile } from "node:fs/promises";
 import { isAbsolute, relative, resolve, sep } from "node:path";
-
-export type SourceId = string;
-
-export interface SourceMetadata {
-  readonly kind: "filesystem" | "git" | "gitlab" | "github";
-  readonly path: string;
-  readonly repository?: string;
-  readonly revision?: string;
-  readonly branch?: string;
-  readonly createdAt?: Date;
-  readonly updatedAt?: Date;
-  readonly author?: {
-    readonly name?: string;
-    readonly email?: string;
-  };
-}
-
-export interface SourceEntry {
-  readonly id: SourceId;
-  readonly path: string;
-  readonly source: SourceMetadata;
-}
-
-export interface SourceDocument extends SourceEntry {
-  readonly content: string;
-}
-
-export interface ListOptions {
-  readonly prefix?: SourceId;
-}
-
-export interface SourceAdapter {
-  list(options?: ListOptions): Promise<SourceEntry[]>;
-  read(id: SourceId): Promise<SourceDocument>;
-}
-
-export class SourceNotFoundError extends Error {
-  constructor(
-    readonly sourceId: SourceId,
-    options?: ErrorOptions,
-  ) {
-    super(`Source not found: ${sourceId}`, options);
-    this.name = "SourceNotFoundError";
-  }
-}
+import {
+  SourceNotFoundError,
+  type ListOptions,
+  type SourceAdapter,
+  type SourceDocument,
+  type SourceEntry,
+  type SourceId,
+} from "./source-adapter.js";
 
 export interface FileSystemSourceOptions {
-  root: string;
+  readonly root: string;
 }
 
 export class FileSystemSource implements SourceAdapter {

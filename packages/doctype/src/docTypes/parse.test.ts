@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import type { SourceDocument } from "../source-adapter.js";
+import type { SourceDocument } from "../source-adapters/index.js";
 import { DocTypeParseError, parseDocType } from "./parse.js";
 import type { LoadedDocType } from "./types.js";
 

@@ -3,7 +3,7 @@ import type {
   LinkReference as MarkdownLinkReference,
   Root,
 } from "mdast";
-import type { SourceId, SourceMetadata } from "../source-adapter.js";
+import type { SourceId, SourceMetadata } from "../source-adapters/index.js";
 
 export const DEFAULT_DOCUMENTS_DIRECTORY = "";
 export const DEFAULT_EXCLUDED_DOCUMENT_DIRECTORIES = [

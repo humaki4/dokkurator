@@ -1,6 +1,6 @@
 import { Ajv, type ErrorObject, type ValidateFunction } from "ajv";
 import { parse as parseYaml } from "yaml";
-import type { SourceDocument } from "../source-adapter.js";
+import type { SourceDocument } from "../source-adapters/index.js";
 import definitionSchema from "./schemas/definition.schema.json" with { type: "json" };
 import rulesSchema from "./schemas/rules.schema.json" with { type: "json" };
 import type {

@@ -1,6 +1,7 @@
 import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { simpleGit } from "simple-git";
 import { afterEach, expect, test } from "vitest";
 import { createCommand } from "./command.js";
 
@@ -145,5 +146,44 @@ test("loadDocuments recursively loads and parses Markdown from the repository ro
     content: "\n# Guide\n",
     ast: { type: "root" },
     headings: [{ text: "Guide" }],
+  });
+});
+
+test("loadDocuments automatically uses GitSource in a Git working tree", async () => {
+  const root = await mkdtemp(join(tmpdir(), "dokkurator-documents-git-cli-"));
+  temporaryDirectories.push(root);
+  await writeFile(join(root, "README.md"), "# Repository\n");
+  const git = simpleGit(root);
+  await git.init(["--initial-branch=main"]);
+  await git.addConfig("user.name", "Dokkurator Test");
+  await git.addConfig("user.email", "test@example.com");
+  await git.add("README.md");
+  await git.commit("add readme");
+
+  let stdout = "";
+  const command = createCommand(
+    {
+      writeOut: (text) => {
+        stdout += text;
+      },
+    },
+    { cwd: root },
+  );
+
+  await command.parseAsync(["node", "dokkurator-doctype", "loadDocuments"]);
+
+  const output = JSON.parse(stdout) as Array<{
+    source: {
+      kind: string;
+      git?: { branch?: string; status: string; fileRevision?: string };
+    };
+  }>;
+  expect(output[0]?.source).toMatchObject({
+    kind: "git",
+    git: {
+      branch: "main",
+      status: "clean",
+      fileRevision: expect.stringMatching(/^[0-9a-f]{40,64}$/),
+    },
   });
 });
