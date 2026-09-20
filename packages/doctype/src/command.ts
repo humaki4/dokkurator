@@ -1,7 +1,11 @@
 import { Command } from "commander";
-import { DEFAULT_DOCTYPES_DIRECTORY, loadDocTypes } from "./index.js";
-import { parseDocTypes } from "./parser.js";
-import { FileSystemSource } from "./source-adapter.js";
+import {
+  DEFAULT_DOCUMENTS_DIRECTORY,
+  DEFAULT_DOCTYPES_DIRECTORY,
+  FileSystemSource,
+  loadDocuments,
+  loadDocTypes,
+} from "./index.js";
 
 export interface CommandOutput {
   writeOut?: (text: string) => void;
@@ -11,6 +15,7 @@ export interface CommandOutput {
 export interface CommandEnvironment {
   cwd?: string;
   doctypesDirectory?: string;
+  documentsDirectory?: string;
 }
 
 export function createCommand(
@@ -33,13 +38,18 @@ export function createCommand(
       "DocType directory relative to the source root",
       environment.doctypesDirectory ?? DEFAULT_DOCTYPES_DIRECTORY,
     )
+    .option(
+      "--documents-directory <directory>",
+      "documentation directory relative to the source root",
+      environment.documentsDirectory ?? DEFAULT_DOCUMENTS_DIRECTORY,
+    )
     .showHelpAfterError();
 
   command.configureOutput({ ...output, writeOut });
 
   command
-    .command("read")
-    .description("Read all document types without parsing them")
+    .command("loadDocTypes")
+    .description("Load and parse all document types")
     .action(async () => {
       const options = command.opts<{
         root: string;
@@ -53,18 +63,18 @@ export function createCommand(
     });
 
   command
-    .command("parse")
-    .description("Parse and validate all document type definitions and rules")
+    .command("loadDocuments")
+    .description("Load and parse all Markdown documents recursively")
     .action(async () => {
       const options = command.opts<{
         root: string;
-        doctypesDirectory: string;
+        documentsDirectory: string;
       }>();
       const source = new FileSystemSource({ root: options.root });
-      const loadedDocTypes = await loadDocTypes(source, {
-        doctypesDirectory: options.doctypesDirectory,
+      const documents = await loadDocuments(source, {
+        documentsDirectory: options.documentsDirectory,
       });
-      writeOut(`${JSON.stringify(parseDocTypes(loadedDocTypes), null, 2)}\n`);
+      writeOut(`${JSON.stringify(documents, null, 2)}\n`);
     });
 
   return command;

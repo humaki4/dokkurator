@@ -1,31 +1,15 @@
 import { Ajv, type ErrorObject, type ValidateFunction } from "ajv";
 import { parse as parseYaml } from "yaml";
-import type { LoadedDocType } from "./index.js";
+import type { SourceDocument } from "../source-adapter.js";
 import definitionSchema from "./schemas/definition.schema.json" with { type: "json" };
 import rulesSchema from "./schemas/rules.schema.json" with { type: "json" };
-import type { SourceDocument } from "./source-adapter.js";
-
-export interface MetadataDefinition {
-  readonly [key: string]: unknown;
-}
-
-export interface StructureDefinition {
-  requiredHeadings?: string[];
-}
-
-export interface RuleDefinition {
-  name: string;
-  field: string;
-  severity: "error" | "warning";
-}
-
-export interface ParsedDocType {
-  name: string;
-  description?: string;
-  metadata: MetadataDefinition;
-  structure?: StructureDefinition;
-  rules: RuleDefinition[];
-}
+import type {
+  LoadedDocType,
+  MetadataDefinition,
+  ParsedDocType,
+  RuleDefinition,
+  StructureDefinition,
+} from "./types.js";
 
 interface DefinitionFile {
   name: string;
@@ -63,13 +47,12 @@ export function parseDocType(source: LoadedDocType): ParsedDocType {
     ? parseAndValidate(source.rules, validateRules, "Invalid DocType rules")
     : undefined;
 
-  return {
-    ...definition,
-    rules: ruleFile?.rules ?? [],
-  };
+  return { ...definition, rules: ruleFile?.rules ?? [] };
 }
 
-export function parseDocTypes(sources: LoadedDocType[]): ParsedDocType[] {
+export function parseDocTypes(
+  sources: readonly LoadedDocType[],
+): ParsedDocType[] {
   return sources.map(parseDocType);
 }
 

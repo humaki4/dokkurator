@@ -1,15 +1,12 @@
 import { expect, test, vi } from "vitest";
-import {
-  DEFAULT_DOCTYPES_DIRECTORY,
-  loadDocType,
-  loadDocTypes,
-} from "./index.js";
+import { DEFAULT_DOCTYPES_DIRECTORY } from "./types.js";
+import { readDocType, readDocTypes } from "./read.js";
 import type {
   SourceAdapter,
   SourceDocument,
   SourceEntry,
-} from "./source-adapter.js";
-import { SourceNotFoundError } from "./source-adapter.js";
+} from "../source-adapter.js";
+import { SourceNotFoundError } from "../source-adapter.js";
 
 test("loads all DocType files through the source adapter without parsing", async () => {
   const documents = new Map<string, SourceDocument>([
@@ -32,7 +29,7 @@ test("loads all DocType files through the source adapter without parsing", async
     }),
   };
 
-  await expect(loadDocType(source, "decision")).resolves.toEqual({
+  await expect(readDocType(source, "decision")).resolves.toEqual({
     directory: "decision",
     definition: documents.get("decision/definition.yml"),
     template: documents.get("decision/template.md"),
@@ -54,7 +51,7 @@ test("loads a DocType without optional template and rules", async () => {
     }),
   };
 
-  await expect(loadDocType(source, "decision")).resolves.toEqual({
+  await expect(readDocType(source, "decision")).resolves.toEqual({
     directory: "decision",
     definition,
     template: undefined,
@@ -68,7 +65,7 @@ test("loads every DocType from the default directory", async () => {
     "concept",
   ]);
 
-  const result = await loadDocTypes(source);
+  const result = await readDocTypes(source);
 
   expect(result.map((docType) => docType.directory)).toEqual([
     "_dokkurator/.doctypes/architecture",
@@ -83,7 +80,7 @@ test("loads every DocType from the default directory", async () => {
 test("loads DocTypes from a configured directory", async () => {
   const source = sourceWithDocTypes("config/types", ["decision"]);
 
-  const result = await loadDocTypes(source, {
+  const result = await readDocTypes(source, {
     doctypesDirectory: "config/types",
   });
 

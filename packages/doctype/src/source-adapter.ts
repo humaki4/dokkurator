@@ -4,25 +4,31 @@ import { isAbsolute, relative, resolve, sep } from "node:path";
 export type SourceId = string;
 
 export interface SourceMetadata {
-  kind: "filesystem" | "git" | "gitlab" | "github";
-  path: string;
-  repository?: string;
-  revision?: string;
-  branch?: string;
+  readonly kind: "filesystem" | "git" | "gitlab" | "github";
+  readonly path: string;
+  readonly repository?: string;
+  readonly revision?: string;
+  readonly branch?: string;
+  readonly createdAt?: Date;
+  readonly updatedAt?: Date;
+  readonly author?: {
+    readonly name?: string;
+    readonly email?: string;
+  };
 }
 
 export interface SourceEntry {
-  id: SourceId;
-  path: string;
-  source: SourceMetadata;
+  readonly id: SourceId;
+  readonly path: string;
+  readonly source: SourceMetadata;
 }
 
 export interface SourceDocument extends SourceEntry {
-  content: string;
+  readonly content: string;
 }
 
 export interface ListOptions {
-  prefix?: SourceId;
+  readonly prefix?: SourceId;
 }
 
 export interface SourceAdapter {

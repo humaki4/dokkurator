@@ -1,9 +1,22 @@
 import { expectTypeOf, test } from "vitest";
-import type { DocType } from "./index.js";
+import {
+  loadDocType,
+  loadDocTypes,
+  loadDocument,
+  loadDocuments,
+} from "./index.js";
+import type { ParsedDocType, ParsedDocument, SourceAdapter } from "./index.js";
 
-test("describes a document type and its required fields", () => {
-  expectTypeOf<DocType>().toEqualTypeOf<{
-    name: string;
-    requiredFields: readonly string[];
-  }>();
+test("exposes parsed results at all public loading boundaries", () => {
+  expectTypeOf(loadDocType).returns.resolves.toEqualTypeOf<ParsedDocType>();
+  expectTypeOf(loadDocTypes).returns.resolves.toEqualTypeOf<ParsedDocType[]>();
+  expectTypeOf(loadDocument).returns.resolves.toEqualTypeOf<ParsedDocument>();
+  expectTypeOf(loadDocuments).returns.resolves.toEqualTypeOf<
+    ParsedDocument[]
+  >();
+});
+
+test("accepts the source adapter abstraction at the public boundary", () => {
+  expectTypeOf(loadDocTypes).parameter(0).toEqualTypeOf<SourceAdapter>();
+  expectTypeOf(loadDocuments).parameter(0).toEqualTypeOf<SourceAdapter>();
 });
