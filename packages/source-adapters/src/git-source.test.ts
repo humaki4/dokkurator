@@ -33,6 +33,7 @@ test("lists tracked and untracked files with Git metadata", async () => {
     "untracked.md",
   ]);
   expect(entries.find(({ id }) => id === "tracked.md")?.source).toMatchObject({
+    sourceId: "https://example.com/docs.git",
     kind: "git",
     repository: "https://example.com/docs.git",
     git: {

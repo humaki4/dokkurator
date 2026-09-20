@@ -11,13 +11,16 @@ import {
 
 export interface FileSystemSourceOptions {
   readonly root: string;
+  readonly sourceId?: string;
 }
 
 export class FileSystemSource implements SourceAdapter {
   readonly root: string;
+  readonly sourceId: string;
 
   constructor(options: FileSystemSourceOptions) {
     this.root = resolve(options.root);
+    this.sourceId = options.sourceId ?? this.root;
   }
 
   async list(options: ListOptions = {}): Promise<SourceEntry[]> {
@@ -48,6 +51,7 @@ export class FileSystemSource implements SourceAdapter {
       path: normalizedId,
       content,
       source: {
+        sourceId: this.sourceId,
         kind: "filesystem",
         path: normalizedId,
       },
@@ -68,7 +72,11 @@ export class FileSystemSource implements SourceAdapter {
         entries.push({
           id,
           path: id,
-          source: { kind: "filesystem", path: id },
+          source: {
+            sourceId: this.sourceId,
+            kind: "filesystem",
+            path: id,
+          },
         });
       }
     }

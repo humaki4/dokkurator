@@ -59,18 +59,38 @@ The internal model is derived from the source documents.
 ```ts
 type KnowledgeDocument = {
   id: DocumentId;
-  type: string;
+  type?: string;
 
   metadata: Record<string, unknown>;
 
   source: SourceReference;
 
+  content: string;
+  headings: Heading[];
+  links: Link[];
+  references: Reference[];
+
   entities: Entity[];
   relations: Relation[];
-
-  content: SearchableContent;
 };
 ```
+
+Knowledge stores a deliberately smaller source model than the source adapter:
+
+```ts
+type SourceReference = {
+  sourceId: string;
+  path: string;
+  revision?: string;
+  repository?: string;
+};
+```
+
+Transient or sensitive adapter details such as a local root, working-tree
+status, branch and author email remain available on `ParsedDocument`, but are
+not copied into the derived index by default. They can later be introduced as
+an explicit provenance or document-state model when required by a concrete UI
+or assessment feature.
 
 Relations are explicit rather than hidden inside Markdown or metadata.
 

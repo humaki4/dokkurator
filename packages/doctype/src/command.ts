@@ -1,14 +1,11 @@
 import { Command } from "commander";
-import { simpleGit } from "simple-git";
+import { createLocalSource } from "@dokkurator/source-adapters";
 import {
   DEFAULT_DOCUMENTS_DIRECTORY,
   DEFAULT_DOCTYPES_DIRECTORY,
-  FileSystemSource,
-  GitSource,
   loadDocuments,
   loadDocTypes,
 } from "./index.js";
-import type { SourceAdapter } from "./index.js";
 
 export interface CommandOutput {
   writeOut?: (text: string) => void;
@@ -81,10 +78,4 @@ export function createCommand(
     });
 
   return command;
-}
-
-export async function createLocalSource(root: string): Promise<SourceAdapter> {
-  return (await simpleGit({ baseDir: root }).checkIsRepo())
-    ? new GitSource({ root })
-    : new FileSystemSource({ root });
 }

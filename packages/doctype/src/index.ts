@@ -31,25 +31,6 @@ export type {
   SourcePosition,
 } from "./documents/index.js";
 
-export {
-  FileSystemSource,
-  GitSource,
-  SourceNotFoundError,
-} from "./source-adapters/index.js";
-export type {
-  FileSystemSourceOptions,
-  GitFileStatus,
-  GitSourceOptions,
-  GitSourceMetadata,
-  ListOptions,
-  SourceAuthor,
-  SourceAdapter,
-  SourceDocument,
-  SourceEntry,
-  SourceId,
-  SourceMetadata,
-} from "./source-adapters/index.js";
-
 /** @deprecated Temporary compatibility model for the unfinished Validator. */
 export interface DocType {
   readonly name: string;

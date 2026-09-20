@@ -21,13 +21,14 @@ test("reads a file as a normalized source document", async () => {
   await mkdir(join(root, "docs"));
   await writeFile(join(root, "docs", "example.md"), "# Example\n");
 
-  const source = new FileSystemSource({ root });
+  const source = new FileSystemSource({ root, sourceId: "docs" });
 
   await expect(source.read("docs/example.md")).resolves.toEqual({
     id: "docs/example.md",
     path: "docs/example.md",
     content: "# Example\n",
     source: {
+      sourceId: "docs",
       kind: "filesystem",
       path: "docs/example.md",
     },
@@ -43,18 +44,26 @@ test("lists files below a source prefix", async () => {
     writeFile(join(root, "docs", "nested", "two.md"), "two"),
   ]);
 
-  const source = new FileSystemSource({ root });
+  const source = new FileSystemSource({ root, sourceId: "docs" });
 
   await expect(source.list({ prefix: "docs" })).resolves.toEqual([
     {
       id: "docs/nested/two.md",
       path: "docs/nested/two.md",
-      source: { kind: "filesystem", path: "docs/nested/two.md" },
+      source: {
+        sourceId: "docs",
+        kind: "filesystem",
+        path: "docs/nested/two.md",
+      },
     },
     {
       id: "docs/one.md",
       path: "docs/one.md",
-      source: { kind: "filesystem", path: "docs/one.md" },
+      source: {
+        sourceId: "docs",
+        kind: "filesystem",
+        path: "docs/one.md",
+      },
     },
   ]);
 });

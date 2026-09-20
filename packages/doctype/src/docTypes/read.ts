@@ -2,8 +2,8 @@ import type {
   SourceAdapter,
   SourceDocument,
   SourceId,
-} from "../source-adapters/index.js";
-import { SourceNotFoundError } from "../source-adapters/index.js";
+} from "@dokkurator/source-adapters";
+import { SourceNotFoundError } from "@dokkurator/source-adapters";
 import {
   DEFAULT_DOCTYPES_DIRECTORY,
   type DocTypeConfig,

@@ -5,7 +5,8 @@ import {
   loadDocument,
   loadDocuments,
 } from "./index.js";
-import type { ParsedDocType, ParsedDocument, SourceAdapter } from "./index.js";
+import type { SourceAdapter } from "@dokkurator/source-adapters";
+import type { ParsedDocType, ParsedDocument } from "./index.js";
 
 test("exposes parsed results at all public loading boundaries", () => {
   expectTypeOf(loadDocType).returns.resolves.toEqualTypeOf<ParsedDocType>();
