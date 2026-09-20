@@ -6,6 +6,7 @@ try {
     {},
     {
       doctypesDirectory: process.env.DOKKURATOR_DOCTYPES_DIRECTORY,
+      documentsDirectory: process.env.DOKKURATOR_DOCUMENTS_DIRECTORY,
     },
   ).parseAsync(process.argv);
 } catch (error) {

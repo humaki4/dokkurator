@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
-import type { LoadedDocType } from "./index.js";
-import { DocTypeParseError, parseDocType } from "./parser.js";
-import type { SourceDocument } from "./source-adapter.js";
+import type { SourceDocument } from "../source-adapters/index.js";
+import { DocTypeParseError, parseDocType } from "./parse.js";
+import type { LoadedDocType } from "./types.js";
 
 describe("parseDocType", () => {
   test("parses and validates definition and rules", () => {

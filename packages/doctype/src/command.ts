@@ -1,7 +1,14 @@
 import { Command } from "commander";
-import { DEFAULT_DOCTYPES_DIRECTORY, loadDocTypes } from "./index.js";
-import { parseDocTypes } from "./parser.js";
-import { FileSystemSource } from "./source-adapter.js";
+import { simpleGit } from "simple-git";
+import {
+  DEFAULT_DOCUMENTS_DIRECTORY,
+  DEFAULT_DOCTYPES_DIRECTORY,
+  FileSystemSource,
+  GitSource,
+  loadDocuments,
+  loadDocTypes,
+} from "./index.js";
+import type { SourceAdapter } from "./index.js";
 
 export interface CommandOutput {
   writeOut?: (text: string) => void;
@@ -11,6 +18,7 @@ export interface CommandOutput {
 export interface CommandEnvironment {
   cwd?: string;
   doctypesDirectory?: string;
+  documentsDirectory?: string;
 }
 
 export function createCommand(
@@ -33,19 +41,24 @@ export function createCommand(
       "DocType directory relative to the source root",
       environment.doctypesDirectory ?? DEFAULT_DOCTYPES_DIRECTORY,
     )
+    .option(
+      "--documents-directory <directory>",
+      "documentation directory relative to the source root",
+      environment.documentsDirectory ?? DEFAULT_DOCUMENTS_DIRECTORY,
+    )
     .showHelpAfterError();
 
   command.configureOutput({ ...output, writeOut });
 
   command
-    .command("read")
-    .description("Read all document types without parsing them")
+    .command("loadDocTypes")
+    .description("Load and parse all document types")
     .action(async () => {
       const options = command.opts<{
         root: string;
         doctypesDirectory: string;
       }>();
-      const source = new FileSystemSource({ root: options.root });
+      const source = await createLocalSource(options.root);
       const docTypes = await loadDocTypes(source, {
         doctypesDirectory: options.doctypesDirectory,
       });
@@ -53,19 +66,25 @@ export function createCommand(
     });
 
   command
-    .command("parse")
-    .description("Parse and validate all document type definitions and rules")
+    .command("loadDocuments")
+    .description("Load and parse all Markdown documents recursively")
     .action(async () => {
       const options = command.opts<{
         root: string;
-        doctypesDirectory: string;
+        documentsDirectory: string;
       }>();
-      const source = new FileSystemSource({ root: options.root });
-      const loadedDocTypes = await loadDocTypes(source, {
-        doctypesDirectory: options.doctypesDirectory,
+      const source = await createLocalSource(options.root);
+      const documents = await loadDocuments(source, {
+        documentsDirectory: options.documentsDirectory,
       });
-      writeOut(`${JSON.stringify(parseDocTypes(loadedDocTypes), null, 2)}\n`);
+      writeOut(`${JSON.stringify(documents, null, 2)}\n`);
     });
 
   return command;
+}
+
+export async function createLocalSource(root: string): Promise<SourceAdapter> {
+  return (await simpleGit({ baseDir: root }).checkIsRepo())
+    ? new GitSource({ root })
+    : new FileSystemSource({ root });
 }

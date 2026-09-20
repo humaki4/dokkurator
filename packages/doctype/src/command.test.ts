@@ -1,6 +1,7 @@
 import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { simpleGit } from "simple-git";
 import { afterEach, expect, test } from "vitest";
 import { createCommand } from "./command.js";
 
@@ -14,14 +15,17 @@ afterEach(async () => {
   );
 });
 
-test("read prints every unparsed DocType from the default directory", async () => {
+test("loadDocTypes loads and parses every DocType from the default directory", async () => {
   const root = await mkdtemp(join(tmpdir(), "dokkurator-doctype-cli-"));
   temporaryDirectories.push(root);
   const directory = join(root, "_dokkurator", ".doctypes", "concept");
   await mkdir(directory, { recursive: true });
 
   await Promise.all([
-    writeFile(join(directory, "definition.yml"), "name: concept\n"),
+    writeFile(
+      join(directory, "definition.yml"),
+      "name: concept\nmetadata:\n  type: object\n",
+    ),
     writeFile(join(directory, "template.md"), "# {{ title }}\n"),
     writeFile(join(directory, "rules.yml"), "rules: []\n"),
   ]);
@@ -40,20 +44,21 @@ test("read prints every unparsed DocType from the default directory", async () =
     { cwd: root },
   );
 
-  await command.parseAsync(["node", "dokkurator-doctype", "read"]);
+  await command.parseAsync(["node", "dokkurator-doctype", "loadDocTypes"]);
 
   expect(stderr).toBe("");
   const output = JSON.parse(stdout) as Array<{
-    directory: string;
-    definition: { content: string };
-    template: { content: string };
-    rules: { content: string };
+    name: string;
+    metadata: unknown;
+    rules: unknown[];
   }>;
-  expect(output).toHaveLength(1);
-  expect(output[0]?.directory).toBe("_dokkurator/.doctypes/concept");
-  expect(output[0]?.definition.content).toBe("name: concept\n");
-  expect(output[0]?.template.content).toBe("# {{ title }}\n");
-  expect(output[0]?.rules.content).toBe("rules: []\n");
+  expect(output).toEqual([
+    {
+      name: "concept",
+      metadata: { type: "object" },
+      rules: [],
+    },
+  ]);
 });
 
 test("reads from a configured DocType directory", async () => {
@@ -62,7 +67,10 @@ test("reads from a configured DocType directory", async () => {
   const directory = join(root, "custom", "decision");
   await mkdir(directory, { recursive: true });
   await Promise.all([
-    writeFile(join(directory, "definition.yml"), "name: decision\n"),
+    writeFile(
+      join(directory, "definition.yml"),
+      "name: decision\nmetadata:\n  type: object\n",
+    ),
     writeFile(join(directory, "template.md"), "# Decision\n"),
     writeFile(join(directory, "rules.yml"), "rules: []\n"),
   ]);
@@ -81,27 +89,33 @@ test("reads from a configured DocType directory", async () => {
     root,
     "--doctypes-directory",
     "custom",
-    "read",
+    "loadDocTypes",
   ]);
 
-  const output = JSON.parse(stdout) as Array<{ directory: string }>;
-  expect(output.map(({ directory: path }) => path)).toEqual([
-    "custom/decision",
+  const output = JSON.parse(stdout) as Array<{ name: string }>;
+  expect(output.map(({ name }) => name)).toEqual(["decision"]);
+});
+
+test("provides exactly the two loading commands", () => {
+  const command = createCommand();
+
+  expect(command.commands.map((subcommand) => subcommand.name())).toEqual([
+    "loadDocTypes",
+    "loadDocuments",
   ]);
 });
 
-test("parse prints validated DocTypes and ignores their templates", async () => {
-  const root = await mkdtemp(join(tmpdir(), "dokkurator-doctype-cli-"));
+test("loadDocuments recursively loads and parses Markdown from the repository root", async () => {
+  const root = await mkdtemp(join(tmpdir(), "dokkurator-documents-cli-"));
   temporaryDirectories.push(root);
-  const directory = join(root, "_dokkurator", ".doctypes", "concept");
-  await mkdir(directory, { recursive: true });
+  await mkdir(join(root, "docs", "nested"), { recursive: true });
   await Promise.all([
+    writeFile(join(root, "README.md"), "# Repository\n"),
     writeFile(
-      join(directory, "definition.yml"),
-      "name: concept\nmetadata:\n  type: object\n",
+      join(root, "docs", "nested", "guide.md"),
+      "---\ndoctype: guide\n---\n\n# Guide\n",
     ),
-    writeFile(join(directory, "template.md"), "ignored: ["),
-    writeFile(join(directory, "rules.yml"), "rules: []\n"),
+    writeFile(join(root, "docs", "ignored.txt"), "not Markdown\n"),
   ]);
 
   let stdout = "";
@@ -114,21 +128,62 @@ test("parse prints validated DocTypes and ignores their templates", async () => 
     { cwd: root },
   );
 
-  await command.parseAsync(["node", "dokkurator-doctype", "parse"]);
+  await command.parseAsync(["node", "dokkurator-doctype", "loadDocuments"]);
 
-  expect(JSON.parse(stdout)).toEqual([
-    {
-      name: "concept",
-      metadata: { type: "object" },
-      rules: [],
-    },
+  const output = JSON.parse(stdout) as Array<{
+    type?: string;
+    content: string;
+    ast: { type: string };
+    headings: Array<{ text: string }>;
+    source: { path: string };
+  }>;
+  expect(output.map(({ source }) => source.path)).toEqual([
+    "README.md",
+    "docs/nested/guide.md",
   ]);
+  expect(output[1]).toMatchObject({
+    type: "guide",
+    content: "\n# Guide\n",
+    ast: { type: "root" },
+    headings: [{ text: "Guide" }],
+  });
 });
 
-test("provides standard help for the read command", () => {
-  const command = createCommand();
+test("loadDocuments automatically uses GitSource in a Git working tree", async () => {
+  const root = await mkdtemp(join(tmpdir(), "dokkurator-documents-git-cli-"));
+  temporaryDirectories.push(root);
+  await writeFile(join(root, "README.md"), "# Repository\n");
+  const git = simpleGit(root);
+  await git.init(["--initial-branch=main"]);
+  await git.addConfig("user.name", "Dokkurator Test");
+  await git.addConfig("user.email", "test@example.com");
+  await git.add("README.md");
+  await git.commit("add readme");
 
-  expect(command.commands[0]?.helpInformation()).toContain(
-    "Usage: dokkurator-doctype read [options]",
+  let stdout = "";
+  const command = createCommand(
+    {
+      writeOut: (text) => {
+        stdout += text;
+      },
+    },
+    { cwd: root },
   );
+
+  await command.parseAsync(["node", "dokkurator-doctype", "loadDocuments"]);
+
+  const output = JSON.parse(stdout) as Array<{
+    source: {
+      kind: string;
+      git?: { branch?: string; status: string; fileRevision?: string };
+    };
+  }>;
+  expect(output[0]?.source).toMatchObject({
+    kind: "git",
+    git: {
+      branch: "main",
+      status: "clean",
+      fileRevision: expect.stringMatching(/^[0-9a-f]{40,64}$/),
+    },
+  });
 });

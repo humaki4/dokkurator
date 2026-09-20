@@ -70,44 +70,53 @@ validate against JSON Schema
 ParsedDocType
 ```
 
-Example API:
+Public API:
 
 ```ts
-const loaded = await loadDocType(source, "_dokkurator/.doctypes/decision");
-const docType = parseDocType(loaded);
+const docType = await loadDocType(source, "_dokkurator/.doctypes/decision");
+
+const docTypes = await loadDocTypes(source);
 ```
+
+Loading is the public operation and includes reading, parsing, normalization,
+and validation of the DocType definition. Raw source loading and parsing are
+internal implementation steps.
 
 ### Document parsing
 
-Once a DocType is available, the library parses actual documentation files.
+The library also loads and parses actual documentation files. Document
+validation remains a separate Validator responsibility.
 
 It is responsible for:
 
 - parsing Frontmatter
 - parsing Markdown
 - extracting headings, links and references
-- applying the DocType's structural information
 - normalizing metadata and document content
 - producing a common document representation for downstream components
 
 Conceptually:
 
 ```text
-document.md + NormalizedDocType
-              ↓
-            parse
-              ↓
-        ParsedDocument
+Markdown source
+      ↓
+load through SourceAdapter
+      ↓
+parse Frontmatter and Markdown
+      ↓
+ParsedDocument
 ```
 
 Example API:
 
 ```ts
-const document = await parseDocument({
-  source,
-  docType,
-});
+const document = await loadDocument(source, "docs/decision.md");
+const documents = await loadDocuments(source);
 ```
+
+`loadDocuments` searches the complete source recursively by default. A
+directory can be configured to narrow the search. DocType templates and common
+generated or dependency directories are excluded.
 
 ## Input and output
 
@@ -127,7 +136,7 @@ type ParsedDocType = {
 the DocType has no `rules.yml` file. The optional template is deliberately not
 part of `ParsedDocType` until template processing is implemented.
 
-Document parsing consumes this definition together with source content:
+Document parsing consumes source content:
 
 ```ts
 type SourceDocument = {
@@ -141,9 +150,10 @@ and produces a normalized document:
 
 ```ts
 type ParsedDocument = {
-  type: string;
-  metadata: Record<string, unknown>;
-  content: MarkdownDocument;
+  type: string | undefined;
+  metadata: unknown;
+  content: string;
+  ast: MarkdownDocument;
   headings: Heading[];
   links: Link[];
   references: Reference[];
@@ -152,6 +162,10 @@ type ParsedDocument = {
 ```
 
 `ParsedDocType` and `ParsedDocument` form the main integration points to Validator and Knowledge.
+
+`metadata` deliberately remains `unknown` at this boundary. Missing, scalar,
+or otherwise invalid Frontmatter is still a parseable document and is reported
+by Validator rather than rejected by DocType.
 
 ## Boundaries
 

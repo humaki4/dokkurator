@@ -67,20 +67,31 @@ type SourceMetadata = {
   repository?: string;
   path: string;
 
-  revision?: string;
-  branch?: string;
-
-  createdAt?: Date;
-  updatedAt?: Date;
-
-  author?: {
-    name?: string;
-    email?: string;
+  git?: {
+    root: string;
+    headRevision?: string;
+    branch?: string;
+    fileRevision?: string;
+    status:
+      | "clean"
+      | "modified"
+      | "added"
+      | "deleted"
+      | "renamed"
+      | "untracked"
+      | "conflicted";
+    committedAt?: Date;
+    author?: {
+      name?: string;
+      email?: string;
+    };
   };
 };
 ```
 
-Provider-specific information can be added separately if required.
+Repository-wide and file-specific Git revisions are deliberately distinct.
+Provider implementations map their output to these Dokkurator-owned types and
+do not expose library-specific models.
 
 ## Local filesystem adapter
 
@@ -121,7 +132,7 @@ const source = new GitSource({
 });
 ```
 
-Additional metadata may include:
+Additional metadata includes:
 
 ```text
 repository root
@@ -130,10 +141,13 @@ commit SHA
 last modifying commit
 author
 commit timestamp
-tracked / untracked state
+working-tree state
 ```
 
-The adapter can use Git commands or a Git library internally.
+The adapter uses `simple-git` internally. It lists tracked files and non-ignored
+untracked files from the working tree. The architectural decision and evaluated
+alternatives are documented in
+[`ADR 0001`](../adr/0001-use-simple-git-for-local-git-access.md).
 
 Core libraries only see normalized `SourceMetadata`.
 
