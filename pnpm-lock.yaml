@@ -60,9 +60,6 @@ importers:
       '@dokkurator/doctype':
         specifier: workspace:*
         version: link:../../packages/doctype
-      '@dokkurator/knowledge':
-        specifier: workspace:*
-        version: link:../../packages/knowledge
       '@dokkurator/validator':
         specifier: workspace:*
         version: link:../../packages/validator
@@ -162,11 +159,29 @@ importers:
         specifier: ^3.36.0
         version: 3.36.0
 
+  packages/index-adapter:
+    dependencies:
+      '@dokkurator/doctype':
+        specifier: workspace:*
+        version: link:../doctype
+
+  packages/index-adapter-sqlite:
+    dependencies:
+      '@dokkurator/index-adapter':
+        specifier: workspace:*
+        version: link:../index-adapter
+
   packages/knowledge:
     dependencies:
       '@dokkurator/doctype':
         specifier: workspace:*
         version: link:../doctype
+      '@dokkurator/index-adapter':
+        specifier: workspace:*
+        version: link:../index-adapter
+      '@dokkurator/index-adapter-sqlite':
+        specifier: workspace:*
+        version: link:../index-adapter-sqlite
       '@dokkurator/source-adapters':
         specifier: workspace:*
         version: link:../source-adapters

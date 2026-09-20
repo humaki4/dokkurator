@@ -26,7 +26,6 @@
   },
   "dependencies": {
     "@dokkurator/doctype": "workspace:*",
-    "@dokkurator/validator": "workspace:*",
-    "@dokkurator/knowledge": "workspace:*"
+    "@dokkurator/validator": "workspace:*"
   }
 }

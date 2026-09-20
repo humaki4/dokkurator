@@ -1,6 +1,9 @@
 import type { ParsedDocument } from "@dokkurator/doctype";
+import type {
+  KnowledgeDocument,
+  SourceReference,
+} from "@dokkurator/index-adapter";
 import type { SourceMetadata } from "@dokkurator/source-adapters";
-import type { KnowledgeDocument, SourceReference } from "./model.js";
 
 export function buildKnowledgeDocument(
   document: ParsedDocument,
@@ -15,8 +18,6 @@ export function buildKnowledgeDocument(
     headings: document.headings,
     links: document.links,
     references: document.references,
-    entities: [],
-    relations: [],
   };
 }
 

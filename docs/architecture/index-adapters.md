@@ -10,7 +10,7 @@ tags: [storage, adapters]
 
 `Index Adapters` persist and query the derived Knowledge model.
 
-They hide the concrete storage technology from `Knowledge` and provide a common interface for document, entity, relation and search operations.
+They hide the concrete storage technology from `Knowledge` and provide a common interface for document and search operations.
 
 ## Technology
 
@@ -19,7 +19,7 @@ They hide the concrete storage technology from `Knowledge` and provide a common 
 - storage-independent interface
 - initial implementation can use SQLite
 - later adapters may target PostgreSQL or OpenSearch
-- relational data model for documents, entities and relations
+- relational data model for documents
 - optional full-text index depending on backend
 - no direct database access from Knowledge
 
@@ -27,7 +27,6 @@ They hide the concrete storage technology from `Knowledge` and provide a common 
 
 - store and update indexed documents
 - remove deleted documents
-- persist entities and relations
 - provide document lookup
 - provide structured queries
 - provide full-text search
@@ -38,6 +37,8 @@ They hide the concrete storage technology from `Knowledge` and provide a common 
 
 ```ts
 interface IndexAdapter {
+  replaceAll(documents: readonly KnowledgeDocument[]): Promise<void>;
+
   upsertDocument(document: KnowledgeDocument): Promise<void>;
 
   removeDocument(id: DocumentId): Promise<void>;
@@ -50,18 +51,6 @@ interface IndexAdapter {
 }
 ```
 
-Optional lower-level operations may be exposed where required:
-
-```ts
-interface IndexAdapter {
-  // ...
-
-  getEntity?(id: EntityId): Promise<Entity | undefined>;
-
-  getRelations?(entity: EntityId): Promise<Relation[]>;
-}
-```
-
 ## Data model
 
 The exact schema depends on the backend, but the logical model should stay stable.
@@ -70,10 +59,7 @@ The exact schema depends on the backend, but the logical model should stay stabl
 Document
    │
    ├── Metadata
-   │
-   ├── Entity
-   │      │
-   │      └── Relation ────── Entity
+   ├── Headings / Links / References
    │
    └── Search Content
 ```
@@ -146,74 +132,9 @@ For SQLite or PostgreSQL this may be represented as JSON / JSONB.
 
 Frequently queried fields may later be indexed separately.
 
-## Entities
-
-Entities represent identifiable objects referenced by documents.
-
-```text
-entities
---------
-id
-type
-key
-name
-document_id
-data
-```
-
-Example:
-
-```text
-id:        service:payment
-type:      service
-key:       payment
-name:      Payment Service
-document:  architecture/payment.md
-```
-
-An entity may originate from a document but has its own stable identity.
-
-## Relations
-
-Relations connect documents and entities.
-
-```text
-relations
----------
-id
-source_entity_id
-type
-target_entity_id
-source_document_id
-```
-
-Example:
-
-```text
-ADR-001
-    --supersedes-->
-ADR-000
-```
-
-or:
-
-```text
-ADR-001
-    --affects-->
-service:payment
-```
-
-Conceptually:
-
-```ts
-type RelationRecord = {
-  source: EntityId;
-  type: string;
-  target: EntityId;
-
-  documentId?: DocumentId;
-};
-```
+Entities and semantic relations are outside the first adapter version. They
+remain a later Knowledge task once concrete identity and ownership semantics
+are available.
 
 ## References
 
@@ -292,24 +213,6 @@ CREATE TABLE documents (
   indexed_at TEXT NOT NULL
 );
 
-CREATE TABLE entities (
-  id TEXT PRIMARY KEY,
-  type TEXT NOT NULL,
-  key TEXT NOT NULL,
-  name TEXT,
-  document_id TEXT,
-  data TEXT,
-  FOREIGN KEY (document_id) REFERENCES documents(id)
-);
-
-CREATE TABLE relations (
-  id TEXT PRIMARY KEY,
-  source_entity_id TEXT NOT NULL,
-  type TEXT NOT NULL,
-  target_entity_id TEXT NOT NULL,
-  source_document_id TEXT,
-  FOREIGN KEY (source_document_id) REFERENCES documents(id)
-);
 ```
 
 Additional indexes:
@@ -321,14 +224,6 @@ CREATE INDEX idx_documents_doctype
 CREATE INDEX idx_documents_source
   ON documents(source_id);
 
-CREATE INDEX idx_entities_type
-  ON entities(type);
-
-CREATE INDEX idx_relations_source
-  ON relations(source_entity_id);
-
-CREATE INDEX idx_relations_target
-  ON relations(target_entity_id);
 ```
 
 ## Update model
@@ -344,8 +239,7 @@ begin update
       ↓
 replace document
 replace metadata
-replace entities
-replace relations
+replace search entry
       ↓
 commit
 ```
@@ -356,12 +250,11 @@ Conceptually:
 await index.transaction(async () => {
   await index.removeDerivedData(document.id);
   await index.upsertDocument(document);
-  await index.insertEntities(document.entities);
-  await index.insertRelations(document.relations);
+  await index.replaceSearchEntry(document);
 });
 ```
 
-This prevents stale relations from surviving document changes.
+This prevents stale search content from surviving document changes.
 
 ## Incremental synchronization
 

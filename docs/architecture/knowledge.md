@@ -10,7 +10,7 @@ tags: [index, search]
 
 `Knowledge` builds and queries the derived knowledge model created from parsed documents.
 
-It consumes `ParsedDocument` objects from DocType and transforms them into indexable documents, entities and relationships.
+It consumes `ParsedDocument` objects from DocType and transforms them into indexable documents.
 
 ## Technology
 
@@ -18,7 +18,6 @@ It consumes `ParsedDocument` objects from DocType and transforms them into index
 - storage-independent core
 - adapter-based persistence
 - explicit query API instead of direct database access
-- graph-like relations represented in the domain model
 - local development can start with SQLite or an in-memory adapter
 - server deployments can later use PostgreSQL, OpenSearch or another index implementation
 
@@ -26,8 +25,6 @@ It consumes `ParsedDocument` objects from DocType and transforms them into index
 
 - index parsed documents
 - update and remove indexed documents
-- derive entities and relationships
-- resolve document references
 - provide search and query APIs
 - support Validator queries across documents
 - expose document relationships for CLI and Catalog Server
@@ -41,11 +38,6 @@ ParsedDocument
  normalize / enrich
       ↓
 KnowledgeDocument
-      ↓
-extract
- ┌────┴─────┐
-Entities  Relations
- └────┬─────┘
       ↓
  Index Adapter
       ↓
@@ -69,9 +61,6 @@ type KnowledgeDocument = {
   headings: Heading[];
   links: Link[];
   references: Reference[];
-
-  entities: Entity[];
-  relations: Relation[];
 };
 ```
 
@@ -92,24 +81,9 @@ not copied into the derived index by default. They can later be introduced as
 an explicit provenance or document-state model when required by a concrete UI
 or assessment feature.
 
-Relations are explicit rather than hidden inside Markdown or metadata.
-
-```ts
-type Relation = {
-  from: EntityReference;
-  type: string;
-  to: EntityReference;
-};
-```
-
-Example:
-
-```text
-ADR-001
-  ├─ supersedes → ADR-000
-  ├─ relates-to → API-42
-  └─ belongs-to → payment-service
-```
+Entities and semantic relations are deliberately deferred. They will be added
+when their identity, ownership and extraction rules are defined by a concrete
+use case.
 
 ## Index adapter
 
@@ -141,25 +115,13 @@ The initial implementation can stay lightweight while keeping the API stable.
 ## Indexing
 
 ```ts
-await knowledge.index(parsedDocument);
+await indexDocuments({ source, index, documentsDirectory: "docs" });
 ```
 
-Conceptually:
-
-```ts
-async function index(document: ParsedDocument) {
-  const knowledgeDocument = buildKnowledgeDocument(document);
-
-  await indexAdapter.upsert(knowledgeDocument);
-}
-```
-
-Incremental updates should be supported:
-
-```ts
-await knowledge.upsert(document);
-await knowledge.remove(documentId);
-```
+`indexDocuments` is the single public indexing operation. Loading, transforming
+and writing individual documents remain implementation details. The first
+version atomically replaces the complete index. Incremental updates may be
+added later without widening this public API.
 
 A full rebuild must always remain possible.
 
@@ -184,10 +146,6 @@ const result = await knowledge.query({
 
   where: {
     status: { equals: "accepted" },
-  },
-
-  relations: {
-    relatedTo: "service:payment",
   },
 
   sort: [{ field: "date", direction: "desc" }],
