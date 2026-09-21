@@ -68,6 +68,23 @@ describe("SQLiteIndex", () => {
     index.close();
   });
 
+  test("rolls back a failed complete replacement", async () => {
+    const { index } = await createIndex();
+    const original = exampleDocument();
+    await index.upsert(original);
+    const duplicatePath = exampleDocument({
+      id: "different-id",
+    });
+
+    await expect(index.replaceAll([original, duplicatePath])).rejects.toThrow();
+
+    await expect(index.query()).resolves.toEqual([original]);
+    await expect(
+      index.search({ text: "authentication" }),
+    ).resolves.toHaveLength(1);
+    index.close();
+  });
+
   test("filters structured and full-text queries", async () => {
     const { index } = await createIndex();
     await index.upsert(exampleDocument());

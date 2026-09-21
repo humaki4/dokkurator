@@ -21,6 +21,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@dokkurator/index-adapter": "workspace:*"
+    "@dokkurator/index-adapter": "workspace:*",
+    "kysely": "^0.29.6"
   }
 }

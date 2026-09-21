@@ -1,10 +1,33 @@
+// Kept for API compatibility. The rebuildable index no longer runs migrations.
 export const SCHEMA_VERSION = 1;
 
-export const schema = `
-  CREATE TABLE IF NOT EXISTS schema_version (
-    version INTEGER NOT NULL
-  ) STRICT;
+export interface DocumentsTable {
+  id: string;
+  type: string | null;
+  source_id: string;
+  path: string;
+  repository: string | null;
+  revision: string | null;
+  metadata: string;
+  content: string;
+  headings: string;
+  links: string;
+  references_: string;
+  indexed_at: string;
+}
 
+export interface DocumentSearchTable {
+  document_id: string;
+  title: string;
+  content: string;
+}
+
+export interface IndexDatabase {
+  documents: DocumentsTable;
+  document_search: DocumentSearchTable;
+}
+
+export const schema = `
   CREATE TABLE IF NOT EXISTS documents (
     id          TEXT PRIMARY KEY,
     type        TEXT,
