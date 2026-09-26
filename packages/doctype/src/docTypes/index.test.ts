@@ -1,8 +1,5 @@
 import { expect, test, vi } from "vitest";
-import type {
-  SourceAdapter,
-  SourceDocument,
-} from "../source-adapter/index.js";
+import type { SourceAdapter, SourceDocument } from "../source-adapter/index.js";
 import { SourceNotFoundError } from "../source-adapter/index.js";
 import { loadDocType, loadDocTypes } from "./index.js";
 

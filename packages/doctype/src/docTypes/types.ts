@@ -1,4 +1,7 @@
-import type { SourceDocument, SourceId } from "../source-adapter/source-adapter.js";
+import type {
+  SourceDocument,
+  SourceId,
+} from "../source-adapter/source-adapter.js";
 
 export const DEFAULT_DOCTYPES_DIRECTORY = "_dokkurator/.doctypes";
 

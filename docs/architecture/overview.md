@@ -73,8 +73,8 @@ Detailed architecture is documented separately:
 | DocType         | [`doctype.md`](doctype.md)                 | Defines, parses and normalizes structured documents based on Markdown, Frontmatter and document type definitions.  |
 | Validator       | [`validator.md`](validator.md)             | Validates documents against structural, metadata and cross-document rules.                                         |
 | Knowledge       | [`knowledge.md`](knowledge.md)             | Builds the searchable knowledge model from parsed documents, references and relationships.                         |
-| Source adapters | [`source-adapters.md`](source-adapters.md) | DocType-owned source contract and filesystem/Git implementations; remote providers can be added as integrations.    |
-| Index adapters  | [`index-adapters.md`](index-adapters.md)   | Knowledge-owned index contract and backend implementations for persistence and querying.                            |
+| Source adapters | [`source-adapters.md`](source-adapters.md) | DocType-owned source contract and filesystem/Git implementations; remote providers can be added as integrations.   |
+| Index adapters  | [`index-adapters.md`](index-adapters.md)   | Knowledge-owned index contract and backend implementations for persistence and querying.                           |
 | CLI             | [`cli.md`](cli.md)                         | Exposes local and CI workflows for validation, indexing, search and inspection.                                    |
 | Catalog Server  | [`catalog-server.md`](catalog-server.md)   | Provides centralized indexing, synchronization, authentication and query APIs for shared documentation sources.    |
 | Explorer UI     | [`explorer-ui.md`](explorer-ui.md)         | Provides the browser-based interface for searching, navigating and inspecting documentation and its relationships. |
