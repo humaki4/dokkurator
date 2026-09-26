@@ -3,8 +3,8 @@ import { DEFAULT_DOCUMENTS_DIRECTORY } from "@dokkurator/doctype";
 import { SQLiteIndex } from "@dokkurator/index-adapter-sqlite";
 import { createLocalSource } from "@dokkurator/source-adapters";
 import { Command } from "commander";
-import { indexDocuments } from "./index-documents.js";
-import { parseSearchExpression } from "./search-query.js";
+import { indexDocuments } from "./index/index-documents.js";
+import { parseSearchExpression } from "./search/search-query.js";
 
 export interface CommandOutput {
   writeOut?: (text: string) => void;
