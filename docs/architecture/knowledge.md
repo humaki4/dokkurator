@@ -162,7 +162,10 @@ Full-text search is exposed through the same abstraction.
 
 ```ts
 await knowledge.search({
-  text: "authentication",
+  expression: {
+    type: "term",
+    value: "authentication",
+  },
   types: ["decision", "architecture"],
   limit: 20,
 });
@@ -173,6 +176,26 @@ The concrete implementation may map this to:
 - SQLite FTS
 - PostgreSQL full-text search
 - OpenSearch
+
+The public search model is a storage-independent expression tree. Terms can
+search content and all metadata, or target one metadata path. `and` and `or`
+nodes combine expressions. A user-facing query language is parsed by Knowledge
+into this model; neither CLI syntax nor database expressions cross the index
+adapter boundary.
+
+```text
+CLI input
+    ↓
+Knowledge query parser
+    ↓
+SearchExpression
+    ↓
+Index adapter
+```
+
+The initial query language supports unqualified terms, `key:value`, quoted
+values, parentheses, and `AND`/`OR`. Adjacent terms imply `AND`, and `AND` binds
+more strongly than `OR`.
 
 ## Validator integration
 

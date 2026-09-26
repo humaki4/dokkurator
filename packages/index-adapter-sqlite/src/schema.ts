@@ -1,5 +1,6 @@
-// Kept for API compatibility. The rebuildable index no longer runs migrations.
-export const SCHEMA_VERSION = 1;
+import type { DatabaseSync } from "node:sqlite";
+
+export const SCHEMA_VERSION = 2;
 
 export interface DocumentsTable {
   id: string;
@@ -18,13 +19,19 @@ export interface DocumentsTable {
 
 export interface DocumentSearchTable {
   document_id: string;
-  title: string;
   content: string;
+}
+
+export interface DocumentMetadataSearchTable {
+  document_id: string;
+  key: string;
+  value: string;
 }
 
 export interface IndexDatabase {
   documents: DocumentsTable;
   document_search: DocumentSearchTable;
+  document_metadata_search: DocumentMetadataSearchTable;
 }
 
 export const schema = `
@@ -55,9 +62,29 @@ export const schema = `
 
   CREATE VIRTUAL TABLE IF NOT EXISTS document_search USING fts5(
     document_id UNINDEXED,
-    title,
     content,
-    tokenize = 'unicode61 remove_diacritics 2',
-    prefix = '2 3 4'
+    tokenize = 'trigram remove_diacritics 1'
+  );
+
+  CREATE VIRTUAL TABLE IF NOT EXISTS document_metadata_search USING fts5(
+    document_id UNINDEXED,
+    key UNINDEXED,
+    value,
+    tokenize = 'trigram remove_diacritics 1'
   );
 `;
+
+export function initializeSchema(database: DatabaseSync): void {
+  const row = database.prepare("PRAGMA user_version").get() as {
+    user_version: number;
+  };
+  if (row.user_version !== SCHEMA_VERSION) {
+    database.exec(`
+      DROP TABLE IF EXISTS document_metadata_search;
+      DROP TABLE IF EXISTS document_search;
+      DROP TABLE IF EXISTS documents;
+    `);
+  }
+  database.exec(schema);
+  database.exec(`PRAGMA user_version = ${SCHEMA_VERSION}`);
+}

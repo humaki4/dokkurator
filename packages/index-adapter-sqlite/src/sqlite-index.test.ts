@@ -107,6 +107,88 @@ describe("SQLiteIndex", () => {
     index.close();
   });
 
+  test("searches partial strings in content and flattened metadata", async () => {
+    const { index } = await createIndex();
+    const document = {
+      ...exampleDocument(),
+      metadata: {
+        title: "Identity",
+        status: "accepted",
+        owner: { team: "platform" },
+        tags: ["security", "oauth"],
+      },
+    };
+    await index.upsert(document);
+
+    await expect(
+      index.search({ expression: term("thenti") }),
+    ).resolves.toHaveLength(1);
+    await expect(
+      index.search({ expression: term("latfor", "owner.team") }),
+    ).resolves.toHaveLength(1);
+    await expect(
+      index.search({ expression: term("ecur", "tags") }),
+    ).resolves.toHaveLength(1);
+    await expect(
+      index.search({ expression: term("accepted", "owner.team") }),
+    ).resolves.toEqual([]);
+    index.close();
+  });
+
+  test("combines search expressions and ranks metadata above one content hit", async () => {
+    const { index } = await createIndex();
+    const metadataHit = {
+      ...exampleDocument({ id: "docs:metadata.md", path: "metadata.md" }),
+      metadata: { topic: "authentication" },
+      content: "Unrelated body.",
+    };
+    const contentHit = {
+      ...exampleDocument({ id: "docs:content.md", path: "content.md" }),
+      metadata: { topic: "other" },
+      content: "Authentication appears once.",
+    };
+    const repeatedContentHit = {
+      ...exampleDocument({ id: "docs:repeated.md", path: "repeated.md" }),
+      metadata: { topic: "other" },
+      content: "Authentication, authentication, authentication.",
+    };
+    const draft = {
+      ...exampleDocument({ id: "docs:draft.md", path: "draft.md" }),
+      metadata: { status: "draft" },
+      content: "Unrelated body.",
+    };
+    await index.replaceAll([
+      metadataHit,
+      contentHit,
+      repeatedContentHit,
+      draft,
+    ]);
+
+    const ranked = await index.search({ expression: term("authentication") });
+    expect(ranked.map((hit) => hit.document.id)).toEqual([
+      metadataHit.id,
+      repeatedContentHit.id,
+      contentHit.id,
+    ]);
+    await expect(
+      index.search({
+        expression: {
+          type: "or",
+          operands: [term("authentication"), term("draft", "status")],
+        },
+      }),
+    ).resolves.toHaveLength(4);
+    await expect(
+      index.search({
+        expression: {
+          type: "and",
+          operands: [term("authentication"), term("other", "topic")],
+        },
+      }),
+    ).resolves.toHaveLength(2);
+    index.close();
+  });
+
   test("removes and clears documents from storage and search", async () => {
     const { index } = await createIndex();
     const document = exampleDocument();
@@ -131,6 +213,14 @@ async function createIndex(): Promise<{
   temporaryDirectories.push(directory);
   const filename = join(directory, "nested", "index.db");
   return { index: new SQLiteIndex({ filename }), filename };
+}
+
+function term(value: string, metadataKey?: string) {
+  return {
+    type: "term" as const,
+    value,
+    ...(metadataKey === undefined ? {} : { metadataKey }),
+  };
 }
 
 function exampleDocument(

@@ -195,6 +195,27 @@ OpenSearch document
 
 The Knowledge API should not expose these implementation differences.
 
+SQLite keeps two derived FTS5 structures: one for document content and one for
+metadata values. Metadata objects are flattened to dotted paths, and arrays
+produce multiple entries for the same path.
+
+```text
+document_metadata_search
+------------------------
+document_id
+key          # for example owner.team or tags
+value        # one scalar value per row
+```
+
+This intentionally denormalizes metadata for fast field-specific and substring
+searches. The JSON value in `documents.metadata` remains the representation used
+to restore a `KnowledgeDocument`; the FTS rows are disposable projections that
+are replaced atomically with their document.
+
+Search-expression parsing belongs to Knowledge. Each adapter only translates
+the resulting backend-neutral expression tree into its native query language
+and ranking implementation.
+
 ## Possible SQLite schema
 
 A lightweight initial implementation could roughly use:

@@ -29,6 +29,11 @@ metadata and the parser-specific Markdown AST are deliberately not part of the
 index model. Entity and relation extraction will be added as a separate
 Knowledge concern.
 
+Search expressions are parsed by Knowledge and passed to the configured index
+adapter as a storage-independent expression tree. Search terms match partial
+strings in content and metadata. `key:value` limits a term to one metadata path;
+`AND`, `OR`, parentheses, and quoted values can be combined.
+
 ## CLI
 
 The package also provides the same operation as a command:
@@ -39,6 +44,14 @@ dokkurator-knowledge \
   --documents-directory <directory> \
   --index .dokkurator/index.db \
   index
+```
+
+Search an existing index:
+
+```text
+dokkurator-knowledge search authentication
+dokkurator-knowledge search status:accepted AND "access token"
+dokkurator-knowledge search owner.team:platform OR tags:security
 ```
 
 `--documents-directory` and `--index` are relative to `--root`. The defaults

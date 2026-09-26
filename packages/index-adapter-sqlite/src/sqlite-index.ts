@@ -10,12 +10,18 @@ import type {
   SearchQuery,
 } from "@dokkurator/index-adapter";
 import { nodeSqliteDatabase } from "./node-sqlite-dialect.js";
-import { schema, type IndexDatabase } from "./schema.js";
+import {
+  toDocument,
+  toDocumentRow,
+  toMetadataRows,
+  toSearchHit,
+} from "./document-mapper.js";
+import { initializeSchema, type IndexDatabase } from "./schema.js";
 import {
   getDocument,
   queryDocuments,
   searchDocuments,
-  writeDocument,
+  writeDocument as writeDocumentQuery,
 } from "./sqlite-queries.js";
 
 export interface SQLiteIndexOptions {
@@ -38,7 +44,7 @@ export class SQLiteIndex implements KnowledgeIndex, Disposable {
     this.#database.exec(
       "PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 5000;",
     );
-    this.#database.exec(schema);
+    initializeSchema(this.#database);
     this.#queries = new Kysely<IndexDatabase>({
       dialect: new SqliteDialect({
         database: nodeSqliteDatabase(this.#database),
@@ -49,16 +55,22 @@ export class SQLiteIndex implements KnowledgeIndex, Disposable {
   async replaceAll(documents: readonly KnowledgeDocument[]): Promise<void> {
     await this.#transaction(async (transaction) => {
       await transaction.deleteFrom("document_search").execute();
+      await transaction.deleteFrom("document_metadata_search").execute();
       await transaction.deleteFrom("documents").execute();
-      for (const document of documents)
-        await writeDocument(transaction, document);
+      for (const document of documents) {
+        const row = toDocumentRow(document);
+        const metadata = toMetadataRows(document.id, document.metadata);
+        await writeDocumentQuery(transaction, row, metadata);
+      }
     });
   }
 
   async upsert(document: KnowledgeDocument): Promise<void> {
-    await this.#transaction((transaction) =>
-      writeDocument(transaction, document),
-    );
+    await this.#transaction(async (transaction) => {
+      const row = toDocumentRow(document);
+      const metadata = toMetadataRows(document.id, document.metadata);
+      await writeDocumentQuery(transaction, row, metadata);
+    });
   }
 
   async remove(id: string): Promise<void> {
@@ -67,27 +79,35 @@ export class SQLiteIndex implements KnowledgeIndex, Disposable {
         .deleteFrom("document_search")
         .where("document_id", "=", id)
         .execute();
+      await transaction
+        .deleteFrom("document_metadata_search")
+        .where("document_id", "=", id)
+        .execute();
       await transaction.deleteFrom("documents").where("id", "=", id).execute();
     });
   }
 
   async get(id: string): Promise<KnowledgeDocument | undefined> {
-    return getDocument(this.#queries, id);
+    const row = await getDocument(this.#queries, id);
+    return row === undefined ? undefined : toDocument(row);
   }
 
   async query(
     query: KnowledgeQuery = {},
   ): Promise<readonly KnowledgeDocument[]> {
-    return queryDocuments(this.#queries, query);
+    const rows = await queryDocuments(this.#queries, query);
+    return rows.map(toDocument);
   }
 
   async search(query: SearchQuery): Promise<readonly SearchHit[]> {
-    return searchDocuments(this.#queries, query);
+    const rows = await searchDocuments(this.#queries, query);
+    return rows.map(toSearchHit);
   }
 
   async clear(): Promise<void> {
     await this.#transaction(async (transaction) => {
       await transaction.deleteFrom("document_search").execute();
+      await transaction.deleteFrom("document_metadata_search").execute();
       await transaction.deleteFrom("documents").execute();
     });
   }

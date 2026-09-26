@@ -47,10 +47,50 @@ test("indexes the configured document directory into SQLite", async () => {
   database.close();
 });
 
-test("provides only the index command", () => {
+test("provides index and search commands", () => {
   expect(
     createCommand().commands.map((subcommand) => subcommand.name()),
-  ).toEqual(["index"]);
+  ).toEqual(["index", "search"]);
+});
+
+test("searches content and individual metadata fields", async () => {
+  const root = await temporaryDirectory();
+  await mkdir(join(root, "docs"), { recursive: true });
+  await writeFile(
+    join(root, "docs", "accepted.md"),
+    "---\nstatus: accepted\nowner:\n  team: platform\n---\n# Authentication\nOAuth tokens are used here.\n",
+  );
+  await writeFile(
+    join(root, "docs", "draft.md"),
+    "---\nstatus: draft\n---\n# Other topic\nNo security content.\n",
+  );
+
+  await createCommand({}, { cwd: root }).parseAsync([
+    "node",
+    "dokkurator-knowledge",
+    "index",
+  ]);
+
+  let stdout = "";
+  await createCommand(
+    { writeOut: (text) => (stdout += text) },
+    { cwd: root },
+  ).parseAsync([
+    "node",
+    "dokkurator-knowledge",
+    "search",
+    "owner.team:latfor",
+    "AND",
+    "Authenti",
+  ]);
+
+  const results = JSON.parse(stdout) as Array<{
+    document: { metadata: { status: string } };
+    rank: number;
+  }>;
+  expect(results).toHaveLength(1);
+  expect(results[0]?.document.metadata.status).toBe("accepted");
+  expect(results[0]?.rank).toBeGreaterThan(100);
 });
 
 async function temporaryDirectory(): Promise<string> {

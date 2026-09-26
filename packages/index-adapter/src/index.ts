@@ -13,8 +13,22 @@ export interface KnowledgeQuery {
   readonly offset?: number;
 }
 
+export type SearchExpression =
+  | {
+      readonly type: "term";
+      readonly value: string;
+      readonly metadataKey?: string;
+    }
+  | {
+      readonly type: "and" | "or";
+      readonly operands: readonly SearchExpression[];
+    };
+
 export interface SearchQuery {
-  readonly text: string;
+  /** Structured search expression. Prefer this for new callers. */
+  readonly expression?: SearchExpression;
+  /** Backwards-compatible shorthand for an AND search across all fields. */
+  readonly text?: string;
   readonly types?: readonly string[];
   readonly limit?: number;
   readonly offset?: number;
@@ -22,6 +36,7 @@ export interface SearchQuery {
 
 export interface SearchHit {
   readonly document: KnowledgeDocument;
+  /** Backend-independent relevance score. Higher values rank first. */
   readonly rank: number;
   readonly snippet: string;
 }

@@ -1,5 +1,5 @@
-import type { KnowledgeDocument } from "@dokkurator/index-adapter";
-import type { DocumentsTable } from "./schema.js";
+import type { KnowledgeDocument, SearchHit } from "@dokkurator/index-adapter";
+import type { DocumentMetadataSearchTable, DocumentsTable } from "./schema.js";
 
 export const documentColumns = [
   "id",
@@ -35,6 +35,16 @@ export function toDocument(row: DocumentRow): KnowledgeDocument {
   };
 }
 
+export function toSearchHit(
+  row: DocumentRow & { readonly rank: number; readonly snippet: string },
+): SearchHit {
+  return {
+    document: toDocument(row),
+    rank: row.rank,
+    snippet: row.snippet,
+  };
+}
+
 export function toDocumentRow(document: KnowledgeDocument): DocumentsTable {
   return {
     id: document.id,
@@ -52,10 +62,40 @@ export function toDocumentRow(document: KnowledgeDocument): DocumentsTable {
   };
 }
 
-export function titleOf(document: KnowledgeDocument): string {
-  const title = document.metadata.title;
-  if (typeof title === "string") return title;
-  return document.headings[0]?.text ?? "";
+export function toMetadataRows(
+  documentId: string,
+  metadata: Readonly<Record<string, unknown>>,
+): DocumentMetadataSearchTable[] {
+  return Object.entries(metadata).flatMap(([key, value]) =>
+    metadataValueRows(documentId, key, value),
+  );
+}
+
+function metadataValueRows(
+  documentId: string,
+  key: string,
+  value: unknown,
+): DocumentMetadataSearchTable[] {
+  if (Array.isArray(value))
+    return value.flatMap((item) => metadataValueRows(documentId, key, item));
+  if (value !== null && typeof value === "object")
+    return Object.entries(value).flatMap(([childKey, childValue]) =>
+      metadataValueRows(documentId, `${key}.${childKey}`, childValue),
+    );
+  if (
+    typeof value !== "string" &&
+    typeof value !== "number" &&
+    typeof value !== "boolean"
+  )
+    return [];
+
+  return [
+    {
+      document_id: documentId,
+      key: key.toLocaleLowerCase(),
+      value: String(value),
+    },
+  ];
 }
 
 function serialize(value: unknown): string {

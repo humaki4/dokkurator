@@ -4,6 +4,7 @@ import { SQLiteIndex } from "@dokkurator/index-adapter-sqlite";
 import { createLocalSource } from "@dokkurator/source-adapters";
 import { Command } from "commander";
 import { indexDocuments } from "./index-documents.js";
+import { parseSearchExpression } from "./search-query.js";
 
 export interface CommandOutput {
   writeOut?: (text: string) => void;
@@ -71,5 +72,41 @@ export function createCommand(
       }
     });
 
+  command
+    .command("search <query...>")
+    .description("Search document content and metadata")
+    .option(
+      "--limit <number>",
+      "maximum number of results",
+      parsePositiveInt,
+      20,
+    )
+    .action(async (queryParts: string[], searchOptions: { limit: number }) => {
+      const options = command.opts<{
+        root: string;
+        index: string;
+      }>();
+      const filename = isAbsolute(options.index)
+        ? options.index
+        : resolve(options.root, options.index);
+      const index = new SQLiteIndex({ filename });
+      try {
+        const results = await index.search({
+          expression: parseSearchExpression(queryParts.join(" ")),
+          limit: searchOptions.limit,
+        });
+        writeOut(`${JSON.stringify(results, null, 2)}\n`);
+      } finally {
+        index.close();
+      }
+    });
+
   return command;
+}
+
+function parsePositiveInt(value: string): number {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isSafeInteger(parsed) || parsed < 1)
+    throw new Error(`Expected a positive integer, received: ${value}`);
+  return parsed;
 }
