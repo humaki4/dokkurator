@@ -30,10 +30,8 @@
   },
   "dependencies": {
     "@dokkurator/doctype": "workspace:*",
-    "@dokkurator/index-adapter": "workspace:*",
-    "@dokkurator/index-adapter-sqlite": "workspace:*",
-    "@dokkurator/source-adapters": "workspace:*",
-    "commander": "^15.0.0"
+    "commander": "^15.0.0",
+    "kysely": "^0.29.6"
   },
   "devDependencies": {
     "peggy": "^5.1.0"

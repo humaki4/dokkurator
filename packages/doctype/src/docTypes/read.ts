@@ -1,9 +1,9 @@
 import type {
-  SourceAdapter,
+  DocumentSource,
   SourceDocument,
   SourceId,
-} from "@dokkurator/source-adapters";
-import { SourceNotFoundError } from "@dokkurator/source-adapters";
+} from "../source-adapter/source-adapter.js";
+import { SourceNotFoundError } from "../source-adapter/source-adapter.js";
 import {
   DEFAULT_DOCTYPES_DIRECTORY,
   type DocTypeConfig,
@@ -11,7 +11,7 @@ import {
 } from "./types.js";
 
 export async function readDocType(
-  source: SourceAdapter,
+  source: DocumentSource,
   directory: SourceId,
 ): Promise<LoadedDocType> {
   const sourceId = (fileName: string): SourceId =>
@@ -26,7 +26,7 @@ export async function readDocType(
 }
 
 export async function readDocTypes(
-  source: SourceAdapter,
+  source: DocumentSource,
   config: DocTypeConfig = {},
 ): Promise<LoadedDocType[]> {
   const doctypesDirectory =
@@ -46,7 +46,7 @@ export async function readDocTypes(
 }
 
 async function readOptionalSource(
-  source: SourceAdapter,
+  source: DocumentSource,
   id: SourceId,
 ): Promise<SourceDocument | undefined> {
   try {

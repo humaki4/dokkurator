@@ -16,9 +16,10 @@ to plain directories, the CLI must recognize local Git working trees and expose
 repository and per-file Git metadata. Core loading and parsing code must remain
 independent of the concrete adapter.
 
-The adapters live in the internal `@dokkurator/source-adapters` package so that
-core libraries depend only on their public source contract. The local adapter
-needs to:
+The source adapter contract and its local implementations are owned by
+`@dokkurator/doctype`, which exports the supported source API from its package
+root. DocType loading and parsing still depend only on the generic source
+contract. The local adapter needs to:
 
 - detect a Git working tree and find its repository root;
 - enumerate tracked and untracked, but non-ignored, files;
@@ -29,10 +30,9 @@ needs to:
 ## Decision
 
 Use `simple-git` as the implementation dependency of the local `GitSource`.
-The source-adapter package uses it to determine whether the supplied directory
-belongs to a Git working tree and selects either `GitSource` or
-`FileSystemSource`. Core loading functions continue to receive only the
-`SourceAdapter` interface.
+DocType uses it to determine whether the supplied directory belongs to a Git
+working tree and selects either `GitSource` or `FileSystemSource`. Core loading
+functions continue to receive only the `DocumentSource` interface.
 
 `simple-git` delegates to the locally installed Git executable. This matches the
 semantics developers already observe in the same checkout, including Git

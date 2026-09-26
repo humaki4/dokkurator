@@ -1,7 +1,7 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { KnowledgeDocument } from "@dokkurator/index-adapter";
+import type { KnowledgeDocument } from "../index.js";
 import { afterEach, describe, expect, test } from "vitest";
 import { SQLiteIndex } from "./sqlite-index.js";
 

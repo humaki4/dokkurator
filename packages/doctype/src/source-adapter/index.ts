@@ -5,6 +5,7 @@ export type { GitSourceOptions } from "./git-source.js";
 export { createLocalSource } from "./local-source.js";
 export { SourceNotFoundError } from "./source-adapter.js";
 export type {
+  DocumentSource,
   GitFileStatus,
   GitSourceMetadata,
   ListOptions,

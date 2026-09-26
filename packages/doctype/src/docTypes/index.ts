@@ -1,17 +1,17 @@
-import type { SourceAdapter, SourceId } from "@dokkurator/source-adapters";
+import type { DocumentSource, SourceId } from "../source-adapter/source-adapter.js";
 import { parseDocType, parseDocTypes } from "./parse.js";
 import { readDocType, readDocTypes } from "./read.js";
 import type { DocTypeConfig, ParsedDocType } from "./types.js";
 
 export async function loadDocType(
-  source: SourceAdapter,
+  source: DocumentSource,
   directory: SourceId,
 ): Promise<ParsedDocType> {
   return parseDocType(await readDocType(source, directory));
 }
 
 export async function loadDocTypes(
-  source: SourceAdapter,
+  source: DocumentSource,
   config: DocTypeConfig = {},
 ): Promise<ParsedDocType[]> {
   return parseDocTypes(await readDocTypes(source, config));

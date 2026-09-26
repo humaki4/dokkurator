@@ -2,7 +2,7 @@ import type {
   KnowledgeQuery,
   SearchExpression,
   SearchQuery,
-} from "@dokkurator/index-adapter";
+} from "../index.js";
 import { sql, type Kysely, type RawBuilder, type Transaction } from "kysely";
 import type {
   DocumentMetadataSearchTable,

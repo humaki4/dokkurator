@@ -1,4 +1,4 @@
-import type { SearchExpression } from "@dokkurator/index-adapter";
+import type { SearchExpression } from "../index-adapter/index.js";
 import { parse } from "./generated/search-query-parser.js";
 
 export function parseSearchExpression(input: string): SearchExpression {

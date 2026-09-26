@@ -2,8 +2,7 @@ import type { ParsedDocument } from "@dokkurator/doctype";
 import type {
   KnowledgeDocument,
   SourceReference,
-} from "@dokkurator/index-adapter";
-import type { SourceMetadata } from "@dokkurator/source-adapters";
+} from "../index-adapter/index.js";
 
 export function buildKnowledgeDocument(
   document: ParsedDocument,
@@ -21,7 +20,9 @@ export function buildKnowledgeDocument(
   };
 }
 
-export function buildSourceReference(source: SourceMetadata): SourceReference {
+export function buildSourceReference(
+  source: ParsedDocument["source"],
+): SourceReference {
   return {
     sourceId: source.sourceId,
     path: source.path,

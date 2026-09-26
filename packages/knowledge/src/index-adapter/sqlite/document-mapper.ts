@@ -1,4 +1,4 @@
-import type { KnowledgeDocument, SearchHit } from "@dokkurator/index-adapter";
+import type { KnowledgeDocument, SearchHit } from "../index.js";
 import type { DocumentMetadataSearchTable, DocumentsTable } from "./schema.js";
 
 export const documentColumns = [

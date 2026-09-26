@@ -8,7 +8,7 @@ import type {
   KnowledgeQuery,
   SearchHit,
   SearchQuery,
-} from "@dokkurator/index-adapter";
+} from "../index.js";
 import { nodeSqliteDatabase } from "./node-sqlite-dialect.js";
 import {
   toDocument,

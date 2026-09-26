@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { createLocalSource } from "@dokkurator/source-adapters";
+import { createLocalSource } from "./source-adapter/index.js";
 import {
   DEFAULT_DOCUMENTS_DIRECTORY,
   DEFAULT_DOCTYPES_DIRECTORY,

@@ -1,4 +1,4 @@
-import { stat } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { isAbsolute, relative, resolve, sep } from "node:path";
 import {
   simpleGit,
@@ -17,7 +17,6 @@ import {
   type SourceId,
   type SourceMetadata,
 } from "./source-adapter.js";
-import { readFile } from "node:fs/promises";
 
 export interface GitSourceOptions {
   readonly root: string;

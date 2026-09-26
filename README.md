@@ -24,9 +24,9 @@ Dokkurator is organized as a monorepo containing reusable libraries and applicat
 ├── apps/
 │ └── cli/
 ├── packages/
-│ ├── doctype/
+│ ├── doctype/   # source contracts and local source implementations
 │ ├── validator/
-│ └── knowledge/
+│ └── knowledge/ # index contract and storage implementations
 ├── docs/
 ├── nx.json
 ├── package.json
@@ -99,6 +99,11 @@ Internal packages use workspace dependencies, for example:
 ```
 
 Nx derives the project dependency graph from these package relationships.
+
+Package boundaries are strict. Cross-package imports must use the dependency's
+public root API; implementation folders are not separate packages unless
+explicitly extracted by an architectural decision. See [AGENTS.md](./AGENTS.md)
+for package-boundary and adapter-ownership rules.
 
 The graph can be inspected with:
 pnpm nx graph

@@ -11,7 +11,7 @@ import remarkParse from "remark-parse";
 import { unified } from "unified";
 import { visit } from "unist-util-visit";
 import { parse as parseYaml } from "yaml";
-import type { SourceDocument } from "@dokkurator/source-adapters";
+import type { SourceDocument } from "../source-adapter/source-adapter.js";
 import type {
   Heading,
   Link,

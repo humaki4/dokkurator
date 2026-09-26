@@ -10,7 +10,11 @@ tags: [storage, adapters]
 
 `Index Adapters` persist and query the derived Knowledge model.
 
-They hide the concrete storage technology from `Knowledge` and provide a common interface for document and search operations.
+They hide concrete storage technology behind a common interface for document
+and search operations. The contract and initial SQLite implementation are
+currently owned by `@dokkurator/knowledge`, with SQLite code kept in a
+separable internal adapter directory. A backend may be extracted as a separate
+library only through a deliberate package-boundary decision.
 
 ## Technology
 
@@ -21,7 +25,7 @@ They hide the concrete storage technology from `Knowledge` and provide a common 
 - later adapters may target PostgreSQL or OpenSearch
 - relational data model for documents
 - optional full-text index depending on backend
-- no direct database access from Knowledge
+- database-specific access is confined to the Knowledge-owned backend
 
 ## Responsibilities
 
@@ -31,7 +35,7 @@ They hide the concrete storage technology from `Knowledge` and provide a common 
 - provide structured queries
 - provide full-text search
 - support incremental updates
-- keep storage-specific logic outside Knowledge
+- keep storage-specific logic inside the backend implementation boundary
 
 ## Common interface
 
@@ -193,7 +197,7 @@ KnowledgeDocument
 OpenSearch document
 ```
 
-The Knowledge API should not expose these implementation differences.
+The public Knowledge API should not expose these implementation differences.
 
 SQLite keeps two derived FTS5 structures: one for document content and one for
 metadata values. Metadata objects are flattened to dotted paths, and arrays

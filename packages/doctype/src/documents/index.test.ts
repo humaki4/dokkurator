@@ -11,7 +11,7 @@ import type {
   SourceAdapter,
   SourceDocument,
   SourceEntry,
-} from "@dokkurator/source-adapters";
+} from "../source-adapter/index.js";
 
 describe("document loading", () => {
   test("loads one document through the source adapter", async () => {

@@ -1,8 +1,8 @@
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { KnowledgeDocument } from "@dokkurator/index-adapter";
-import { FileSystemSource } from "@dokkurator/source-adapters";
+import type { KnowledgeDocument } from "../index-adapter/model.js";
+import { FileSystemSource } from "@dokkurator/doctype";
 import { afterEach, expect, test, vi } from "vitest";
 import { indexDocuments } from "./index-documents.js";
 
@@ -17,7 +17,9 @@ afterEach(async () => {
 });
 
 test("loads a complete directory and replaces the index once", async () => {
-  const replaceAll = vi.fn<(documents: readonly KnowledgeDocument[]) => void>();
+  const replaceAll = vi.fn<
+    (documents: readonly KnowledgeDocument[]) => Promise<void>
+  >(async () => {});
   const root = await temporaryDirectory();
   await mkdir(join(root, "handbook", "nested"), { recursive: true });
   await Promise.all([
@@ -43,7 +45,9 @@ test("loads a complete directory and replaces the index once", async () => {
 });
 
 test("replaces the index with an empty set when the directory is empty", async () => {
-  const replaceAll = vi.fn<(documents: readonly KnowledgeDocument[]) => void>();
+  const replaceAll = vi.fn<
+    (documents: readonly KnowledgeDocument[]) => Promise<void>
+  >(async () => {});
   const root = await temporaryDirectory();
 
   await expect(

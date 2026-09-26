@@ -1,9 +1,11 @@
 import { isAbsolute, resolve } from "node:path";
-import { DEFAULT_DOCUMENTS_DIRECTORY } from "@dokkurator/doctype";
-import { SQLiteIndex } from "@dokkurator/index-adapter-sqlite";
-import { createLocalSource } from "@dokkurator/source-adapters";
+import {
+  createLocalSource,
+  DEFAULT_DOCUMENTS_DIRECTORY,
+} from "@dokkurator/doctype";
 import { Command } from "commander";
 import { indexDocuments } from "./index/index-documents.js";
+import { SQLiteIndex } from "./index-adapter/sqlite/index.js";
 import { parseSearchExpression } from "./search/search-query.js";
 
 export interface CommandOutput {

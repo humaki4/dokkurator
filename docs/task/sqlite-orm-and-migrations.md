@@ -9,9 +9,9 @@ tags: [index, sqlite, orm, migrations, fts]
 
 ## Ausgangslage
 
-`@dokkurator/index-adapter-sqlite` verwendet aktuell unmittelbar
-`node:sqlite`. Schemaerzeugung, Inserts, Upserts, Abfragen und Transaktionen
-werden als SQL innerhalb des Adapters formuliert. Eine einzelne
+Der SQLite-Indexadapter unter `@dokkurator/knowledge` verwendet aktuell
+unmittelbar `node:sqlite`. Schemaerzeugung, Inserts, Upserts, Abfragen und
+Transaktionen werden innerhalb der separaten Adapterimplementierung formuliert. Eine einzelne
 `schema_version`-Tabelle erkennt derzeit lediglich, ob die erwartete
 Schemaversion vorliegt. Sie kann bestehende Datenbanken noch nicht schrittweise
 auf eine neue Version migrieren.

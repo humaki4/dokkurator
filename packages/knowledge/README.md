@@ -30,9 +30,17 @@ index model. Entity and relation extraction will be added as a separate
 Knowledge concern.
 
 Search expressions are parsed by Knowledge and passed to the configured index
-adapter as a storage-independent expression tree. Search terms match partial
-strings in content and metadata. `key:value` limits a term to one metadata path;
-`AND`, `OR`, parentheses, and quoted values can be combined.
+as a storage-independent expression tree. `KnowledgeIndex` and the initial
+`SQLiteIndex` implementation are both owned and exported by Knowledge; the
+SQLite implementation lives in a separable internal adapter directory. Search
+terms match partial strings in content and metadata. `key:value` limits a term
+to one metadata path; `AND`, `OR`, parentheses, and quoted values can be
+combined.
+
+Consumers can import `SQLiteIndex`, `KnowledgeIndex`, and the document/query
+types from `@dokkurator/knowledge`. Source implementations are provided by
+`@dokkurator/doctype`; indexing accepts only DocType's generic `DocumentSource`
+contract and does not depend on a concrete source adapter.
 
 ## CLI
 

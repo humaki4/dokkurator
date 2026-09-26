@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import type { SourceDocument } from "@dokkurator/source-adapters";
+import type { SourceDocument } from "../source-adapter/source-adapter.js";
 import { DocTypeParseError, parseDocType } from "./parse.js";
 import type { LoadedDocType } from "./types.js";
 
@@ -95,28 +95,32 @@ function loadedDocType(overrides: {
   template?: string | undefined;
 }): LoadedDocType {
   const directory = "_dokkurator/.doctypes/example";
-  const result: LoadedDocType = {
+  const includeRules = !("rules" in overrides) || overrides.rules !== undefined;
+  const includeTemplate =
+    !("template" in overrides) || overrides.template !== undefined;
+  return {
     directory,
     definition: document(
       `${directory}/definition.yml`,
       overrides.definition ?? "name: example\nmetadata:\n  type: object\n",
     ),
+    ...(includeRules
+      ? {
+          rules: document(
+            `${directory}/rules.yml`,
+            overrides.rules ?? "rules: []\n",
+          ),
+        }
+      : {}),
+    ...(includeTemplate
+      ? {
+          template: document(
+            `${directory}/template.md`,
+            overrides.template ?? "# Example\n",
+          ),
+        }
+      : {}),
   };
-
-  if (!("rules" in overrides) || overrides.rules !== undefined) {
-    result.rules = document(
-      `${directory}/rules.yml`,
-      overrides.rules ?? "rules: []\n",
-    );
-  }
-  if (!("template" in overrides) || overrides.template !== undefined) {
-    result.template = document(
-      `${directory}/template.md`,
-      overrides.template ?? "# Example\n",
-    );
-  }
-
-  return result;
 }
 
 function document(path: string, content: string): SourceDocument {

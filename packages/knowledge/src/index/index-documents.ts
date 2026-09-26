@@ -1,10 +1,13 @@
-import { loadDocuments, type DocumentConfig } from "@dokkurator/doctype";
-import type { KnowledgeIndex } from "@dokkurator/index-adapter";
-import type { SourceAdapter } from "@dokkurator/source-adapters";
+import {
+  loadDocuments,
+  type DocumentConfig,
+  type DocumentSource,
+} from "@dokkurator/doctype";
+import type { KnowledgeIndex } from "../index-adapter/index.js";
 import { buildKnowledgeDocuments } from "./documents.js";
 
 export interface IndexDocumentsOptions extends DocumentConfig {
-  readonly source: SourceAdapter;
+  readonly source: DocumentSource;
   readonly index: Pick<KnowledgeIndex, "replaceAll">;
 }
 
