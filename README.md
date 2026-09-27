@@ -48,6 +48,8 @@ Dokkurator is organized as a monorepo containing reusable libraries and applicat
 
 - **@dokkurator/cli**
   Command-line interface for using Dokkurator functionality locally, in CI pipelines or from automated tooling.
+  See the [CLI README](./apps/cli/README.md) and the
+  [command reference](./apps/cli/docs/commands.md) for configuration and usage.
 
 - **@dokkurator/hub**
   A prototypical server application built on top of the Dokkurator libraries. It collects documentation from distributed repositories and provides centralized access, search and navigation across the resulting knowledge base.
