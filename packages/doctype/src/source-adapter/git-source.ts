@@ -11,12 +11,18 @@ import {
   type GitFileStatus,
   type GitSourceMetadata,
   type ListOptions,
+  type ReadOptions,
   type SourceAdapter,
+  type SourceDiff,
+  type SourceDiffOptions,
   type SourceDocument,
   type SourceEntry,
+  type SourceFileState,
   type SourceId,
   type SourceMetadata,
+  type SourceState,
 } from "./source-adapter.js";
+import { diffFileStates } from "./source-diff.js";
 
 export interface GitSourceOptions {
   readonly root: string;
@@ -49,6 +55,10 @@ export class GitSource implements SourceAdapter {
     this.root = resolve(options.root);
     this.configuredSourceId = options.sourceId;
     this.git = simpleGit({ baseDir: this.root, maxConcurrentProcesses: 6 });
+  }
+
+  async getSourceId(): Promise<string> {
+    return (await this.repositoryContext()).sourceId;
   }
 
   async list(options: ListOptions = {}): Promise<SourceEntry[]> {
@@ -86,7 +96,9 @@ export class GitSource implements SourceAdapter {
     );
   }
 
-  async read(id: SourceId): Promise<SourceDocument> {
+  async read(id: SourceId, options: ReadOptions = {}): Promise<SourceDocument> {
+    if (options.revision !== undefined)
+      return this.readCommitted(id, options.revision);
     const path = this.resolveId(id);
     const normalizedId = this.toSourceId(path);
 
@@ -122,6 +134,119 @@ export class GitSource implements SourceAdapter {
         await this.git.status(),
       ),
     };
+  }
+
+  async diff(
+    previous?: SourceState,
+    options: SourceDiffOptions = {},
+  ): Promise<SourceDiff> {
+    const context = await this.repositoryContext();
+    const revision = context.headRevision;
+    if (revision === undefined)
+      throw new Error("Git source diff requires at least one commit");
+    if (previous !== undefined && previous.sourceId !== context.sourceId)
+      throw new Error(
+        `Cannot diff source ${context.sourceId} from state ${previous.sourceId}`,
+      );
+    if (previous !== undefined && previous.revision.type !== "git-commit")
+      throw new Error("Git source requires a git-commit revision");
+    if (
+      previous?.scope !== undefined &&
+      JSON.stringify(previous.scope) !== JSON.stringify(options)
+    )
+      throw new Error(
+        "Cannot diff source states created with different scopes",
+      );
+
+    const [before, after] = await Promise.all([
+      previous === undefined
+        ? Promise.resolve<readonly SourceFileState[]>([])
+        : this.committedFileStates(previous.revision.id, context, options),
+      this.committedFileStates(revision, context, options),
+    ]);
+    const state: SourceState = {
+      sourceId: context.sourceId,
+      revision: { id: revision, type: "git-commit" },
+      scope: options,
+    };
+    return {
+      sourceId: context.sourceId,
+      ...(previous === undefined ? {} : { fromRevision: previous.revision }),
+      state,
+      changes: diffFileStates(before, after),
+    };
+  }
+
+  private async readCommitted(
+    id: SourceId,
+    revision: string,
+  ): Promise<SourceDocument> {
+    this.resolveId(id);
+    const normalizedId = normalizeId(id);
+    const context = await this.repositoryContext();
+    const repositoryPath = joinGitPath(context.sourcePrefix, normalizedId);
+    let content: string;
+    try {
+      content = await this.git.show([`${revision}:${repositoryPath}`]);
+    } catch (error) {
+      throw new SourceNotFoundError(normalizedId, { cause: error });
+    }
+    const lastCommit = await this.lastCommit(repositoryPath, revision);
+    return {
+      id: normalizedId,
+      path: normalizedId,
+      content,
+      source: {
+        sourceId: context.sourceId,
+        kind: "git",
+        path: normalizedId,
+        ...(context.repository === undefined
+          ? {}
+          : { repository: context.repository }),
+        git: {
+          root: context.root,
+          headRevision: revision,
+          branch: context.branch,
+          fileRevision: lastCommit?.revision,
+          status: "clean",
+          committedAt: lastCommit?.committedAt,
+          author: lastCommit?.author,
+        },
+      },
+    };
+  }
+
+  private async committedFileStates(
+    revision: string,
+    context: RepositoryContext,
+    options: SourceDiffOptions,
+  ): Promise<readonly SourceFileState[]> {
+    const args = ["ls-tree", "--full-tree", "-r", "-z", revision];
+    const output = await this.git.raw(args);
+    return output
+      .split("\0")
+      .filter(Boolean)
+      .map((entry): SourceFileState | undefined => {
+        const match = /^[0-7]+ blob ([0-9a-f]+)\t(.+)$/u.exec(entry);
+        if (!match) return undefined;
+        const [, hash, repositoryPath] = match;
+        if (hash === undefined || repositoryPath === undefined)
+          return undefined;
+        const path = context.sourcePrefix
+          ? relativeGitPath(context.sourcePrefix, repositoryPath)
+          : repositoryPath;
+        return path === undefined ? undefined : { path, hash: `git:${hash}` };
+      })
+      .filter((file): file is SourceFileState => file !== undefined)
+      .filter(
+        ({ path }) =>
+          (options.prefix === undefined ||
+            options.prefix === "" ||
+            path === options.prefix ||
+            path.startsWith(`${options.prefix.replace(/\/$/u, "")}/`)) &&
+          !isExcluded(path, options.excludeDirectories ?? []),
+      )
+      .sort((left, right) => left.path.localeCompare(right.path));
   }
 
   private async repositoryContext(): Promise<RepositoryContext> {
@@ -182,22 +307,26 @@ export class GitSource implements SourceAdapter {
     };
   }
 
-  private async lastCommit(path: string): Promise<LastCommit | undefined> {
+  private async lastCommit(
+    path: string,
+    revision?: string,
+  ): Promise<LastCommit | undefined> {
     const value = await optional(() =>
       this.git.raw([
         "log",
         "-1",
         "--format=%H%x00%cI%x00%an%x00%ae",
+        ...(revision === undefined ? [] : [revision]),
         "--",
         path,
       ]),
     );
     if (!value) return undefined;
 
-    const [revision, date, name, email] = value.trim().split("\0");
-    if (!revision || !date) return undefined;
+    const [commitRevision, date, name, email] = value.trim().split("\0");
+    if (!commitRevision || !date) return undefined;
     return {
-      revision,
+      revision: commitRevision,
       committedAt: new Date(date),
       author: { name, email },
     };
@@ -238,6 +367,13 @@ export class GitSource implements SourceAdapter {
   private toSourceId(path: string): SourceId {
     return toPosixPath(relative(this.root, path));
   }
+}
+
+function isExcluded(path: string, directories: readonly string[]): boolean {
+  const segments = path.split("/");
+  return directories.some((directory) =>
+    segments.includes(directory.replace(/^\/+|\/+$/gu, "")),
+  );
 }
 
 function fileStatus(status: StatusResult, path: string): GitFileStatus {

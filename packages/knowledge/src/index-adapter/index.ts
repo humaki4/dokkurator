@@ -1,3 +1,4 @@
+import type { SourceState } from "@dokkurator/doctype";
 import type { KnowledgeDocument } from "./model.js";
 
 export type {
@@ -49,4 +50,17 @@ export interface KnowledgeIndex {
   query(query?: KnowledgeQuery): Promise<readonly KnowledgeDocument[]>;
   search(query: SearchQuery): Promise<readonly SearchHit[]>;
   clear(): Promise<void>;
+}
+
+export interface SourceIndexUpdate {
+  readonly state: SourceState;
+  readonly upsert: readonly KnowledgeDocument[];
+  readonly remove: readonly string[];
+  /** Reconcile a source without a compatible previous checkpoint. */
+  readonly replaceSource?: boolean;
+}
+
+export interface IncrementalKnowledgeIndex extends KnowledgeIndex {
+  getSourceState(sourceId: string): Promise<SourceState | undefined>;
+  applySourceUpdate(update: SourceIndexUpdate): Promise<void>;
 }

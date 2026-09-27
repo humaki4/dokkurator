@@ -1,6 +1,12 @@
 import type { DatabaseSync } from "node:sqlite";
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
+
+export interface SourceStatesTable {
+  source_id: string;
+  state: string;
+  indexed_at: string;
+}
 
 export interface DocumentsTable {
   id: string;
@@ -29,12 +35,19 @@ export interface DocumentMetadataSearchTable {
 }
 
 export interface IndexDatabase {
+  source_states: SourceStatesTable;
   documents: DocumentsTable;
   document_search: DocumentSearchTable;
   document_metadata_search: DocumentMetadataSearchTable;
 }
 
 export const schema = `
+  CREATE TABLE IF NOT EXISTS source_states (
+    source_id  TEXT PRIMARY KEY,
+    state      TEXT NOT NULL CHECK (json_valid(state)),
+    indexed_at TEXT NOT NULL
+  ) STRICT;
+
   CREATE TABLE IF NOT EXISTS documents (
     id          TEXT PRIMARY KEY,
     type        TEXT,
@@ -83,6 +96,7 @@ export function initializeSchema(database: DatabaseSync): void {
       DROP TABLE IF EXISTS document_metadata_search;
       DROP TABLE IF EXISTS document_search;
       DROP TABLE IF EXISTS documents;
+      DROP TABLE IF EXISTS source_states;
     `);
   }
   database.exec(schema);

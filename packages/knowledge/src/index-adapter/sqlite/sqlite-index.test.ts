@@ -1,6 +1,7 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { DatabaseSync } from "node:sqlite";
 import type { KnowledgeDocument } from "../index.js";
 import { afterEach, describe, expect, test } from "vitest";
 import { SQLiteIndex } from "./sqlite-index.js";
@@ -16,6 +17,19 @@ afterEach(async () => {
 });
 
 describe("SQLiteIndex", () => {
+  test("treats a read-only legacy index without source states as unindexed", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "dokkurator-index-"));
+    temporaryDirectories.push(directory);
+    const filename = join(directory, "legacy.db");
+    const database = new DatabaseSync(filename);
+    database.exec("CREATE TABLE documents (id TEXT PRIMARY KEY)");
+    database.close();
+
+    const index = new SQLiteIndex({ filename, readOnly: true });
+    await expect(index.getSourceState("docs")).resolves.toBeUndefined();
+    index.close();
+  });
+
   test("persists and restores complete documents", async () => {
     const { index, filename } = await createIndex();
     const document = exampleDocument();

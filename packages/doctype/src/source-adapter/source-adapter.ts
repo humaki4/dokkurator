@@ -46,14 +46,70 @@ export interface ListOptions {
   readonly prefix?: SourceId;
 }
 
+export interface ReadOptions {
+  /** Read a committed Git revision instead of the mutable working tree. */
+  readonly revision?: string;
+}
+
+export interface SourceRevision {
+  readonly id: string;
+  readonly type: "git-commit" | "content-hash";
+}
+
+export interface SourceFileState {
+  readonly path: string;
+  readonly hash: string;
+}
+
+/** Serializable checkpoint returned by a source adapter. */
+export interface SourceState {
+  readonly sourceId: string;
+  readonly revision: SourceRevision;
+  readonly scope?: SourceDiffOptions;
+  /** Required for sources without provider-managed revision history. */
+  readonly files?: readonly SourceFileState[];
+}
+
+export interface SourceDiffOptions {
+  readonly prefix?: SourceId;
+  readonly excludeDirectories?: readonly SourceId[];
+}
+
+export type SourceChange =
+  | { readonly type: "added"; readonly path: string; readonly hash: string }
+  | {
+      readonly type: "modified";
+      readonly path: string;
+      readonly previousHash: string;
+      readonly hash: string;
+    }
+  | {
+      readonly type: "deleted";
+      readonly path: string;
+      readonly previousHash: string;
+    };
+
+export interface SourceDiff {
+  readonly sourceId: string;
+  readonly fromRevision?: SourceRevision;
+  readonly state: SourceState;
+  readonly changes: readonly SourceChange[];
+}
+
 /** Minimal source contract accepted by document loading workflows. */
 export interface DocumentSource {
   list(options?: ListOptions): Promise<SourceEntry[]>;
-  read(id: SourceId): Promise<SourceDocument>;
+  read(id: SourceId, options?: ReadOptions): Promise<SourceDocument>;
 }
 
-/** Full source-adapter contract; currently equivalent to DocumentSource. */
-export type SourceAdapter = DocumentSource;
+/** Full source-adapter contract, including checkpoint-based change detection. */
+export interface SourceAdapter extends DocumentSource {
+  getSourceId(): Promise<string>;
+  diff(
+    previous?: SourceState,
+    options?: SourceDiffOptions,
+  ): Promise<SourceDiff>;
+}
 
 export class SourceNotFoundError extends Error {
   constructor(

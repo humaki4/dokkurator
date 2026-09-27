@@ -118,10 +118,15 @@ The initial implementation can stay lightweight while keeping the API stable.
 await indexDocuments({ source, index, documentsDirectory: "docs" });
 ```
 
-`indexDocuments` is the single public indexing operation. Loading, transforming
-and writing individual documents remain implementation details. The first
-version atomically replaces the complete index. Incremental updates may be
-added later without widening this public API.
+`indexDocumentChanges` is the normal indexing operation. It obtains a
+source-specific diff from DocType, loads added and modified documents, removes
+deleted documents, and advances the persisted source checkpoint in the same
+index transaction. `calculateDocumentDiff` exposes the same comparison without
+changing the index or checkpoint.
+
+`indexDocuments` remains available for an explicit complete replacement. A
+full replacement clears incremental source checkpoints so the next incremental
+run reconciles the current source from an empty baseline.
 
 A full rebuild must always remain possible.
 

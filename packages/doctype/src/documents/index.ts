@@ -1,5 +1,6 @@
 import type {
   DocumentSource,
+  ReadOptions,
   SourceId,
 } from "../source-adapter/source-adapter.js";
 import { parseDocument, parseDocuments } from "./parse.js";
@@ -9,8 +10,9 @@ import type { DocumentConfig, ParsedDocument } from "./types.js";
 export async function loadDocument(
   source: DocumentSource,
   id: SourceId,
+  options?: ReadOptions,
 ): Promise<ParsedDocument> {
-  return parseDocument(await readDocument(source, id));
+  return parseDocument(await readDocument(source, id, options));
 }
 
 export async function loadDocuments(
@@ -21,6 +23,7 @@ export async function loadDocuments(
 }
 
 export { DocumentParseError } from "./parse.js";
+export { isDocumentationFile } from "./read.js";
 export {
   DEFAULT_DOCUMENTS_DIRECTORY,
   DEFAULT_EXCLUDED_DOCUMENT_DIRECTORIES,

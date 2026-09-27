@@ -2,12 +2,14 @@ import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { Kysely, SqliteDialect, type Transaction } from "kysely";
+import type { SourceState } from "@dokkurator/doctype";
 import type {
+  IncrementalKnowledgeIndex,
   KnowledgeDocument,
-  KnowledgeIndex,
   KnowledgeQuery,
   SearchHit,
   SearchQuery,
+  SourceIndexUpdate,
 } from "../index.js";
 import { nodeSqliteDatabase } from "./node-sqlite-dialect.js";
 import {
@@ -26,25 +28,30 @@ import {
 
 export interface SQLiteIndexOptions {
   readonly filename: string;
+  readonly readOnly?: boolean;
 }
 
-export class SQLiteIndex implements KnowledgeIndex, Disposable {
+export class SQLiteIndex implements IncrementalKnowledgeIndex, Disposable {
   readonly filename: string;
   readonly #database: DatabaseSync;
   readonly #queries: Kysely<IndexDatabase>;
 
-  constructor({ filename }: SQLiteIndexOptions) {
+  constructor({ filename, readOnly = false }: SQLiteIndexOptions) {
     this.filename = filename;
-    if (filename !== ":memory:")
+    if (!readOnly && filename !== ":memory:")
       mkdirSync(dirname(filename), { recursive: true });
 
     this.#database = new DatabaseSync(filename, {
       enableForeignKeyConstraints: true,
+      readOnly,
     });
-    this.#database.exec(
-      "PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 5000;",
-    );
-    initializeSchema(this.#database);
+    if (readOnly) this.#database.exec("PRAGMA busy_timeout = 5000;");
+    else {
+      this.#database.exec(
+        "PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 5000;",
+      );
+      initializeSchema(this.#database);
+    }
     this.#queries = new Kysely<IndexDatabase>({
       dialect: new SqliteDialect({
         database: nodeSqliteDatabase(this.#database),
@@ -54,6 +61,7 @@ export class SQLiteIndex implements KnowledgeIndex, Disposable {
 
   async replaceAll(documents: readonly KnowledgeDocument[]): Promise<void> {
     await this.#transaction(async (transaction) => {
+      await transaction.deleteFrom("source_states").execute();
       await transaction.deleteFrom("document_search").execute();
       await transaction.deleteFrom("document_metadata_search").execute();
       await transaction.deleteFrom("documents").execute();
@@ -62,6 +70,59 @@ export class SQLiteIndex implements KnowledgeIndex, Disposable {
         const metadata = toMetadataRows(document.id, document.metadata);
         await writeDocumentQuery(transaction, row, metadata);
       }
+    });
+  }
+
+  async getSourceState(sourceId: string): Promise<SourceState | undefined> {
+    try {
+      const row = await this.#queries
+        .selectFrom("source_states")
+        .select("state")
+        .where("source_id", "=", sourceId)
+        .executeTakeFirst();
+      return row === undefined
+        ? undefined
+        : (JSON.parse(row.state) as SourceState);
+    } catch (error) {
+      if (isMissingSourceStatesTable(error)) return undefined;
+      throw error;
+    }
+  }
+
+  async applySourceUpdate(update: SourceIndexUpdate): Promise<void> {
+    await this.#transaction(async (transaction) => {
+      if (update.replaceSource === true) {
+        const existing = await transaction
+          .selectFrom("documents")
+          .select("id")
+          .where("source_id", "=", update.state.sourceId)
+          .execute();
+        for (const { id } of existing) await removeDocument(transaction, id);
+      }
+      for (const id of update.remove) {
+        await removeDocument(transaction, id);
+      }
+      for (const document of update.upsert) {
+        await writeDocumentQuery(
+          transaction,
+          toDocumentRow(document),
+          toMetadataRows(document.id, document.metadata),
+        );
+      }
+      await transaction
+        .insertInto("source_states")
+        .values({
+          source_id: update.state.sourceId,
+          state: JSON.stringify(update.state),
+          indexed_at: new Date().toISOString(),
+        })
+        .onConflict((conflict) =>
+          conflict.column("source_id").doUpdateSet({
+            state: JSON.stringify(update.state),
+            indexed_at: new Date().toISOString(),
+          }),
+        )
+        .execute();
     });
   }
 
@@ -75,15 +136,7 @@ export class SQLiteIndex implements KnowledgeIndex, Disposable {
 
   async remove(id: string): Promise<void> {
     await this.#transaction(async (transaction) => {
-      await transaction
-        .deleteFrom("document_search")
-        .where("document_id", "=", id)
-        .execute();
-      await transaction
-        .deleteFrom("document_metadata_search")
-        .where("document_id", "=", id)
-        .execute();
-      await transaction.deleteFrom("documents").where("id", "=", id).execute();
+      await removeDocument(transaction, id);
     });
   }
 
@@ -106,6 +159,7 @@ export class SQLiteIndex implements KnowledgeIndex, Disposable {
 
   async clear(): Promise<void> {
     await this.#transaction(async (transaction) => {
+      await transaction.deleteFrom("source_states").execute();
       await transaction.deleteFrom("document_search").execute();
       await transaction.deleteFrom("document_metadata_search").execute();
       await transaction.deleteFrom("documents").execute();
@@ -125,4 +179,26 @@ export class SQLiteIndex implements KnowledgeIndex, Disposable {
   ): Promise<void> {
     await this.#queries.transaction().execute(operation);
   }
+}
+
+function isMissingSourceStatesTable(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    error.message.includes("no such table: source_states")
+  );
+}
+
+async function removeDocument(
+  transaction: Transaction<IndexDatabase>,
+  id: string,
+): Promise<void> {
+  await transaction
+    .deleteFrom("document_search")
+    .where("document_id", "=", id)
+    .execute();
+  await transaction
+    .deleteFrom("document_metadata_search")
+    .where("document_id", "=", id)
+    .execute();
+  await transaction.deleteFrom("documents").where("id", "=", id).execute();
 }

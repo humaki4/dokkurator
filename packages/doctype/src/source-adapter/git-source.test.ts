@@ -83,6 +83,76 @@ test("keeps source ids relative to a configured repository subdirectory", async 
   expect(entries[0]?.source.git?.root).toBe(root);
 });
 
+test("diffs commits and ignores working-tree changes", async () => {
+  const root = await createRepository();
+  const git = simpleGit(root);
+  await writeFile(join(root, "changed.md"), "before\n");
+  await writeFile(join(root, "deleted.md"), "deleted\n");
+  await git.add(["changed.md", "deleted.md"]);
+  await git.commit("initial documents");
+  const source = new GitSource({ root });
+  const previous = await source.diff();
+
+  await writeFile(join(root, "changed.md"), "committed\n");
+  await writeFile(join(root, "added.md"), "added\n");
+  await rm(join(root, "deleted.md"));
+  await git.add(["changed.md", "added.md", "deleted.md"]);
+  await git.commit("change documents");
+  await writeFile(join(root, "changed.md"), "uncommitted\n");
+  await writeFile(join(root, "untracked.md"), "untracked\n");
+
+  const current = await source.diff(previous.state);
+  expect(current.state).toEqual({
+    sourceId: "https://example.com/docs.git",
+    revision: {
+      id: await git.revparse(["HEAD"]),
+      type: "git-commit",
+    },
+    scope: {},
+  });
+  expect(current.changes).toEqual([
+    expect.objectContaining({ type: "added", path: "added.md" }),
+    expect.objectContaining({ type: "modified", path: "changed.md" }),
+    expect.objectContaining({ type: "deleted", path: "deleted.md" }),
+  ]);
+  await expect(
+    source.read("changed.md", { revision: current.state.revision.id }),
+  ).resolves.toMatchObject({ content: "committed\n" });
+});
+
+test("an empty diff prefix includes the complete committed tree", async () => {
+  const root = await createRepository();
+  await writeFile(join(root, "document.md"), "# Committed\n");
+  const git = simpleGit(root);
+  await git.add("document.md");
+  await git.commit("add document");
+
+  const diff = await new GitSource({ root }).diff(undefined, { prefix: "" });
+
+  expect(diff.changes).toEqual([
+    expect.objectContaining({ type: "added", path: "document.md" }),
+  ]);
+});
+
+test("diffs a source rooted in a repository subdirectory", async () => {
+  const root = await createRepository();
+  const docs = join(root, "docs");
+  await mkdir(docs);
+  await writeFile(join(docs, "guide.md"), "# Guide\n");
+  await writeFile(join(root, "outside.md"), "# Outside\n");
+  const git = simpleGit(root);
+  await git.add(["docs/guide.md", "outside.md"]);
+  await git.commit("add documents");
+
+  const diff = await new GitSource({ root: docs }).diff(undefined, {
+    prefix: "",
+  });
+
+  expect(diff.changes).toEqual([
+    expect.objectContaining({ type: "added", path: "guide.md" }),
+  ]);
+});
+
 async function createRepository(): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), "dokkurator-git-source-"));
   temporaryDirectories.push(root);
