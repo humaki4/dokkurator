@@ -1,6 +1,8 @@
 import type { ParsedDocument } from "@dokkurator/doctype";
-import type { SourceMetadata } from "@dokkurator/source-adapters";
-import type { KnowledgeDocument, SourceReference } from "./model.js";
+import type {
+  KnowledgeDocument,
+  SourceReference,
+} from "../index-adapter/index.js";
 
 export function buildKnowledgeDocument(
   document: ParsedDocument,
@@ -15,12 +17,12 @@ export function buildKnowledgeDocument(
     headings: document.headings,
     links: document.links,
     references: document.references,
-    entities: [],
-    relations: [],
   };
 }
 
-export function buildSourceReference(source: SourceMetadata): SourceReference {
+export function buildSourceReference(
+  source: ParsedDocument["source"],
+): SourceReference {
   return {
     sourceId: source.sourceId,
     path: source.path,

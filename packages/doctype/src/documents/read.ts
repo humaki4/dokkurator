@@ -1,8 +1,8 @@
 import type {
-  SourceAdapter,
+  DocumentSource,
   SourceDocument,
   SourceId,
-} from "@dokkurator/source-adapters";
+} from "../source-adapter/source-adapter.js";
 import {
   DEFAULT_DOCUMENTS_DIRECTORY,
   DEFAULT_EXCLUDED_DOCUMENT_DIRECTORIES,
@@ -10,14 +10,14 @@ import {
 } from "./types.js";
 
 export async function readDocument(
-  source: SourceAdapter,
+  source: DocumentSource,
   id: SourceId,
 ): Promise<SourceDocument> {
   return source.read(id);
 }
 
 export async function readDocuments(
-  source: SourceAdapter,
+  source: DocumentSource,
   config: DocumentConfig = {},
 ): Promise<SourceDocument[]> {
   const documentsDirectory =

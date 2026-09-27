@@ -18,15 +18,22 @@
     "dokkurator-knowledge": "./dist/cli.js"
   },
   "scripts": {
+    "generate": "mkdir -p src/search/generated && peggy --format es --dts --output src/search/generated/search-query-parser.js src/search/search-query.peggy",
+    "prebuild": "pnpm generate",
     "build": "tsc -p tsconfig.json",
+    "pretypecheck": "pnpm generate",
     "typecheck": "tsc -p tsconfig.check.json",
+    "pretest": "pnpm generate",
     "test": "vitest run",
     "lint": "eslint .",
     "start": "node dist/cli.js"
   },
   "dependencies": {
     "@dokkurator/doctype": "workspace:*",
-    "@dokkurator/source-adapters": "workspace:*",
-    "commander": "^15.0.0"
+    "commander": "^15.0.0",
+    "kysely": "^0.29.6"
+  },
+  "devDependencies": {
+    "peggy": "^5.1.0"
   }
 }

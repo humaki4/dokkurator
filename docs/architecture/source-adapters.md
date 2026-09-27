@@ -10,9 +10,12 @@ tags: [sources, adapters]
 
 `Source Adapters` provide documents and source metadata to Dokkurator without exposing filesystem, Git or provider-specific APIs to the core libraries.
 
-They are implemented in the workspace-internal
-`@dokkurator/source-adapters` package. The package is not published, but it is
-an explicit Nx project and dependency boundary for the other core libraries.
+The source contract and local filesystem/Git implementations are owned by
+`@dokkurator/doctype` and exported from its public package root. They are
+organized under a dedicated source-adapter directory so the implementation can
+be extracted deliberately later without creating an incidental package
+boundary. Knowledge consumes DocType's generic loading contract and parsed
+document model, not concrete source implementations.
 
 They normalize different sources into a common input model for DocType, Validator and Knowledge.
 

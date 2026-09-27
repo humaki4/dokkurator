@@ -64,4 +64,14 @@ index
 search / query / inspect
 ```
 
+The `search` command accepts the Knowledge query language. The CLI forwards the
+input to Knowledge and only formats results; parsing and storage translation do
+not belong to the CLI layer.
+
+```text
+dokkurator-knowledge search authentication
+dokkurator-knowledge search status:accepted
+dokkurator-knowledge search "authentication AND owner.team:platform"
+```
+
 The local index is derived data and can be rebuilt from the repository.

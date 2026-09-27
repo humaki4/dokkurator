@@ -1,6 +1,6 @@
 # @dokkurator/knowledge
 
-Core library for transforming parsed Markdown documents into Dokkurator's
+Core library for indexing a complete documentation directory into Dokkurator's
 derived Knowledge model.
 
 Knowledge consumes the public `ParsedDocument` model from
@@ -10,14 +10,18 @@ depend on DocType implementation details.
 ## Usage
 
 ```ts
-import { loadDocuments } from "@dokkurator/doctype";
-import { FileSystemSource } from "@dokkurator/source-adapters";
-import { buildKnowledgeDocuments } from "@dokkurator/knowledge";
+import { indexDocuments } from "@dokkurator/knowledge";
 
-const source = new FileSystemSource({ root: process.cwd() });
-const parsedDocuments = await loadDocuments(source);
-const knowledgeDocuments = buildKnowledgeDocuments(parsedDocuments);
+const result = await indexDocuments({
+  source,
+  index,
+  documentsDirectory: "docs",
+});
 ```
+
+`indexDocuments` is the single public indexing operation. It recursively loads
+the complete configured directory, transforms every parsed document and
+atomically replaces the index contents.
 
 The Knowledge document preserves normalized metadata, a stable source
 reference, Markdown content, headings, links, and references. Transient adapter
@@ -25,14 +29,38 @@ metadata and the parser-specific Markdown AST are deliberately not part of the
 index model. Entity and relation extraction will be added as a separate
 Knowledge concern.
 
-## Internal CLI
+Search expressions are parsed by Knowledge and passed to the configured index
+as a storage-independent expression tree. `KnowledgeIndex` and the initial
+`SQLiteIndex` implementation are both owned and exported by Knowledge; the
+SQLite implementation lives in a separable internal adapter directory. Search
+terms match partial strings in content and metadata. `key:value` limits a term
+to one metadata path; `AND`, `OR`, parentheses, and quoted values can be
+combined.
 
-The package includes an internal CLI for inspecting the transformation:
+Consumers can import `SQLiteIndex`, `KnowledgeIndex`, and the document/query
+types from `@dokkurator/knowledge`. Source implementations are provided by
+`@dokkurator/doctype`; indexing accepts only DocType's generic `DocumentSource`
+contract and does not depend on a concrete source adapter.
+
+## CLI
+
+The package also provides the same operation as a command:
 
 ```text
-dokkurator-knowledge [--root <directory>]
-  [--documents-directory <directory>] loadDocuments
+dokkurator-knowledge \
+  --root <directory> \
+  --documents-directory <directory> \
+  --index .dokkurator/index.db \
+  index
 ```
 
-`DOKKURATOR_DOCUMENTS_DIRECTORY` provides the same environment-based directory
-configuration as the DocType CLI.
+Search an existing index:
+
+```text
+dokkurator-knowledge search authentication
+dokkurator-knowledge search status:accepted AND "access token"
+dokkurator-knowledge search owner.team:platform OR tags:security
+```
+
+`--documents-directory` and `--index` are relative to `--root`. The defaults
+index the complete root into `.dokkurator/index.db`.

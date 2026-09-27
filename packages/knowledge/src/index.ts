@@ -1,24 +1,24 @@
-/** Public API for building the derived Knowledge model. */
+/** Public API for building and replacing a complete Knowledge index. */
 
-import type { DocType } from "@dokkurator/doctype";
-
+export { indexDocuments } from "./index/index-documents.js";
 export {
-  buildKnowledgeDocument,
-  buildKnowledgeDocuments,
-  buildSourceReference,
-} from "./documents.js";
+  parseSearchExpression,
+  SearchQuerySyntaxError,
+} from "./search/search-query.js";
+export type {
+  IndexDocumentsOptions,
+  IndexDocumentsResult,
+} from "./index/index-documents.js";
+
 export type {
   DocumentId,
-  Entity,
-  EntityId,
-  EntityReference,
   KnowledgeDocument,
-  Relation,
+  KnowledgeIndex,
+  KnowledgeQuery,
+  SearchExpression,
+  SearchHit,
+  SearchQuery,
   SourceReference,
-} from "./model.js";
-
-/** @deprecated Temporary compatibility value for the unfinished application CLI. */
-export const exampleDocType: DocType = {
-  name: "example",
-  requiredFields: ["title", "status"],
-};
+} from "./index-adapter/index.js";
+export { SQLiteIndex, SCHEMA_VERSION } from "./index-adapter/sqlite/index.js";
+export type { SQLiteIndexOptions } from "./index-adapter/sqlite/index.js";

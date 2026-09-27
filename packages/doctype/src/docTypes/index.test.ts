@@ -1,9 +1,6 @@
 import { expect, test, vi } from "vitest";
-import type {
-  SourceAdapter,
-  SourceDocument,
-} from "@dokkurator/source-adapters";
-import { SourceNotFoundError } from "@dokkurator/source-adapters";
+import type { SourceAdapter, SourceDocument } from "../source-adapter/index.js";
+import { SourceNotFoundError } from "../source-adapter/index.js";
 import { loadDocType, loadDocTypes } from "./index.js";
 
 test("loadDocType reads, parses, and validates a DocType", async () => {

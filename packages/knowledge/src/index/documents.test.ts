@@ -24,8 +24,6 @@ describe("buildKnowledgeDocument", () => {
       headings: parsed.headings,
       links: parsed.links,
       references: parsed.references,
-      entities: [],
-      relations: [],
     });
     expect(result).not.toHaveProperty("ast");
   });

@@ -46,10 +46,14 @@ export interface ListOptions {
   readonly prefix?: SourceId;
 }
 
-export interface SourceAdapter {
+/** Minimal source contract accepted by document loading workflows. */
+export interface DocumentSource {
   list(options?: ListOptions): Promise<SourceEntry[]>;
   read(id: SourceId): Promise<SourceDocument>;
 }
+
+/** Full source-adapter contract; currently equivalent to DocumentSource. */
+export type SourceAdapter = DocumentSource;
 
 export class SourceNotFoundError extends Error {
   constructor(
