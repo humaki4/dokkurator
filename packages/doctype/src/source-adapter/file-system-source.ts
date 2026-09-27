@@ -6,8 +6,16 @@ import {
   type SourceAdapter,
   type SourceDocument,
   type SourceEntry,
+  type SourceDiff,
+  type SourceDiffOptions,
   type SourceId,
+  type SourceState,
 } from "./source-adapter.js";
+import {
+  contentHash,
+  diffFileStates,
+  fileStateRevision,
+} from "./source-diff.js";
 
 export interface FileSystemSourceOptions {
   readonly root: string;
@@ -21,6 +29,10 @@ export class FileSystemSource implements SourceAdapter {
   constructor(options: FileSystemSourceOptions) {
     this.root = resolve(options.root);
     this.sourceId = options.sourceId ?? this.root;
+  }
+
+  async getSourceId(): Promise<string> {
+    return this.sourceId;
   }
 
   async list(options: ListOptions = {}): Promise<SourceEntry[]> {
@@ -55,6 +67,40 @@ export class FileSystemSource implements SourceAdapter {
         kind: "filesystem",
         path: normalizedId,
       },
+    };
+  }
+
+  async diff(
+    previous?: SourceState,
+    options: SourceDiffOptions = {},
+  ): Promise<SourceDiff> {
+    if (previous !== undefined && previous.sourceId !== this.sourceId)
+      throw new Error(
+        `Cannot diff source ${this.sourceId} from state ${previous.sourceId}`,
+      );
+    if (previous !== undefined && previous.files === undefined)
+      throw new Error("Filesystem source state requires file hashes");
+    assertSameScope(previous, options);
+
+    const files = await Promise.all(
+      (await this.list({ prefix: options.prefix }))
+        .filter(({ id }) => !isExcluded(id, options.excludeDirectories ?? []))
+        .map(async ({ id }) => ({
+          path: id,
+          hash: contentHash((await this.read(id)).content),
+        })),
+    );
+    const state: SourceState = {
+      sourceId: this.sourceId,
+      revision: fileStateRevision(files),
+      scope: options,
+      files,
+    };
+    return {
+      sourceId: this.sourceId,
+      ...(previous === undefined ? {} : { fromRevision: previous.revision }),
+      state,
+      changes: diffFileStates(previous?.files ?? [], files),
     };
   }
 
@@ -100,6 +146,24 @@ export class FileSystemSource implements SourceAdapter {
   private toSourceId(path: string): SourceId {
     return relative(this.root, path).split(sep).join("/");
   }
+}
+
+function isExcluded(path: string, directories: readonly string[]): boolean {
+  const segments = path.split("/");
+  return directories.some((directory) =>
+    segments.includes(directory.replace(/^\/+|\/+$/gu, "")),
+  );
+}
+
+function assertSameScope(
+  previous: SourceState | undefined,
+  options: SourceDiffOptions,
+): void {
+  if (
+    previous?.scope !== undefined &&
+    JSON.stringify(previous.scope) !== JSON.stringify(options)
+  )
+    throw new Error("Cannot diff source states created with different scopes");
 }
 
 function isFileNotFoundError(error: unknown): error is NodeJS.ErrnoException {

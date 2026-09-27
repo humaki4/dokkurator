@@ -20,6 +20,7 @@ export {
   DocumentParseError,
   loadDocument,
   loadDocuments,
+  isDocumentationFile,
 } from "./documents/index.js";
 export type {
   DocumentConfig,
@@ -44,12 +45,19 @@ export type {
   GitSourceMetadata,
   GitSourceOptions,
   ListOptions,
+  ReadOptions,
   SourceAdapter,
   SourceAuthor,
+  SourceChange,
+  SourceDiff,
+  SourceDiffOptions,
   SourceDocument,
   SourceEntry,
+  SourceFileState,
   SourceId,
   SourceMetadata,
+  SourceRevision,
+  SourceState,
 } from "./source-adapter/index.js";
 
 /** @deprecated Temporary compatibility model for the unfinished Validator. */

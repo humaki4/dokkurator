@@ -1,5 +1,6 @@
 import type {
   DocumentSource,
+  ReadOptions,
   SourceDocument,
   SourceId,
 } from "../source-adapter/source-adapter.js";
@@ -12,8 +13,9 @@ import {
 export async function readDocument(
   source: DocumentSource,
   id: SourceId,
+  options?: ReadOptions,
 ): Promise<SourceDocument> {
-  return source.read(id);
+  return options === undefined ? source.read(id) : source.read(id, options);
 }
 
 export async function readDocuments(
@@ -33,9 +35,9 @@ export async function readDocuments(
   return Promise.all(ids.map((id) => readDocument(source, id)));
 }
 
-function isDocumentationFile(
+export function isDocumentationFile(
   id: SourceId,
-  excludedDirectories: readonly SourceId[],
+  excludedDirectories: readonly SourceId[] = DEFAULT_EXCLUDED_DOCUMENT_DIRECTORIES,
 ): boolean {
   const segments = id.split("/");
 

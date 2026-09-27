@@ -4,10 +4,18 @@ import { createCommand } from "./command.js";
 try {
   await createCommand(
     {},
-    { documentsDirectory: process.env.DOKKURATOR_DOCUMENTS_DIRECTORY },
-  ).parseAsync(process.argv);
+    {
+      cwd: process.env.INIT_CWD ?? process.cwd(),
+      documentsDirectory: process.env.DOKKURATOR_DOCUMENTS_DIRECTORY,
+    },
+  ).parseAsync(withoutPnpmArgumentSeparator(process.argv));
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
   process.stderr.write(`error: ${message}\n`);
-  process.exitCode = 1;
+  process.exitCode = process.argv.includes("--exit-code") ? 2 : 1;
+}
+
+/** pnpm preserves the conventional `--` before script arguments. */
+function withoutPnpmArgumentSeparator(argv: readonly string[]): string[] {
+  return argv[2] === "--" ? [...argv.slice(0, 2), ...argv.slice(3)] : [...argv];
 }

@@ -36,6 +36,11 @@ test("indexes the configured document directory into SQLite", async () => {
 
   expect(JSON.parse(stdout)).toEqual({
     indexedDocuments: 1,
+    removedDocuments: 0,
+    revision: {
+      id: expect.stringMatching(/^sha256:/),
+      type: "content-hash",
+    },
     index: join(root, ".dokkurator", "index.db"),
   });
   const database = new DatabaseSync(join(root, ".dokkurator", "index.db"), {
@@ -47,10 +52,38 @@ test("indexes the configured document directory into SQLite", async () => {
   database.close();
 });
 
-test("provides index and search commands", () => {
+test("provides index, diff, and search commands", () => {
   expect(
     createCommand().commands.map((subcommand) => subcommand.name()),
-  ).toEqual(["index", "search"]);
+  ).toEqual(["index", "diff", "search"]);
+});
+
+test("shows document changes without advancing the indexed state", async () => {
+  const root = await temporaryDirectory();
+  await mkdir(join(root, "docs"));
+  await writeFile(join(root, "docs", "guide.md"), "# Before\n");
+  await createCommand({}, { cwd: root }).parseAsync([
+    "node",
+    "dokkurator-knowledge",
+    "index",
+  ]);
+  await writeFile(join(root, "docs", "guide.md"), "# After\n");
+
+  const outputs: string[] = [];
+  for (let run = 0; run < 2; run += 1) {
+    let stdout = "";
+    await createCommand(
+      { writeOut: (text) => (stdout += text) },
+      { cwd: root },
+    ).parseAsync(["node", "dokkurator-knowledge", "diff", "--format", "json"]);
+    outputs.push(stdout);
+  }
+
+  for (const output of outputs) {
+    expect(JSON.parse(output).changes).toEqual([
+      expect.objectContaining({ type: "modified", path: "docs/guide.md" }),
+    ]);
+  }
 });
 
 test("searches content and individual metadata fields", async () => {

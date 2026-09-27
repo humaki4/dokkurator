@@ -13,15 +13,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: 10.32.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: pnpm
@@ -32,5 +32,18 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Run repository checks
-        run: pnpm check
+      - name: Typecheck repository
+        run: pnpm typecheck
+
+      - name: Lint repository
+        run: pnpm lint
+
+      - name: Run test coverage
+        run: pnpm coverage
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report
+          path: coverage/

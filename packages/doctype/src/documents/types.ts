@@ -11,6 +11,7 @@ import type {
 export const DEFAULT_DOCUMENTS_DIRECTORY = "";
 export const DEFAULT_EXCLUDED_DOCUMENT_DIRECTORIES = [
   ".git",
+  ".dokkurator",
   ".nx",
   "node_modules",
   "dist",

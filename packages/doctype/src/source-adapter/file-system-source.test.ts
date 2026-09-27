@@ -90,3 +90,27 @@ test("reports a missing source with a portable error", async () => {
     }),
   );
 });
+
+test("diffs the filesystem against a hashed source state", async () => {
+  const root = await mkdtemp(join(tmpdir(), "dokkurator-source-"));
+  temporaryDirectories.push(root);
+  await writeFile(join(root, "changed.md"), "before");
+  await writeFile(join(root, "deleted.md"), "deleted");
+  const source = new FileSystemSource({ root, sourceId: "docs" });
+  const previous = await source.diff();
+
+  await writeFile(join(root, "changed.md"), "after");
+  await writeFile(join(root, "added.md"), "added");
+  await rm(join(root, "deleted.md"));
+
+  const current = await source.diff(previous.state);
+  expect(current.sourceId).toBe("docs");
+  expect(current.fromRevision).toEqual(previous.state.revision);
+  expect(current.state.revision.type).toBe("content-hash");
+  expect(current.state.files).toHaveLength(2);
+  expect(current.changes).toEqual([
+    expect.objectContaining({ type: "added", path: "added.md" }),
+    expect.objectContaining({ type: "modified", path: "changed.md" }),
+    expect.objectContaining({ type: "deleted", path: "deleted.md" }),
+  ]);
+});
