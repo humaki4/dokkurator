@@ -32,5 +32,18 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Run repository checks
-        run: pnpm check
+      - name: Typecheck repository
+        run: pnpm typecheck
+
+      - name: Lint repository
+        run: pnpm lint
+
+      - name: Run test coverage
+        run: pnpm coverage
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
