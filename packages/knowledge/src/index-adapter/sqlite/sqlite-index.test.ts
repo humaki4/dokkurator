@@ -217,6 +217,34 @@ describe("SQLiteIndex", () => {
     await expect(index.query()).resolves.toEqual([]);
     index.close();
   });
+
+  test("atomically deletes only documents and state for one source", async () => {
+    const { index } = await createIndex();
+    const docs = exampleDocument();
+    const handbook = exampleDocument({
+      id: "handbook:guide.md",
+      sourceId: "handbook",
+      path: "guide.md",
+    });
+    await index.upsert(docs);
+    await index.upsert(handbook);
+    await index.applySourceUpdate({
+      state: {
+        sourceId: "docs",
+        revision: { type: "content-hash", id: "one" },
+        files: [],
+      },
+      upsert: [],
+      remove: [],
+    });
+
+    await index.deleteSource("docs");
+
+    await expect(index.get(docs.id)).resolves.toBeUndefined();
+    await expect(index.get(handbook.id)).resolves.toEqual(handbook);
+    await expect(index.getSourceState("docs")).resolves.toBeUndefined();
+    index.close();
+  });
 });
 
 async function createIndex(): Promise<{

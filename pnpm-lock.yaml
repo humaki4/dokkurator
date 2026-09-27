@@ -66,9 +66,6 @@ importers:
       '@dokkurator/knowledge':
         specifier: workspace:*
         version: link:../../packages/knowledge
-      '@dokkurator/validator':
-        specifier: workspace:*
-        version: link:../../packages/validator
       commander:
         specifier: ^15.0.0
         version: 15.0.0

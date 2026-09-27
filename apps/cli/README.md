@@ -32,9 +32,9 @@ Die CLI verwendet diese Datei:
 <project-root>/.dokkurator/config.yaml
 ```
 
-Der Projekt-Root ist standardmäßig das Arbeitsverzeichnis beim Start der CLI.
-Mit der globalen Option `--project <directory>` kann er ausdrücklich gesetzt
-werden:
+Ohne explizite Angabe sucht die CLI vom Arbeitsverzeichnis nach oben nach der
+Config. Mit der globalen Option `--project <directory>` kann der Root
+ausdrücklich gesetzt werden:
 
 ```bash
 dokkurator --project /work/documentation source list
@@ -64,6 +64,8 @@ versioniert werden.
 
 Die vollständige Referenz mit allen Befehlen, Argumenten, Optionen, Defaults
 und Auswirkungen steht in [docs/commands.md](./docs/commands.md).
+Sie beschreibt außerdem die Verwendung bestehender Git-/SSH-Credentials für
+Remote-Sources.
 
 Die Architektur und der weitere Multi-Repository-Plan stehen in
 [../../docs/task/multiRepo.md](../../docs/task/multiRepo.md).

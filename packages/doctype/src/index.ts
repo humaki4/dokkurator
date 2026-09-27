@@ -35,6 +35,7 @@ export type {
 export {
   createLocalSource,
   createConfiguredLocalSource,
+  createGitCheckoutSource,
   FileSystemSource,
   GitSource,
   SourceNotFoundError,
@@ -45,6 +46,7 @@ export type {
   GitFileStatus,
   GitSourceMetadata,
   GitSourceOptions,
+  GitCheckoutOptions,
   LocalSourceOptions,
   ListOptions,
   ReadOptions,

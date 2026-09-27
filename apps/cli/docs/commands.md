@@ -18,9 +18,9 @@ Die globale Option steht vor dem Befehl:
 dokkurator --project ../documentation index
 ```
 
-Aktuell sucht die CLI nicht automatisch in Elternverzeichnissen nach einer
-Config. Bei einem Aufruf außerhalb des Projekt-Roots muss daher `--project`
-gesetzt werden.
+Ohne `--project` sucht die CLI vom Arbeitsverzeichnis aufwärts nach
+`.dokkurator/config.yaml`. Wird keine Datei gefunden, gilt das aktuelle
+Arbeitsverzeichnis als neuer Projekt-Root.
 
 ## Dateien und Verzeichnisse
 
@@ -43,14 +43,44 @@ sources:
     path: repos/handbook
   - id: architecture
     path: ../architecture-docs
+  - id: remote-handbook
+    remote:
+      url: https://github.com/example/handbook.git
+      branch: main
 ```
 
 Eigenschaften einer Source:
 
-| Eigenschaft | Pflicht | Bedeutung                                                                                     |
-| ----------- | ------- | --------------------------------------------------------------------------------------------- |
-| `id`        | ja      | Stabiler, projektweit eindeutiger Schlüssel im Index                                          |
-| `path`      | ja      | Lokaler Repository-Pfad, relativ zum Projekt-Root; absolute Pfade werden ebenfalls akzeptiert |
+| Eigenschaft     | Pflicht | Bedeutung                                                                                     |
+| --------------- | ------- | --------------------------------------------------------------------------------------------- |
+| `id`            | ja      | Stabiler, projektweit eindeutiger Schlüssel im Index                                          |
+| `path`          | bedingt | Lokaler Repository-Pfad, relativ zum Projekt-Root; absolute Pfade werden ebenfalls akzeptiert |
+| `remote.url`    | bedingt | Git-URL; erforderlich, wenn kein lokaler Pfad angegeben ist                                   |
+| `remote.branch` | nein    | Auszucheckender Branch                                                                        |
+
+Remote-Sources ohne `path` werden unter
+`.dokkurator/repos/<source-id>` geklont. Vor normalen CLI-Operationen wird ein
+vorhandener Checkout vom Remote aktualisiert.
+
+### Authentifizierung für Remote-Sources
+
+Dokkurator implementiert keinen eigenen Login und speichert keine
+Zugangsdaten. Der Source-Adapter führt das lokal installierte Git aus und nutzt
+dessen vorhandene Authentifizierung:
+
+- SSH-URLs wie `git@github.com:organisation/handbook.git` verwenden
+  SSH-Agent, Schlüssel und `~/.ssh/config`.
+- HTTPS-URLs verwenden den eingerichteten Git Credential Helper, etwa den
+  Betriebssystem-Schlüsselbund oder einen Provider-spezifischen Helper.
+- In CI muss Git vor dem Dokkurator-Aufruf nicht-interaktiv eingerichtet sein,
+  beispielsweise über einen kurzlebigen SSH-Key oder den Credential Helper des
+  CI-Systems.
+
+Tokens oder Passwörter sollen nicht in `remote.url` eingetragen werden, weil
+die URL in `.dokkurator/config.yaml` gespeichert wird. Fehlt eine gültige
+Git-Anmeldung, schlägt Clone, Fetch oder Pull mit der entsprechenden Git-
+Fehlermeldung fehl. Interaktive OAuth- und Provider-Login-Flows sind nicht Teil
+dieser Implementierung.
 
 ## `source list`
 
@@ -71,12 +101,15 @@ Fügt ein vorhandenes lokales Verzeichnis zur Config hinzu.
 
 ```bash
 dokkurator source add ../handbook --id handbook
+dokkurator source add --remote https://github.com/example/handbook.git --branch main --id handbook
 ```
 
-| Argument/Option | Pflicht             | Bedeutung                                                               |
-| --------------- | ------------------- | ----------------------------------------------------------------------- |
-| `[path]`        | interaktiv optional | Pfad zum vorhandenen Verzeichnis, relativ zum Projekt-Root oder absolut |
-| `--id <id>`     | interaktiv optional | Stabile Source-ID; ohne Wert wird der Verzeichnisname vorgeschlagen     |
+| Argument/Option     | Pflicht             | Bedeutung                                                               |
+| ------------------- | ------------------- | ----------------------------------------------------------------------- |
+| `[path]`            | interaktiv optional | Pfad zum vorhandenen Verzeichnis, relativ zum Projekt-Root oder absolut |
+| `--id <id>`         | interaktiv optional | Stabile Source-ID; ohne Wert wird der Verzeichnisname vorgeschlagen     |
+| `--remote <url>`    | nein                | Git-Remote statt eines vorhandenen lokalen Pfads                        |
+| `--branch <branch>` | nein                | Branch der Remote-Source                                                |
 
 In einem Terminal fragt die CLI fehlende Werte ab. In CI oder bei umgeleiteter
 Eingabe müssen Pfad und ID angegeben werden. Doppelte IDs und nicht vorhandene
@@ -89,16 +122,21 @@ Entfernt eine Source aus `.dokkurator/config.yaml`.
 ```bash
 dokkurator source remove handbook
 dokkurator source remove handbook --yes
+dokkurator source remove handbook --keep-index --yes
 ```
 
-| Argument/Option | Pflicht             | Bedeutung                                                |
-| --------------- | ------------------- | -------------------------------------------------------- |
-| `[id]`          | interaktiv optional | ID der zu entfernenden Source                            |
-| `--yes`         | nein                | Überspringt die Sicherheitsabfrage, beispielsweise in CI |
+| Argument/Option  | Pflicht             | Bedeutung                                                  |
+| ---------------- | ------------------- | ---------------------------------------------------------- |
+| `[id]`           | interaktiv optional | ID der zu entfernenden Source                              |
+| `--yes`          | nein                | Überspringt die Sicherheitsabfrage, beispielsweise in CI   |
+| `--keep-index`   | nein                | Behält bereits indexierte Dokumente und den Source-Zustand |
+| `--index <file>` | nein                | Zu bereinigender Index; Standard `.dokkurator/index.db`    |
 
-Wichtig: Der Befehl entfernt derzeit ausschließlich den Config-Eintrag.
-Bereits indexierte Daten dieser Source bleiben in `index.db` erhalten. Auch das
-Repository-Verzeichnis selbst wird nicht gelöscht.
+Standardmäßig entfernt der Befehl den Config-Eintrag und die Source atomisch
+aus dem Knowledge-Index. Interaktiv werden beide Schritte bestätigt. Mit
+`--yes` werden Config und Index ohne Rückfrage bereinigt; `--keep-index`
+verhindert das Löschen aus dem Index. Das Repository beziehungsweise ein
+verwalteter Checkout wird nie vom Dateisystem gelöscht.
 
 ## `index [source-id]`
 
@@ -193,6 +231,27 @@ dokkurator doctype documents handbook --directory docs
 | ------------------------- | -------------------------------------------- | ---------------------- |
 | `[source-id]`             | Nur diese Source laden; ohne ID alle Sources | alle                   |
 | `--directory <directory>` | Dokumentverzeichnis relativ zur Source       | kompletter Source-Root |
+
+## `watch [source-id]`
+
+Indexiert zunächst den aktuellen Stand und beobachtet anschließend lokale
+Änderungen. Ereignisse werden pro Source zusammengefasst und lösen die
+hash-basierte inkrementelle Indexierung aus.
+
+```bash
+dokkurator watch
+dokkurator watch handbook --debounce 500
+```
+
+| Argument/Option                     | Bedeutung                                         | Standard               |
+| ----------------------------------- | ------------------------------------------------- | ---------------------- |
+| `[source-id]`                       | Nur diese Source beobachten; ohne ID alle Sources | alle                   |
+| `--debounce <milliseconds>`         | Ruhezeit vor der Synchronisierung                 | `300`                  |
+| `--documents-directory <directory>` | Dokumentverzeichnis relativ zur Source            | kompletter Source-Root |
+| `--index <file>`                    | Zu aktualisierende SQLite-Datei                   | `.dokkurator/index.db` |
+
+Der Watcher läuft bis `Ctrl+C` beziehungsweise `SIGTERM`. Remote-Sources werden
+beim Start aktualisiert; danach wird der lokale Checkout beobachtet.
 
 ## Interaktive und automatisierte Verwendung
 

@@ -58,9 +58,13 @@ sources:
 Projekt-Root aufgelöst, nicht relativ zum aktuellen Arbeitsverzeichnis. Dadurch
 bleiben Aufrufe aus Unterverzeichnissen deterministisch.
 
-Remote-Repositories, Branches und Credentials sind nicht Bestandteil des
-ersten Schritts. Sie werden erst ergänzt, wenn ein entsprechender Resolver und
-Lifecycle (clone/fetch/checkout) implementiert wird.
+Remote-Repositories können per Git-URL und optionalem Branch konfiguriert
+werden. Verwaltete Checkouts liegen standardmäßig unter
+`.dokkurator/repos/<source-id>`. Zugangsdaten werden nicht in der Config
+gespeichert; Git verwendet die lokal eingerichtete Credential-Lösung.
+Dokkurator besitzt dabei keinen eigenen Login: SSH-Agent und Git Credential
+Helper bleiben die verantwortlichen Mechanismen. Secrets dürfen nicht Teil der
+versionierbaren Projektkonfiguration sein.
 
 ## CLI-Oberfläche
 
@@ -91,16 +95,15 @@ erfragen:
 
 - `source add`: Pfad und vorgeschlagene/stabile ID
 - `source remove`: Source-Auswahl und Bestätigung
-- später Remote-URL, Branch und Checkout-Ziel
+- Remote-URL und Branch können nicht-interaktiv über Optionen gesetzt werden
 
 Jeder Ablauf muss gleichzeitig vollständig über Argumente und Flags ausführbar
 sein. Das ist für CI, Skripte und Tests erforderlich. Destruktive Varianten
 verwenden explizite Bestätigung beziehungsweise `--yes`.
 
-`source remove` entfernt im ersten Stand nur den Config-Eintrag und weist darauf
-hin, dass Indexdaten erhalten bleiben. Das spätere Löschen aus Knowledge wird
-erst angeboten, wenn Knowledge eine atomische öffentliche Operation wie
-`deleteSource(sourceId)` besitzt. Dann sind sinnvolle Optionen:
+`source remove` trennt Config, Index und Dateisystem. Config und Index werden
+standardmäßig entfernt; `--keep-index` behält die abgeleiteten Daten. Lokale
+Repositories und verwaltete Checkouts werden niemals automatisch gelöscht:
 
 ```bash
 dokkurator source remove documentation            # Rückfrage zum Index
@@ -149,11 +152,9 @@ Der vorhandene Knowledge-Store trennt Zustände und Dokumente bereits anhand von
 `sourceId`. Gleiche relative Pfade in verschiedenen Repositories kollidieren
 dadurch nicht.
 
-## Umsetzungsstand des ersten Inkrements
+## Umsetzungsstand
 
-Die folgende Liste beschreibt ausdrücklich nicht die Umsetzung der gesamten
-Task. Abgeschlossen ist nur der lokale Multi-Repository-Grundstand. Die offenen
-Punkte darunter gehören weiterhin zum geplanten Gesamtumfang.
+Die folgende Liste beschreibt den Umfang dieser Task.
 
 - [x] zentrale CLI in `apps/cli`
 - [x] YAML-Konfiguration unter `.dokkurator/config.yaml`
@@ -163,19 +164,13 @@ Punkte darunter gehören weiterhin zum geplanten Gesamtumfang.
 - [x] zentrale `search`- und DocType-Kommandos
 - [x] konfigurierte Source-ID an DocType-Adapter übergeben
 - [x] CLI-README und vollständige Benutzerreferenz
-- [ ] Config-Suche vom aktuellen Verzeichnis nach oben bis zum Projekt-Root
-- [ ] Validator auf das aktuelle Parsed-DocType-Modell umstellen und als
-      zentrales `validate`-Kommando ergänzen
-- [ ] `knowledge.deleteSource(sourceId)` und Remove-Dialog für Indexdaten
-- [ ] Remote-Resolver und Repository-Lifecycle
-- [ ] Watcher pro konfigurierter Source
+- [x] Config-Suche vom aktuellen Verzeichnis nach oben bis zum Projekt-Root
+- [x] `knowledge.deleteSource(sourceId)` und Remove-Dialog für Indexdaten
+- [x] Remote-Git-Resolver mit Clone, Fetch, Checkout und Pull
+- [x] Watcher pro konfigurierter Source mit Debounce und inkrementellem Sync
 
-## Nächste Schritte
+## Abgrenzung
 
-1. Projekt-Root automatisch anhand von `.dokkurator/config.yaml` finden.
-2. Validator vom temporären Kompatibilitätsmodell lösen; erst danach
-   `dokkurator validate [source-id]` ergänzen.
-3. Öffentliche, atomische Knowledge-Operation zum Löschen einer Source bauen.
-4. Danach den interaktiven Remove-Ablauf um `Indexdaten löschen/behalten`
-   erweitern.
-5. Remote-Sources und Watch-Modus auf demselben Source-Modell aufbauen.
+Das in dieser Task beschriebene lokale und Git-basierte Multi-Repository-
+Inkrement ist umgesetzt. Provider-spezifische APIs und Validation sind
+eigenständige spätere Ausbaustufen.
