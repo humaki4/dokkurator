@@ -8,6 +8,8 @@ import type { LoadedConfig, SourceConfig } from "./model.js";
  * @param path - Absolute path or path relative to the workspace root.
  * @returns An absolute normalized filesystem path.
  */
+
+//TODO: warum exportieren, wenn es nur hier verwendet wird?
 export function resolveProjectPath(loaded: LoadedConfig, path: string): string {
   return isAbsolute(path) ? path : resolve(loaded.projectRoot, path);
 }

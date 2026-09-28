@@ -101,7 +101,7 @@ export async function resolveSourceContent(
   };
 }
 
-//Wird nur noch in projects verwendet. Aber kann dort auch weg, wenn createconfiguredSource dort überflüssig ist.
+//TODO: Wird nur noch in projects verwendet. Aber kann dort auch weg, wenn createconfiguredSource dort überflüssig ist.
 export function resolveSourceConfig(
   loaded: LoadedConfig,
   source: SourceConfig,
