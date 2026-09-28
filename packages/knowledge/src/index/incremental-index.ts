@@ -12,17 +12,19 @@ import {
 import type { IncrementalKnowledgeIndex } from "../index-adapter/index.js";
 import { buildKnowledgeDocument } from "./documents.js";
 
-export interface CalculateDocumentDiffOptions extends DocumentConfig {
+export interface CalculateDocumentDiffOptions {
   readonly source: SourceAdapter;
   readonly index: Pick<IncrementalKnowledgeIndex, "getSourceState">;
+  readonly documents: DocumentConfig;
 }
 
-export interface IndexDocumentChangesOptions extends DocumentConfig {
+export interface IndexDocumentChangesOptions {
   readonly source: SourceAdapter;
   readonly index: Pick<
     IncrementalKnowledgeIndex,
     "getSourceState" | "applySourceUpdate"
   >;
+  readonly documents: DocumentConfig;
 }
 
 export interface IndexDocumentChangesResult {
@@ -35,11 +37,10 @@ export interface IndexDocumentChangesResult {
 export async function calculateDocumentDiff({
   source,
   index,
-  documentsDirectory,
-  excludeDirectories,
-  include,
-  exclude,
+  documents,
 }: CalculateDocumentDiffOptions): Promise<SourceDiff> {
+  const { documentsDirectory, excludeDirectories, include, exclude } =
+    documents;
   const sourceId = await source.getSourceId();
   const previous = await index.getSourceState(sourceId);
   const diff = await source.diff(previous, {

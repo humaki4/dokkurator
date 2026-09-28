@@ -1,7 +1,7 @@
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { LoadedConfig } from "@dokkurator/config";
+import { resolveActiveConfig, type LoadedConfig } from "@dokkurator/config";
 import { describe, expect, test } from "vitest";
 import { diffSources, indexSources, searchIndex } from "./knowledge-actions.js";
 
@@ -34,7 +34,7 @@ describe("diffSources", () => {
       index: ".dokkurator/index.db",
       documentsDirectory: "docs",
     };
-    await indexSources(loaded, undefined, options);
+    await indexSources(await resolveActiveConfig(loaded, options));
     await writeFile(join(docs, "first.md"), "# Changed\n");
     await rm(join(docs, "second.md"));
     await writeFile(join(docs, "third.md"), "# Added\n");
@@ -44,8 +44,12 @@ describe("diffSources", () => {
       { type: "deleted", path: "docs/second.md" },
       { type: "added", path: "docs/third.md" },
     ];
-    const [firstDiff] = await diffSources(loaded, "docs", options);
-    const [secondDiff] = await diffSources(loaded, "docs", options);
+    const active = await resolveActiveConfig(loaded, {
+      sourceId: "docs",
+      ...options,
+    });
+    const [firstDiff] = await diffSources(active);
+    const [secondDiff] = await diffSources(active);
 
     expect(
       firstDiff?.diff.changes.map(({ type, path }) => ({ type, path })),
@@ -58,7 +62,8 @@ describe("diffSources", () => {
   test("rejects an unknown source id", async () => {
     const { loaded } = await fixture();
     await expect(
-      diffSources(loaded, "missing", {
+      resolveActiveConfig(loaded, {
+        sourceId: "missing",
         index: "index.db",
         documentsDirectory: "docs",
       }),
@@ -70,26 +75,28 @@ describe("searchIndex", () => {
   test("supports metadata expressions and result limits", async () => {
     const { loaded } = await fixture();
     const index = ".dokkurator/index.db";
-    await indexSources(loaded, undefined, {
+    const active = await resolveActiveConfig(loaded, {
       index,
       documentsDirectory: "docs",
     });
-    const accepted = await searchIndex(loaded, "status:accepted", {
-      index,
-      limit: 10,
-    });
+    await indexSources(active);
+    const accepted = await searchIndex(active, "status:accepted", 10);
     expect(accepted.map(({ document }) => document.source.path)).toEqual([
       "docs/first.md",
     ]);
     await expect(
-      searchIndex(loaded, "authentication", { index, limit: 1 }),
+      searchIndex(active, "authentication", 1),
     ).resolves.toHaveLength(1);
   });
 
   test("rejects invalid search syntax", async () => {
     const { loaded } = await fixture();
     await expect(
-      searchIndex(loaded, "status:", { index: "missing.db", limit: 10 }),
+      searchIndex(
+        await resolveActiveConfig(loaded, { index: "missing.db" }),
+        "status:",
+        10,
+      ),
     ).rejects.toThrow("Invalid search query");
   });
 });

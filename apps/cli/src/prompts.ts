@@ -1,6 +1,11 @@
 import { stdin, stdout } from "node:process";
 import { createInterface } from "node:readline/promises";
 
+export interface Prompts {
+  ask(question: string): Promise<string>;
+  confirm(question: string): Promise<boolean>;
+}
+
 export async function ask(question: string): Promise<string> {
   if (!stdin.isTTY)
     throw new Error(`${question} (argument required in non-interactive mode)`);

@@ -1,9 +1,6 @@
 import { simpleGit } from "simple-git";
-import { mkdir } from "node:fs/promises";
-import { existsSync } from "node:fs";
-import { dirname } from "node:path";
 import { FileSystemSource } from "./file-system-source.js";
-import { GitSource } from "./git-source.js";
+import { createGitCheckoutSource, GitSource } from "./git-source.js";
 import type { SourceAdapter } from "./source-adapter.js";
 
 export async function createLocalSource(root: string): Promise<SourceAdapter> {
@@ -25,37 +22,25 @@ export async function createConfiguredLocalSource({
     : new FileSystemSource({ root, sourceId });
 }
 
-export interface GitCheckoutOptions {
-  readonly root: string;
-  readonly url: string;
-  readonly branch?: string;
-  readonly sourceId?: string;
-  readonly update?: boolean;
-}
-
-/** Clones or updates a managed checkout and exposes it as a Git source. */
-export async function createGitCheckoutSource({
-  root,
-  url,
-  branch,
-  sourceId,
+/** Creates the adapter selected by a configured local or remote source. */
+export async function createConfiguredSource(
+  source: {
+    readonly id: string;
+    readonly root: string;
+    readonly remote?: { readonly url: string; readonly branch?: string };
+  },
   update = true,
-}: GitCheckoutOptions): Promise<SourceAdapter> {
-  const checkout = existsSync(root) ? simpleGit({ baseDir: root }) : undefined;
-  if (checkout !== undefined && (await checkout.checkIsRepo())) {
-    if (update) {
-      await checkout.fetch("origin");
-      if (branch !== undefined) await checkout.checkout(branch);
-      if (branch === undefined) await checkout.pull("origin");
-      else await checkout.pull("origin", branch);
-    }
-    return new GitSource({ root, sourceId });
-  }
-  await mkdir(dirname(root), { recursive: true });
-  await simpleGit().clone(
-    url,
-    root,
-    branch === undefined ? [] : ["--branch", branch],
-  );
-  return new GitSource({ root, sourceId });
+): Promise<SourceAdapter> {
+  if (source.remote !== undefined)
+    return createGitCheckoutSource({
+      root: source.root,
+      sourceId: source.id,
+      url: source.remote.url,
+      branch: source.remote.branch,
+      update,
+    });
+  return createConfiguredLocalSource({
+    root: source.root,
+    sourceId: source.id,
+  });
 }

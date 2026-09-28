@@ -35,6 +35,7 @@ export type {
 export {
   createLocalSource,
   createConfiguredLocalSource,
+  createConfiguredSource,
   createGitCheckoutSource,
   FileSystemSource,
   GitSource,

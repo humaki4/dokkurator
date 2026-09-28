@@ -1,40 +1,37 @@
-import { loadDocTypes, loadDocuments } from "@dokkurator/doctype";
-import { resolveSourceContent, type LoadedConfig } from "@dokkurator/config";
-import { configuredSource, selectSources } from "../project.js";
+import {
+  createConfiguredSource,
+  loadDocTypes,
+  loadDocuments,
+} from "@dokkurator/doctype";
+import { type ActiveConfig } from "@dokkurator/config";
 
-export async function inspectDocTypes(
-  loaded: LoadedConfig,
-  sourceId: string | undefined,
-  directory?: string,
-) {
+export async function inspectDocTypes(active: ActiveConfig) {
   return Promise.all(
-    selectSources(loaded, sourceId).map(async (source) => {
-      const content = await resolveSourceContent(loaded, source);
+    active.sources.map(async (source) => {
       return {
         sourceId: source.id,
-        doctypes: await loadDocTypes(await configuredSource(loaded, source), {
-          doctypesDirectory: directory ?? content.doctypes.directory,
-        }),
+        doctypes: await loadDocTypes(
+          await createConfiguredSource(source, false),
+          { doctypesDirectory: source.doctypes.directory },
+        ),
       };
     }),
   );
 }
 
-export async function inspectDocuments(
-  loaded: LoadedConfig,
-  sourceId: string | undefined,
-  directory?: string,
-) {
+export async function inspectDocuments(active: ActiveConfig) {
   return Promise.all(
-    selectSources(loaded, sourceId).map(async (source) => {
-      const content = await resolveSourceContent(loaded, source);
+    active.sources.map(async (source) => {
       return {
         sourceId: source.id,
-        documents: await loadDocuments(await configuredSource(loaded, source), {
-          documentsDirectory: directory ?? content.documents.directory,
-          include: content.documents.include,
-          exclude: content.documents.exclude,
-        }),
+        documents: await loadDocuments(
+          await createConfiguredSource(source, false),
+          {
+            documentsDirectory: source.documents.directory,
+            include: source.documents.include,
+            exclude: source.documents.exclude,
+          },
+        ),
       };
     }),
   );

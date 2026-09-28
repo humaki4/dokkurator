@@ -2,17 +2,17 @@ import { existsSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import { SQLiteIndex } from "@dokkurator/knowledge";
 import {
+  resolveIndexPath,
   saveConfig,
   type LoadedConfig,
   type SourceConfig,
 } from "@dokkurator/config";
-import { indexFilename } from "../project.js";
 import type { WriteOutput } from "../command.js";
+import type { Prompts } from "../prompts.js";
 
-export interface SourceActionPrompts {
-  ask(question: string): Promise<string>;
-  confirm(question: string): Promise<boolean>;
-}
+//TODO: hier wird noch LoadedConfig verwendet, sollte doch ActiveConfig sein...
+//TODO: überlegen: will ich hier auch git auschecken (bei add) und löschen (bei remove)?
+//TODO: überlegen: Aber wie ist es, wenn ein command mit der Config das 1. mal aufgerufen wird
 
 export function listSources(
   loaded: LoadedConfig,
@@ -35,7 +35,7 @@ export async function addSource(
     remote?: string;
     branch?: string;
   },
-  prompts: Pick<SourceActionPrompts, "ask">,
+  prompts: Pick<Prompts, "ask">,
 ): Promise<SourceConfig> {
   const path =
     input.path ??
@@ -81,9 +81,8 @@ export async function removeSource(
     id?: string;
     yes?: boolean;
     keepIndex?: boolean;
-    index?: string;
   },
-  prompts: SourceActionPrompts,
+  prompts: Prompts,
 ): Promise<{ removed: boolean; id: string; deletedIndex: boolean }> {
   const id = input.id ?? (await prompts.ask("Source id: "));
   if (!loaded.config.sources.some((item) => item.id === id))
@@ -98,7 +97,7 @@ export async function removeSource(
     (input.yes === true ||
       (await prompts.confirm(`Delete ${id} from the Knowledge index?`)));
   if (deleteIndex) {
-    const filename = indexFilename(loaded, input.index);
+    const filename = resolveIndexPath(loaded);
     if (existsSync(filename)) {
       const index = new SQLiteIndex({ filename });
       try {

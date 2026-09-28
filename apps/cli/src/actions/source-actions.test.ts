@@ -88,7 +88,7 @@ describe("source actions", () => {
     await expect(
       removeSource(
         configured,
-        { id: "docs", index: ".dokkurator/index.db" },
+        { id: "docs" },
         {
           ask: vi.fn(),
           confirm: vi.fn(async () => false),
@@ -102,7 +102,6 @@ describe("source actions", () => {
           id: "docs",
           yes: true,
           keepIndex: true,
-          index: ".dokkurator/index.db",
         },
         {
           ask: vi.fn(),
@@ -119,7 +118,7 @@ describe("source actions", () => {
     await expect(
       removeSource(
         await fixture(),
-        { id: "missing", yes: true, index: "index.db" },
+        { id: "missing", yes: true },
         {
           ask: vi.fn(),
           confirm: vi.fn(),

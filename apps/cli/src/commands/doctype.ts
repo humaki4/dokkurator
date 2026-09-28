@@ -4,7 +4,7 @@ import {
   inspectDocTypes,
   inspectDocuments,
 } from "../actions/doctype-actions.js";
-import { currentConfig } from "../project.js";
+import { currentActiveConfig } from "../project.js";
 
 export function addDocTypeCommands(
   command: Command,
@@ -22,9 +22,10 @@ export function addDocTypeCommands(
         { directory }: { directory?: string },
       ) => {
         for (const result of await inspectDocTypes(
-          await currentConfig(command),
-          sourceId,
-          directory,
+          await currentActiveConfig(command, {
+            sourceId,
+            doctypesDirectory: directory,
+          }),
         ))
           writeOut(`${JSON.stringify(result, null, 2)}\n`);
       },
@@ -38,9 +39,10 @@ export function addDocTypeCommands(
         { directory }: { directory?: string },
       ) => {
         for (const result of await inspectDocuments(
-          await currentConfig(command),
-          sourceId,
-          directory,
+          await currentActiveConfig(command, {
+            sourceId,
+            documentsDirectory: directory,
+          }),
         ))
           writeOut(`${JSON.stringify(result, null, 2)}\n`);
       },

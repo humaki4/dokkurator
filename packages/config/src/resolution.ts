@@ -2,11 +2,39 @@ import { loadConfig } from "./config-file.js";
 import { DEFAULT_CONFIG } from "./defaults.js";
 import type {
   ContentConfig,
+  ActiveConfig,
+  ActiveConfigOptions,
   EffectiveContentConfig,
   LoadedConfig,
+  ResolvedSourceConfig,
   SourceConfig,
 } from "./model.js";
-import { resolveSourcePath } from "./paths.js";
+import { resolveIndexPath, resolveSourcePath } from "./paths.js";
+import { selectSources } from "./sources.js";
+
+export type EffectiveDocumentsConfig = EffectiveContentConfig["documents"];
+export type EffectiveDoctypesConfig = EffectiveContentConfig["doctypes"];
+
+//TODO: wird nirgends mehr verwendet??
+export function resolveDocumentsConfig(
+  config: ContentConfig,
+): EffectiveDocumentsConfig {
+  return {
+    directory:
+      config.documents?.directory ?? DEFAULT_CONFIG.documents.directory,
+    include: config.documents?.include ?? DEFAULT_CONFIG.documents.include,
+    exclude: config.documents?.exclude ?? DEFAULT_CONFIG.documents.exclude,
+  };
+}
+
+//TODO: wird nirgends mehr verwendet??
+export function resolveDoctypesConfig(
+  config: ContentConfig,
+): EffectiveDoctypesConfig {
+  return {
+    directory: config.doctypes?.directory ?? DEFAULT_CONFIG.doctypes.directory,
+  };
+}
 /**
  * Completes partial document and DocType settings with built-in defaults.
  *
@@ -14,18 +42,12 @@ import { resolveSourcePath } from "./paths.js";
  * @returns A complete content configuration with document directory, include
  * and exclude patterns, and DocType directory.
  */
+
+//TODO: wird nur noch in doctype und knowledge cli verwendet??
 export function resolveContent(config: ContentConfig): EffectiveContentConfig {
   return {
-    documents: {
-      directory:
-        config.documents?.directory ?? DEFAULT_CONFIG.documents.directory,
-      include: config.documents?.include ?? DEFAULT_CONFIG.documents.include,
-      exclude: config.documents?.exclude ?? DEFAULT_CONFIG.documents.exclude,
-    },
-    doctypes: {
-      directory:
-        config.doctypes?.directory ?? DEFAULT_CONFIG.doctypes.directory,
-    },
+    documents: resolveDocumentsConfig(config),
+    doctypes: resolveDoctypesConfig(config),
   };
 }
 /**
@@ -42,6 +64,8 @@ export function resolveContent(config: ContentConfig): EffectiveContentConfig {
  * @throws {Error} If the repository configuration exists but cannot be read,
  * parsed, or validated.
  */
+
+//TODO: wird nur noch in tests verwendet??
 export async function resolveSourceContent(
   loaded: LoadedConfig,
   source: SourceConfig,
@@ -73,6 +97,59 @@ export async function resolveSourceContent(
         override?.doctypes?.directory ??
         repository.doctypes?.directory ??
         workspace.doctypes.directory,
+    },
+  };
+}
+
+//Wird nur noch in projects verwendet. Aber kann dort auch weg, wenn createconfiguredSource dort überflüssig ist.
+export function resolveSourceConfig(
+  loaded: LoadedConfig,
+  source: SourceConfig,
+): ResolvedSourceConfig {
+  return {
+    id: source.id,
+    root: resolveSourcePath(loaded, source),
+    ...(source.remote === undefined ? {} : { remote: source.remote }),
+  };
+}
+
+//TODO: diese wird aktiv verwendet in cli projekt
+/** Resolves every value needed by an invocation before it enters an action. */
+export async function resolveActiveConfig(
+  loaded: LoadedConfig,
+  options: ActiveConfigOptions = {},
+): Promise<ActiveConfig> {
+  const selected =
+    options.includeSources === false
+      ? []
+      : selectSources(loaded, options.sourceId);
+  const sources = await Promise.all(
+    selected.map(async (source) => {
+      const content = await resolveSourceContent(loaded, source);
+      return {
+        id: source.id,
+        root: resolveSourcePath(loaded, source),
+        ...(source.remote === undefined ? {} : { remote: source.remote }),
+        documents: {
+          ...content.documents,
+          directory: options.documentsDirectory ?? content.documents.directory,
+        },
+        doctypes: {
+          ...content.doctypes,
+          directory: options.doctypesDirectory ?? content.doctypes.directory,
+        },
+      };
+    }),
+  );
+  return {
+    loaded,
+    sources,
+    knowledge: { index: resolveIndexPath(loaded, options.index) },
+    watch: {
+      debounce:
+        options.debounce ??
+        loaded.config.watch?.debounce ??
+        DEFAULT_CONFIG.watch.debounce,
     },
   };
 }

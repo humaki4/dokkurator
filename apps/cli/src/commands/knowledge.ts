@@ -5,7 +5,7 @@ import {
   indexSources,
   searchIndex,
 } from "../actions/knowledge-actions.js";
-import { currentConfig } from "../project.js";
+import { currentActiveConfig } from "../project.js";
 import { positiveInteger } from "./options.js";
 
 export function addKnowledgeCommands(
@@ -22,9 +22,7 @@ export function addKnowledgeCommands(
         options: { documentsDirectory?: string; index?: string },
       ) => {
         for (const { sourceId: id, result } of await indexSources(
-          await currentConfig(command),
-          sourceId,
-          options,
+          await currentActiveConfig(command, { sourceId, ...options }),
         ))
           writeOut(
             `${id}: ${result.indexedDocuments} indexed, ${result.removedDocuments} removed\n`,
@@ -42,9 +40,7 @@ export function addKnowledgeCommands(
         options: { documentsDirectory?: string; index?: string },
       ) => {
         for (const { sourceId: id, diff } of await diffSources(
-          await currentConfig(command),
-          sourceId,
-          options,
+          await currentActiveConfig(command, { sourceId, ...options }),
         )) {
           writeOut(`${id}: ${diff.changes.length} changes\n`);
           for (const change of diff.changes)
@@ -60,9 +56,12 @@ export function addKnowledgeCommands(
     .action(
       async (parts: string[], options: { limit: number; index?: string }) => {
         const results = await searchIndex(
-          await currentConfig(command),
+          await currentActiveConfig(command, {
+            includeSources: false,
+            index: options.index,
+          }),
           parts.join(" "),
-          options,
+          options.limit,
         );
         writeOut(`${JSON.stringify(results, null, 2)}\n`);
       },

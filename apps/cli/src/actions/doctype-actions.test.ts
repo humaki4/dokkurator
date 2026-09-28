@@ -2,9 +2,10 @@ import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, test } from "vitest";
-import type { LoadedConfig } from "@dokkurator/config";
+import { resolveActiveConfig, type LoadedConfig } from "@dokkurator/config";
 import { inspectDocTypes, inspectDocuments } from "./doctype-actions.js";
 
+//TODO: warum beides in 1 Test? Es sind doch 2 Funktionen!!
 test("inspects DocTypes and documents for a configured source", async () => {
   const projectRoot = await mkdtemp(
     join(tmpdir(), "dokkurator-doctype-actions-"),
@@ -26,8 +27,18 @@ test("inspects DocTypes and documents for a configured source", async () => {
     config: { sources: [{ id: "docs", path: "repo" }] },
   };
 
-  const types = await inspectDocTypes(loaded, "docs", "types");
+  //TODO: warum muss hier noch eine config resolved werden?
+  // hier kann doch einfach eine config übergeben werden
+  // wo sie herkommt ist egal
+  const types = await inspectDocTypes(
+    await resolveActiveConfig(loaded, {
+      sourceId: "docs",
+      doctypesDirectory: "types",
+    }),
+  );
   expect(types[0]?.doctypes[0]?.name).toBe("decision");
-  const documents = await inspectDocuments(loaded, undefined, "docs");
+  const documents = await inspectDocuments(
+    await resolveActiveConfig(loaded, { documentsDirectory: "docs" }),
+  );
   expect(documents[0]?.documents[0]).toMatchObject({ type: "decision" });
 });

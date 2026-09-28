@@ -1,16 +1,6 @@
+import { createConfiguredSource } from "@dokkurator/doctype";
 import { indexDocumentChanges, SQLiteIndex } from "@dokkurator/knowledge";
-import {
-  resolveSourceContent,
-  type LoadedConfig,
-  type SourceConfig,
-} from "@dokkurator/config";
-import { configuredSource, indexFilename } from "./project.js";
-
-export interface SyncSourceOptions {
-  readonly index?: string;
-  readonly documentsDirectory?: string;
-  readonly updateRemote?: boolean;
-}
+import type { ActiveSourceConfig } from "@dokkurator/config";
 
 export interface SyncSourceResult {
   readonly indexedDocuments: number;
@@ -18,26 +8,20 @@ export interface SyncSourceResult {
 }
 
 export async function syncSource(
-  loaded: LoadedConfig,
-  source: SourceConfig,
-  options: SyncSourceOptions,
+  source: ActiveSourceConfig,
+  indexFilename: string,
+  updateRemote = true,
 ): Promise<SyncSourceResult> {
-  const index = new SQLiteIndex({
-    filename: indexFilename(loaded, options.index),
-  });
+  const index = new SQLiteIndex({ filename: indexFilename });
   try {
-    const content = await resolveSourceContent(loaded, source);
     return await indexDocumentChanges({
-      source: await configuredSource(
-        loaded,
-        source,
-        options.updateRemote ?? true,
-      ),
+      source: await createConfiguredSource(source, updateRemote),
       index,
-      documentsDirectory:
-        options.documentsDirectory ?? content.documents.directory,
-      include: content.documents.include,
-      exclude: content.documents.exclude,
+      documents: {
+        documentsDirectory: source.documents.directory,
+        include: source.documents.include,
+        exclude: source.documents.exclude,
+      },
     });
   } finally {
     index.close();

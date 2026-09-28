@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import { watchSources } from "../actions/watch-action.js";
 import type { WriteOutput } from "../command.js";
-import { currentConfig } from "../project.js";
+import { currentActiveConfig } from "../project.js";
 import { positiveInteger } from "./options.js";
 
 export function addWatchCommand(command: Command, writeOut: WriteOutput): void {
@@ -20,9 +20,7 @@ export function addWatchCommand(command: Command, writeOut: WriteOutput): void {
         },
       ) => {
         await watchSources(
-          await currentConfig(command),
-          sourceId,
-          options,
+          await currentActiveConfig(command, { sourceId, ...options }),
           writeOut,
         );
       },

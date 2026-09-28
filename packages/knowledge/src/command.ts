@@ -74,7 +74,7 @@ export function createCommand(
         const result = await indexDocumentChanges({
           source,
           index,
-          documentsDirectory: options.documentsDirectory,
+          documents: { documentsDirectory: options.documentsDirectory },
         });
         writeOut(
           `${JSON.stringify(
@@ -128,7 +128,7 @@ export function createCommand(
           const diff = await calculateDocumentDiff({
             source,
             index: index ?? { getSourceState: async () => undefined },
-            documentsDirectory: options.documentsDirectory,
+            documents: { documentsDirectory: options.documentsDirectory },
           });
           writeOut(
             diffOptions.format === "json"
