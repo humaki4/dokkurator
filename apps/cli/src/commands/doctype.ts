@@ -1,7 +1,3 @@
-import {
-  DEFAULT_DOCUMENTS_DIRECTORY,
-  DEFAULT_DOCTYPES_DIRECTORY,
-} from "@dokkurator/doctype";
 import { Command } from "commander";
 import type { WriteOutput } from "../command.js";
 import {
@@ -19,15 +15,11 @@ export function addDocTypeCommands(
     .description("Inspect parsed document sources");
   doctype
     .command("list [source-id]")
-    .option(
-      "--directory <directory>",
-      "DocType directory",
-      DEFAULT_DOCTYPES_DIRECTORY,
-    )
+    .option("--directory <directory>", "DocType directory")
     .action(
       async (
         sourceId: string | undefined,
-        { directory }: { directory: string },
+        { directory }: { directory?: string },
       ) => {
         for (const result of await inspectDocTypes(
           await currentConfig(command),
@@ -39,15 +31,11 @@ export function addDocTypeCommands(
     );
   doctype
     .command("documents [source-id]")
-    .option(
-      "--directory <directory>",
-      "documents directory",
-      DEFAULT_DOCUMENTS_DIRECTORY,
-    )
+    .option("--directory <directory>", "documents directory")
     .action(
       async (
         sourceId: string | undefined,
-        { directory }: { directory: string },
+        { directory }: { directory?: string },
       ) => {
         for (const result of await inspectDocuments(
           await currentConfig(command),

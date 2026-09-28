@@ -1,4 +1,3 @@
-import { DEFAULT_DOCUMENTS_DIRECTORY } from "@dokkurator/doctype";
 import { Command } from "commander";
 import type { WriteOutput } from "../command.js";
 import {
@@ -15,16 +14,12 @@ export function addKnowledgeCommands(
 ): void {
   command
     .command("index [source-id]")
-    .option(
-      "--documents-directory <directory>",
-      "documents directory",
-      DEFAULT_DOCUMENTS_DIRECTORY,
-    )
-    .option("--index <file>", "SQLite index file", ".dokkurator/index.db")
+    .option("--documents-directory <directory>", "documents directory")
+    .option("--index <file>", "SQLite index file")
     .action(
       async (
         sourceId: string | undefined,
-        options: { documentsDirectory: string; index: string },
+        options: { documentsDirectory?: string; index?: string },
       ) => {
         for (const { sourceId: id, result } of await indexSources(
           await currentConfig(command),
@@ -39,16 +34,12 @@ export function addKnowledgeCommands(
 
   command
     .command("diff [source-id]")
-    .option(
-      "--documents-directory <directory>",
-      "documents directory",
-      DEFAULT_DOCUMENTS_DIRECTORY,
-    )
-    .option("--index <file>", "SQLite index file", ".dokkurator/index.db")
+    .option("--documents-directory <directory>", "documents directory")
+    .option("--index <file>", "SQLite index file")
     .action(
       async (
         sourceId: string | undefined,
-        options: { documentsDirectory: string; index: string },
+        options: { documentsDirectory?: string; index?: string },
       ) => {
         for (const { sourceId: id, diff } of await diffSources(
           await currentConfig(command),
@@ -65,9 +56,9 @@ export function addKnowledgeCommands(
   command
     .command("search <query...>")
     .option("--limit <number>", "maximum results", positiveInteger, 20)
-    .option("--index <file>", "SQLite index file", ".dokkurator/index.db")
+    .option("--index <file>", "SQLite index file")
     .action(
-      async (parts: string[], options: { limit: number; index: string }) => {
+      async (parts: string[], options: { limit: number; index?: string }) => {
         const results = await searchIndex(
           await currentConfig(command),
           parts.join(" "),

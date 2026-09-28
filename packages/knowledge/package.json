@@ -29,6 +29,7 @@
     "start": "node dist/cli.js"
   },
   "dependencies": {
+    "@dokkurator/config": "workspace:*",
     "@dokkurator/doctype": "workspace:*",
     "commander": "^15.0.0",
     "kysely": "^0.29.6"

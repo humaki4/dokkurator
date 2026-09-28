@@ -14,6 +14,8 @@ The goal is to make distributed documentation easier to maintain, search, analyz
 This repository currently serves both as the implementation workspace and as documentation of the project's architecture, design decisions and planned development.
 
 Further documentation and concepts can be found in [docs-folder](./docs)
+The project configuration format is documented in
+[docs/configuration.md](./docs/configuration.md).
 
 ## Project structure
 

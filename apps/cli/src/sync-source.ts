@@ -1,10 +1,14 @@
 import { indexDocumentChanges, SQLiteIndex } from "@dokkurator/knowledge";
-import type { LoadedConfig, SourceConfig } from "./config.js";
+import {
+  resolveSourceContent,
+  type LoadedConfig,
+  type SourceConfig,
+} from "@dokkurator/config";
 import { configuredSource, indexFilename } from "./project.js";
 
 export interface SyncSourceOptions {
-  readonly index: string;
-  readonly documentsDirectory: string;
+  readonly index?: string;
+  readonly documentsDirectory?: string;
   readonly updateRemote?: boolean;
 }
 
@@ -22,6 +26,7 @@ export async function syncSource(
     filename: indexFilename(loaded, options.index),
   });
   try {
+    const content = await resolveSourceContent(loaded, source);
     return await indexDocumentChanges({
       source: await configuredSource(
         loaded,
@@ -29,7 +34,10 @@ export async function syncSource(
         options.updateRemote ?? true,
       ),
       index,
-      documentsDirectory: options.documentsDirectory,
+      documentsDirectory:
+        options.documentsDirectory ?? content.documents.directory,
+      include: content.documents.include,
+      exclude: content.documents.exclude,
     });
   } finally {
     index.close();

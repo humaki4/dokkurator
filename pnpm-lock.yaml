@@ -60,6 +60,9 @@ importers:
 
   apps/cli:
     dependencies:
+      '@dokkurator/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@dokkurator/doctype':
         specifier: workspace:*
         version: link:../../packages/doctype
@@ -131,8 +134,17 @@ importers:
         specifier: ^8.3.0
         version: 8.3.0(@types/node@24.13.6)(esbuild@0.28.2)(yaml@2.9.1)
 
+  packages/config:
+    dependencies:
+      yaml:
+        specifier: ^2.9.1
+        version: 2.9.1
+
   packages/doctype:
     dependencies:
+      '@dokkurator/config':
+        specifier: workspace:*
+        version: link:../config
       '@types/mdast':
         specifier: ^4.0.4
         version: 4.0.4
@@ -145,6 +157,9 @@ importers:
       mdast-util-to-string:
         specifier: ^4.0.0
         version: 4.0.0
+      minimatch:
+        specifier: ^10.2.5
+        version: 10.2.6
       remark-frontmatter:
         specifier: ^5.0.0
         version: 5.0.0
@@ -166,6 +181,9 @@ importers:
 
   packages/knowledge:
     dependencies:
+      '@dokkurator/config':
+        specifier: workspace:*
+        version: link:../config
       '@dokkurator/doctype':
         specifier: workspace:*
         version: link:../doctype

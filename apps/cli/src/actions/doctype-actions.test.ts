@@ -2,7 +2,7 @@ import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, test } from "vitest";
-import type { LoadedConfig } from "../config.js";
+import type { LoadedConfig } from "@dokkurator/config";
 import { inspectDocTypes, inspectDocuments } from "./doctype-actions.js";
 
 test("inspects DocTypes and documents for a configured source", async () => {

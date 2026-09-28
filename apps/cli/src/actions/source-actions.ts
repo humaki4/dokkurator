@@ -1,7 +1,11 @@
 import { existsSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import { SQLiteIndex } from "@dokkurator/knowledge";
-import { saveConfig, type LoadedConfig, type SourceConfig } from "../config.js";
+import {
+  saveConfig,
+  type LoadedConfig,
+  type SourceConfig,
+} from "@dokkurator/config";
 import { indexFilename } from "../project.js";
 import type { WriteOutput } from "../command.js";
 
@@ -77,7 +81,7 @@ export async function removeSource(
     id?: string;
     yes?: boolean;
     keepIndex?: boolean;
-    index: string;
+    index?: string;
   },
   prompts: SourceActionPrompts,
 ): Promise<{ removed: boolean; id: string; deletedIndex: boolean }> {

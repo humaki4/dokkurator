@@ -1,12 +1,23 @@
 #!/usr/bin/env node
 import { createCommand } from "./command.js";
+import {
+  findProjectRoot,
+  loadConfig,
+  resolveContent,
+} from "@dokkurator/config";
 
 try {
+  const root = findProjectRoot(process.env.INIT_CWD ?? process.cwd());
+  const content = resolveContent((await loadConfig(root)).config);
   await createCommand(
     {},
     {
-      doctypesDirectory: process.env.DOKKURATOR_DOCTYPES_DIRECTORY,
-      documentsDirectory: process.env.DOKKURATOR_DOCUMENTS_DIRECTORY,
+      cwd: root,
+      doctypesDirectory:
+        process.env.DOKKURATOR_DOCTYPES_DIRECTORY ?? content.doctypes.directory,
+      documentsDirectory:
+        process.env.DOKKURATOR_DOCUMENTS_DIRECTORY ??
+        content.documents.directory,
     },
   ).parseAsync(process.argv);
 } catch (error) {

@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parse } from "yaml";
 import { describe, expect, test, vi } from "vitest";
-import type { LoadedConfig } from "../config.js";
+import type { LoadedConfig } from "@dokkurator/config";
 import { addSource, listSources, removeSource } from "./source-actions.js";
 
 async function fixture(): Promise<LoadedConfig> {

@@ -46,11 +46,11 @@ export function addSourceCommands(
     .command("remove [id]")
     .option("--yes", "skip confirmation")
     .option("--keep-index", "keep indexed documents")
-    .option("--index <file>", "SQLite index file", ".dokkurator/index.db")
+    .option("--index <file>", "SQLite index file")
     .action(
       async (
         id: string | undefined,
-        options: { yes?: boolean; keepIndex?: boolean; index: string },
+        options: { yes?: boolean; keepIndex?: boolean; index?: string },
       ) => {
         const result = await removeSource(
           await currentConfig(command),

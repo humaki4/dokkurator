@@ -5,7 +5,7 @@ import { parse } from "yaml";
 import { SQLiteIndex } from "@dokkurator/knowledge";
 import { describe, expect, test } from "vitest";
 import { createCommand } from "./command.js";
-import { findProjectRoot } from "./config.js";
+import { findProjectRoot } from "@dokkurator/config";
 
 describe("dokkurator CLI", () => {
   test("finds the project config from a nested directory", async () => {

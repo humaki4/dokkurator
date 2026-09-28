@@ -21,6 +21,7 @@ export interface CommandOutput {
 export interface CommandEnvironment {
   cwd?: string;
   documentsDirectory?: string;
+  index?: string;
 }
 
 export function createCommand(
@@ -46,7 +47,7 @@ export function createCommand(
     .option(
       "--index <file>",
       "SQLite index file, relative to the source root",
-      ".dokkurator/index.db",
+      environment.index ?? ".dokkurator/index.db",
     )
     .showHelpAfterError();
 

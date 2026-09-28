@@ -4,7 +4,7 @@ import { addDocTypeCommands } from "./commands/doctype.js";
 import { addKnowledgeCommands } from "./commands/knowledge.js";
 import { addSourceCommands } from "./commands/source.js";
 import { addWatchCommand } from "./commands/watch.js";
-import { findProjectRoot } from "./config.js";
+import { findProjectRoot } from "@dokkurator/config";
 
 export interface CommandOutput {
   writeOut?: (text: string) => void;

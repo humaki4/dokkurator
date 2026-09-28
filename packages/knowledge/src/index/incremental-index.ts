@@ -37,6 +37,8 @@ export async function calculateDocumentDiff({
   index,
   documentsDirectory,
   excludeDirectories,
+  include,
+  exclude,
 }: CalculateDocumentDiffOptions): Promise<SourceDiff> {
   const sourceId = await source.getSourceId();
   const previous = await index.getSourceState(sourceId);
@@ -48,7 +50,13 @@ export async function calculateDocumentDiff({
   return {
     ...diff,
     changes: diff.changes.filter((change) =>
-      isIndexedDocument(change.path, documentsDirectory, excludeDirectories),
+      isIndexedDocument(
+        change.path,
+        documentsDirectory,
+        excludeDirectories,
+        include,
+        exclude,
+      ),
     ),
   };
 }
@@ -97,9 +105,14 @@ function isIndexedDocument(
   path: string,
   documentsDirectory = DEFAULT_DOCUMENTS_DIRECTORY,
   excludeDirectories: readonly SourceId[] = DEFAULT_EXCLUDED_DOCUMENT_DIRECTORIES,
+  include?: readonly string[],
+  exclude?: readonly string[],
 ): boolean {
   const directory = documentsDirectory.replace(/^\/+|\/+$/gu, "");
   const belowDirectory =
     directory === "" || path === directory || path.startsWith(`${directory}/`);
-  return belowDirectory && isDocumentationFile(path, excludeDirectories);
+  return (
+    belowDirectory &&
+    isDocumentationFile(path, excludeDirectories, include, exclude)
+  );
 }

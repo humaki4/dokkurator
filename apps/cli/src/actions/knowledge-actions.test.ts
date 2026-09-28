@@ -2,7 +2,7 @@ import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
-import type { LoadedConfig } from "../config.js";
+import type { LoadedConfig } from "@dokkurator/config";
 import { diffSources, indexSources, searchIndex } from "./knowledge-actions.js";
 
 async function fixture(): Promise<LoadedConfig> {

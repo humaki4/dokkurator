@@ -6,11 +6,12 @@ import {
 } from "@dokkurator/doctype";
 import { Command } from "commander";
 import {
+  DEFAULT_CONFIG,
   loadConfig,
   resolveSourcePath,
   type LoadedConfig,
   type SourceConfig,
-} from "./config.js";
+} from "@dokkurator/config";
 
 export async function currentConfig(command: Command): Promise<LoadedConfig> {
   return loadConfig(command.opts<{ project: string }>().project);
@@ -56,8 +57,12 @@ export async function forEachSource(
   for (const item of selectSources(loaded, id)) await operation(item, loaded);
 }
 
-export function indexFilename(loaded: LoadedConfig, filename: string): string {
-  return isAbsolute(filename)
-    ? filename
-    : resolve(loaded.projectRoot, filename);
+export function indexFilename(loaded: LoadedConfig, filename?: string): string {
+  const resolvedFilename =
+    filename ??
+    loaded.config.knowledge?.index ??
+    DEFAULT_CONFIG.knowledge.index;
+  return isAbsolute(resolvedFilename)
+    ? resolvedFilename
+    : resolve(loaded.projectRoot, resolvedFilename);
 }

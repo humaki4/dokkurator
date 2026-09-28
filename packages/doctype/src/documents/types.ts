@@ -20,6 +20,8 @@ export const DEFAULT_EXCLUDED_DOCUMENT_DIRECTORIES = [
 export interface DocumentConfig {
   readonly documentsDirectory?: SourceId;
   readonly excludeDirectories?: readonly SourceId[];
+  readonly include?: readonly string[];
+  readonly exclude?: readonly string[];
 }
 
 export type MarkdownDocument = Root;
