@@ -39,6 +39,7 @@ export {
   createGitCheckoutSource,
   FileSystemSource,
   GitSource,
+  isGitRepositoryRoot,
   SourceNotFoundError,
 } from "./source-adapter/index.js";
 export type {

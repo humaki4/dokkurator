@@ -36,6 +36,14 @@ export interface GitCheckoutOptions extends GitSourceOptions {
   readonly update?: boolean;
 }
 
+/** Returns whether root itself is a Git repository, not merely inside one. */
+export async function isGitRepositoryRoot(root: string): Promise<boolean> {
+  if (!existsSync(root)) return false;
+  const git = simpleGit({ baseDir: resolve(root) });
+  if (!(await git.checkIsRepo())) return false;
+  return resolve(await git.revparse(["--show-toplevel"])) === resolve(root);
+}
+
 /** Clones or updates a managed checkout and exposes it as a Git source. */
 export async function createGitCheckoutSource({
   root,
@@ -207,15 +215,12 @@ export class GitSource implements SourceAdapter {
     branch?: string;
     url: string;
   }): Promise<void> {
-    const checkout = existsSync(this.root)
-      ? simpleGit({ baseDir: this.root, maxConcurrentProcesses: 6 })
-      : undefined;
-    if (checkout !== undefined && (await checkout.checkIsRepo())) {
+    if (await isGitRepositoryRoot(this.root)) {
       if (update) {
-        await checkout.fetch("origin");
-        if (branch !== undefined) await checkout.checkout(branch);
-        if (branch === undefined) await checkout.pull("origin");
-        else await checkout.pull("origin", branch);
+        await this.git.fetch("origin");
+        if (branch !== undefined) await this.git.checkout(branch);
+        if (branch === undefined) await this.git.pull("origin");
+        else await this.git.pull("origin", branch);
       }
       return;
     }

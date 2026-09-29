@@ -1,6 +1,10 @@
 export { FileSystemSource } from "./file-system-source.js";
 export type { FileSystemSourceOptions } from "./file-system-source.js";
-export { createGitCheckoutSource, GitSource } from "./git-source.js";
+export {
+  createGitCheckoutSource,
+  GitSource,
+  isGitRepositoryRoot,
+} from "./git-source.js";
 export type { GitCheckoutOptions, GitSourceOptions } from "./git-source.js";
 export {
   createConfiguredLocalSource,

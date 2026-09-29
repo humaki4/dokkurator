@@ -5,12 +5,13 @@ import {
   indexSources,
   searchIndex,
 } from "../actions/knowledge-actions.js";
-import { currentActiveConfig } from "../project.js";
+import { currentActiveConfig, type ConfirmCheckout } from "../project.js";
 import { positiveInteger } from "./options.js";
 
 export function addKnowledgeCommands(
   command: Command,
   writeOut: WriteOutput,
+  confirmCheckout: ConfirmCheckout,
 ): void {
   command
     .command("index [source-id]")
@@ -21,9 +22,13 @@ export function addKnowledgeCommands(
         sourceId: string | undefined,
         options: { documentsDirectory?: string; index?: string },
       ) => {
-        for (const { sourceId: id, result } of await indexSources(
-          await currentActiveConfig(command, { sourceId, ...options }),
-        ))
+        const active = await currentActiveConfig(
+          command.opts<{ project: string }>().project,
+          { sourceId, ...options },
+          confirmCheckout,
+        );
+        if (active === undefined) return writeOut("Cancelled.\n");
+        for (const { sourceId: id, result } of await indexSources(active))
           writeOut(
             `${id}: ${result.indexedDocuments} indexed, ${result.removedDocuments} removed\n`,
           );
@@ -39,9 +44,13 @@ export function addKnowledgeCommands(
         sourceId: string | undefined,
         options: { documentsDirectory?: string; index?: string },
       ) => {
-        for (const { sourceId: id, diff } of await diffSources(
-          await currentActiveConfig(command, { sourceId, ...options }),
-        )) {
+        const active = await currentActiveConfig(
+          command.opts<{ project: string }>().project,
+          { sourceId, ...options },
+          confirmCheckout,
+        );
+        if (active === undefined) return writeOut("Cancelled.\n");
+        for (const { sourceId: id, diff } of await diffSources(active)) {
           writeOut(`${id}: ${diff.changes.length} changes\n`);
           for (const change of diff.changes)
             writeOut(`  ${change.type}\t${change.path}\n`);
@@ -55,11 +64,17 @@ export function addKnowledgeCommands(
     .option("--index <file>", "SQLite index file")
     .action(
       async (parts: string[], options: { limit: number; index?: string }) => {
-        const results = await searchIndex(
-          await currentActiveConfig(command, {
+        const active = await currentActiveConfig(
+          command.opts<{ project: string }>().project,
+          {
             includeSources: false,
             index: options.index,
-          }),
+          },
+          confirmCheckout,
+        );
+        if (active === undefined) return writeOut("Cancelled.\n");
+        const results = await searchIndex(
+          active,
           parts.join(" "),
           options.limit,
         );

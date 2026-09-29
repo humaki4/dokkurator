@@ -4,11 +4,12 @@ import {
   inspectDocTypes,
   inspectDocuments,
 } from "../actions/doctype-actions.js";
-import { currentActiveConfig } from "../project.js";
+import { currentActiveConfig, type ConfirmCheckout } from "../project.js";
 
 export function addDocTypeCommands(
   command: Command,
   writeOut: WriteOutput,
+  confirmCheckout: ConfirmCheckout,
 ): void {
   const doctype = command
     .command("doctype")
@@ -21,12 +22,13 @@ export function addDocTypeCommands(
         sourceId: string | undefined,
         { directory }: { directory?: string },
       ) => {
-        for (const result of await inspectDocTypes(
-          await currentActiveConfig(command, {
-            sourceId,
-            doctypesDirectory: directory,
-          }),
-        ))
+        const active = await currentActiveConfig(
+          command.opts<{ project: string }>().project,
+          { sourceId, doctypesDirectory: directory },
+          confirmCheckout,
+        );
+        if (active === undefined) return writeOut("Cancelled.\n");
+        for (const result of await inspectDocTypes(active))
           writeOut(`${JSON.stringify(result, null, 2)}\n`);
       },
     );
@@ -38,12 +40,13 @@ export function addDocTypeCommands(
         sourceId: string | undefined,
         { directory }: { directory?: string },
       ) => {
-        for (const result of await inspectDocuments(
-          await currentActiveConfig(command, {
-            sourceId,
-            documentsDirectory: directory,
-          }),
-        ))
+        const active = await currentActiveConfig(
+          command.opts<{ project: string }>().project,
+          { sourceId, documentsDirectory: directory },
+          confirmCheckout,
+        );
+        if (active === undefined) return writeOut("Cancelled.\n");
+        for (const result of await inspectDocuments(active))
           writeOut(`${JSON.stringify(result, null, 2)}\n`);
       },
     );

@@ -1,10 +1,14 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { simpleGit } from "simple-git";
 import { afterEach, expect, test } from "vitest";
 import { FileSystemSource } from "./file-system-source.js";
-import { createGitCheckoutSource, GitSource } from "./git-source.js";
+import {
+  createGitCheckoutSource,
+  GitSource,
+  isGitRepositoryRoot,
+} from "./git-source.js";
 import { createLocalSource } from "./local-source.js";
 
 const temporaryDirectories: string[] = [];
@@ -30,6 +34,15 @@ test("creates a Git adapter inside a Git working tree", async () => {
   await simpleGit(root).init();
 
   await expect(createLocalSource(root)).resolves.toBeInstanceOf(GitSource);
+});
+
+test("does not treat a directory inside another repository as its checkout", async () => {
+  const project = await temporaryDirectory();
+  const checkout = join(project, ".dokkurator", "repos", "docs");
+  await mkdir(checkout, { recursive: true });
+  await simpleGit(project).init();
+
+  await expect(isGitRepositoryRoot(checkout)).resolves.toBe(false);
 });
 
 test("clones a configured Git remote into a managed checkout", async () => {

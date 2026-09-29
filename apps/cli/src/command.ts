@@ -5,6 +5,8 @@ import { addKnowledgeCommands } from "./commands/knowledge.js";
 import { addSourceCommands } from "./commands/source.js";
 import { addWatchCommand } from "./commands/watch.js";
 import { findProjectRoot } from "@dokkurator/config";
+import { confirm } from "./prompts.js";
+import type { ConfirmCheckout } from "./project.js";
 
 export interface CommandOutput {
   writeOut?: (text: string) => void;
@@ -13,6 +15,7 @@ export interface CommandOutput {
 
 export interface CommandEnvironment {
   cwd?: string;
+  confirmCheckout?: ConfirmCheckout;
 }
 
 export type WriteOutput = (text: string) => void;
@@ -24,6 +27,7 @@ export function createCommand(
   const writeOut =
     output.writeOut ?? ((text: string) => process.stdout.write(text));
   const cwd = resolve(environment.cwd ?? process.cwd());
+  const confirmCheckout = environment.confirmCheckout ?? confirm;
   const command = new Command()
     .name("dokkurator")
     .description("Manage and process Dokkurator projects")
@@ -37,8 +41,8 @@ export function createCommand(
   command.configureOutput({ ...output, writeOut });
 
   addSourceCommands(command, writeOut);
-  addKnowledgeCommands(command, writeOut);
-  addDocTypeCommands(command, writeOut);
-  addWatchCommand(command, writeOut);
+  addKnowledgeCommands(command, writeOut, confirmCheckout);
+  addDocTypeCommands(command, writeOut, confirmCheckout);
+  addWatchCommand(command, writeOut, confirmCheckout);
   return command;
 }

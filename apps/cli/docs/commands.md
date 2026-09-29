@@ -59,8 +59,10 @@ Eigenschaften einer Source:
 | `remote.branch` | nein    | Auszucheckender Branch                                                                        |
 
 Remote-Sources ohne `path` werden unter
-`.dokkurator/repos/<source-id>` geklont. Vor normalen CLI-Operationen wird ein
-vorhandener Checkout vom Remote aktualisiert.
+`.dokkurator/checkouts/<source-id>` verwaltet. Bei einem fehlenden Checkout
+fragt ein Source-verarbeitender Befehl vor dem Klonen nach; bei Ablehnung wird
+der Befehl abgebrochen. Wird eine `source-id` angegeben, betrifft die Prüfung
+nur diese Source. Vorhandene Checkouts werden wie bisher vom Remote aktualisiert.
 
 ### Authentifizierung für Remote-Sources
 

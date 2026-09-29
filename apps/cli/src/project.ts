@@ -2,13 +2,17 @@ import { Command } from "commander";
 import {
   loadConfig,
   resolveActiveConfig,
-  resolveSourceConfig,
-  selectSources,
   type ActiveConfig,
   type ActiveConfigOptions,
   type LoadedConfig,
 } from "@dokkurator/config";
-import { createConfiguredSource } from "@dokkurator/doctype";
+import {
+  createConfiguredSource,
+  isGitRepositoryRoot,
+} from "@dokkurator/doctype";
+import { confirm } from "./prompts.js";
+
+export type ConfirmCheckout = (question: string) => Promise<boolean>;
 
 export async function currentConfig(command: Command): Promise<LoadedConfig> {
   return loadConfig(command.opts<{ project: string }>().project);
@@ -20,14 +24,25 @@ export async function currentConfig(command: Command): Promise<LoadedConfig> {
 //eigentlich direkt resolveActiveConfig aufgerufen werden (die dann auch die currentConfig direkt selbst lädt.
 // dann kann dieser Teil hier weg!!.
 export async function currentActiveConfig(
-  command: Command,
+  root: string,
   options: ActiveConfigOptions = {},
-): Promise<ActiveConfig> {
-  const loaded = await currentConfig(command);
-  //TODO: warum wird hier createConfiguredSource aufgerufen?
-  // Es wird ja gar nicht zurückgegeben oder weiterverwendet
-  if (options.includeSources !== false)
-    for (const source of selectSources(loaded, options.sourceId))
-      await createConfiguredSource(resolveSourceConfig(loaded, source));
-  return resolveActiveConfig(loaded, options);
+  confirmCheckout: ConfirmCheckout = confirm,
+): Promise<ActiveConfig | undefined> {
+  //const loaded = await currentConfig(command);
+  const loaded = await loadConfig(root);
+  const active = await resolveActiveConfig(loaded, options);
+
+  for (const source of active.sources) {
+    if (
+      source.remote !== undefined &&
+      !(await isGitRepositoryRoot(source.root)) &&
+      !(await confirmCheckout(
+        `Checkout ${source.remote.url} to ${source.root}?`,
+      ))
+    )
+      return undefined;
+  }
+
+  for (const source of active.sources) await createConfiguredSource(source);
+  return active;
 }
