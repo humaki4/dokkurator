@@ -2,10 +2,10 @@ import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
-import { resolveActiveConfig, type LoadedConfig } from "@dokkurator/config";
+import { resolveActiveConfig } from "@dokkurator/config";
 import { diffSources, indexSources, searchIndex } from "./knowledge-actions.js";
 
-async function fixture(): Promise<LoadedConfig> {
+async function fixture(): Promise<string> {
   const projectRoot = await mkdtemp(
     join(tmpdir(), "dokkurator-knowledge-actions-"),
   );
@@ -14,22 +14,23 @@ async function fixture(): Promise<LoadedConfig> {
     join(projectRoot, "repo", "docs", "guide.md"),
     "---\ntitle: Authentication\n---\n# OAuth\nUse access tokens.\n",
   );
-  return {
-    projectRoot,
-    filename: join(projectRoot, ".dokkurator", "config.yaml"),
-    config: { sources: [{ id: "docs", path: "repo" }] },
-  };
+  await mkdir(join(projectRoot, ".dokkurator"), { recursive: true });
+  await writeFile(
+    join(projectRoot, ".dokkurator/config.yaml"),
+    "sources:\n  - id: docs\n    path: repo\n",
+  );
+  return projectRoot;
 }
 
 describe("knowledge actions", () => {
   test("indexes, diffs and searches a configured source", async () => {
-    const loaded = await fixture();
+    const root = await fixture();
     const options = {
       index: ".dokkurator/index.db",
       documentsDirectory: "docs",
     };
     await expect(
-      indexSources(await resolveActiveConfig(loaded, options)),
+      indexSources(await resolveActiveConfig({ root, ...options })),
     ).resolves.toMatchObject([
       {
         sourceId: "docs",
@@ -38,11 +39,15 @@ describe("knowledge actions", () => {
     ]);
     await expect(
       diffSources(
-        await resolveActiveConfig(loaded, { sourceId: "docs", ...options }),
+        await resolveActiveConfig({ root, sourceId: "docs", ...options }),
       ),
     ).resolves.toMatchObject([{ sourceId: "docs", diff: { changes: [] } }]);
     const hits = await searchIndex(
-      await resolveActiveConfig(loaded, { index: options.index }),
+      await resolveActiveConfig({
+        root,
+        includeSources: false,
+        index: options.index,
+      }),
       "authentication",
       10,
     );
@@ -51,9 +56,10 @@ describe("knowledge actions", () => {
   });
 
   test("reports every document as added without an existing index", async () => {
-    const loaded = await fixture();
+    const root = await fixture();
     const result = await diffSources(
-      await resolveActiveConfig(loaded, {
+      await resolveActiveConfig({
+        root,
         index: "missing.db",
         documentsDirectory: "docs",
       }),

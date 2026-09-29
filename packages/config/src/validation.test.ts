@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { validateConfig } from "./validation.js";
+import { validateConfig, validateRepositoryConfig } from "./validation.js";
 
 describe("validateConfig", () => {
   test("accepts and preserves a complete workspace configuration", () => {
@@ -19,9 +19,6 @@ describe("validateConfig", () => {
         {
           id: "remote-docs",
           remote: { url: "git@example.test:docs.git", branch: "main" },
-          config: {
-            documents: { directory: "published", exclude: ["private/**"] },
-          },
         },
       ],
     } as const;
@@ -89,7 +86,7 @@ describe("validateConfig", () => {
     ],
     [
       { sources: [{ id: "docs", path: ".", config: [] }] },
-      "sources[0].config must be an object",
+      "sources[0].config is no longer supported",
     ],
     [
       {
@@ -103,4 +100,15 @@ describe("validateConfig", () => {
   ])("rejects invalid input %#", (value, message) => {
     expect(() => validateConfig(value)).toThrow(message);
   });
+});
+
+describe("validateRepositoryConfig", () => {
+  test.each(["knowledge", "checkouts", "watch", "sources"])(
+    "rejects project-only setting %s",
+    (key) => {
+      expect(() => validateRepositoryConfig({ [key]: {} })).toThrow(
+        `${key} is only supported in the project-root Dokkurator config`,
+      );
+    },
+  );
 });

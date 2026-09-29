@@ -1,66 +1,68 @@
-import type { DokkuratorConfig, SourceConfig } from "./model.js";
+import type {
+  DokkuratorConfig,
+  RepositoryConfig,
+  SourceConfig,
+} from "./model.js";
 
-/**
- * Validates an untrusted value against the Dokkurator configuration model.
- *
- * @param value - Value produced by a YAML parser or another external source.
- * @returns The validated configuration. Missing `sources` are normalized to an
- * empty array; other defaults are applied later by the resolution functions.
- * @throws {Error} If the root structure, version, nested settings, source IDs,
- * source locations, or source overrides are invalid.
- */
-export function validateConfig(value: unknown): DokkuratorConfig {
-  const raw = record(value, "config");
-  if (raw.version !== undefined && raw.version !== 1)
-    throw new Error("Config version must be 1");
+const PROJECT_FIELDS = [
+  "version",
+  "knowledge",
+  "checkouts",
+  "watch",
+  "sources",
+];
+const REPOSITORY_FIELDS = ["documents", "doctypes"];
+const DOCUMENT_FIELDS = ["directory", "include", "exclude"];
+const DOCTYPE_FIELDS = ["directory"];
 
-  //first level documents and doctypes folders
-  validateContent(raw);
+/** Validates a complete project config after defaults and CLI options are merged. */
+export function validateConfig(
+  value: unknown,
+): DokkuratorConfig & { readonly sources: readonly SourceConfig[] } {
+  const raw = object(value, "config");
+  keys(raw, [...PROJECT_FIELDS, ...REPOSITORY_FIELDS], "config");
+  version(raw.version);
+  repositoryFields(raw, "config");
 
-  //knowledge config
-  optionalObject(raw.knowledge, "knowledge", (v) =>
-    optionalString(v.index, "knowledge.index"),
-  );
-
-  //checkouts config
-  optionalObject(raw.checkouts, "checkouts", (v) =>
-    optionalString(v.directory, "checkouts.directory"),
-  );
-
-  //watch config
-  optionalObject(raw.watch, "watch", (v) => {
+  optionalObject(raw.knowledge, "knowledge", (settings) => {
+    keys(settings, ["index"], "knowledge");
+    optionalString(settings.index, "knowledge.index");
+  });
+  optionalObject(raw.checkouts, "checkouts", (settings) => {
+    keys(settings, ["directory"], "checkouts");
+    optionalString(settings.directory, "checkouts.directory");
+  });
+  optionalObject(raw.watch, "watch", (settings) => {
+    keys(settings, ["debounce"], "watch");
     if (
-      v.debounce !== undefined &&
-      (!Number.isSafeInteger(v.debounce) || Number(v.debounce) < 1)
+      settings.debounce !== undefined &&
+      (!Number.isSafeInteger(settings.debounce) ||
+        Number(settings.debounce) < 1)
     )
       throw new Error("watch.debounce must be a positive integer");
   });
 
-  //config of sources
   const sources = raw.sources ?? [];
   if (!Array.isArray(sources)) throw new Error("sources must be an array");
   const ids = new Set<string>();
-  const parsed = sources.map((item, index) => {
-    //single source configuration
-    const source = record(item, `sources[${index}]`);
-
-    //validate source id
+  const parsed = sources.map((value, index): SourceConfig => {
+    const source = object(value, `sources[${index}]`);
+    keys(source, ["id", "path", "remote", "config"], `sources[${index}]`);
+    if (source.config !== undefined)
+      throw new Error(
+        `sources[${index}].config is no longer supported; configure documents and doctypes in the repository config`,
+      );
     if (
       typeof source.id !== "string" ||
       !/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/u.test(source.id)
     )
       throw new Error(`sources[${index}].id must be safe`);
-
-    //validate source path
     optionalString(source.path, `sources[${index}].path`);
-    //validate source remote
-    optionalObject(source.remote, `sources[${index}].remote`, (v) => {
-      requiredString(v.url, "remote.url");
-      optionalString(v.branch, "remote.branch");
+    optionalObject(source.remote, `sources[${index}].remote`, (remote) => {
+      keys(remote, ["url", "branch"], `sources[${index}].remote`);
+      string(remote.url, "remote.url");
+      optionalString(remote.branch, "remote.branch");
     });
-
-    //validate source config
-    optionalObject(source.config, `sources[${index}].config`, validateContent);
     if (source.path === undefined && source.remote === undefined)
       throw new Error(`Source ${source.id} requires path or remote`);
     if (ids.has(source.id))
@@ -68,49 +70,85 @@ export function validateConfig(value: unknown): DokkuratorConfig {
     ids.add(source.id);
     return source as unknown as SourceConfig;
   });
+
   return { ...(raw as unknown as DokkuratorConfig), sources: parsed };
 }
 
-//validate documents and docType folders
-function validateContent(value: Record<string, unknown>): void {
-  //validate documents folder
-  optionalObject(value.documents, "documents", (v) => {
-    optionalString(v.directory, "documents.directory");
-    optionalStrings(v.include, "documents.include");
-    optionalStrings(v.exclude, "documents.exclude");
-  });
-
-  //validate doctypes folder
-  optionalObject(value.doctypes, "doctypes", (v) =>
-    optionalString(v.directory, "doctypes.directory"),
-  );
+/** Validates repository-only settings loaded from a source repository. */
+export function validateRepositoryConfig(value: unknown): RepositoryConfig {
+  const raw = object(value, "repository config");
+  for (const key of Object.keys(raw)) {
+    if (REPOSITORY_FIELDS.includes(key)) continue;
+    if (PROJECT_FIELDS.includes(key))
+      throw new Error(
+        `${key} is only supported in the project-root Dokkurator config`,
+      );
+    throw new Error(`repository config.${key} is not supported`);
+  }
+  version(raw.version);
+  repositoryFields(raw, "repository config");
+  return raw as RepositoryConfig;
 }
 
-//helper
-function record(v: unknown, name: string): Record<string, unknown> {
-  if (v === null || typeof v !== "object" || Array.isArray(v))
-    throw new Error(`${name} must be an object`);
-  return v as Record<string, unknown>;
-}
-function optionalObject(
-  v: unknown,
-  name: string,
-  check: (v: Record<string, unknown>) => void,
+function repositoryFields(
+  value: Record<string, unknown>,
+  prefix: string,
 ): void {
-  if (v === undefined) return;
-  check(record(v, name));
+  optionalObject(value.documents, `${prefix}.documents`, (documents) => {
+    keys(documents, DOCUMENT_FIELDS, `${prefix}.documents`);
+    optionalString(documents.directory, "documents.directory");
+    optionalStrings(documents.include, "documents.include");
+    optionalStrings(documents.exclude, "documents.exclude");
+  });
+  optionalObject(value.doctypes, `${prefix}.doctypes`, (doctypes) => {
+    keys(doctypes, DOCTYPE_FIELDS, `${prefix}.doctypes`);
+    optionalString(doctypes.directory, "doctypes.directory");
+  });
 }
-function optionalString(v: unknown, name: string): void {
-  if (v !== undefined) requiredString(v, name);
+
+function object(value: unknown, label: string): Record<string, unknown> {
+  if (value === null || typeof value !== "object" || Array.isArray(value))
+    throw new Error(`${label} must be an object`);
+  return value as Record<string, unknown>;
 }
-function requiredString(v: unknown, name: string): void {
-  if (typeof v !== "string" || v.trim() === "")
-    throw new Error(`${name} must be a non-empty string`);
+
+function optionalObject(
+  value: unknown,
+  label: string,
+  validate: (value: Record<string, unknown>) => void,
+): void {
+  if (value !== undefined) validate(object(value, label));
 }
-function optionalStrings(v: unknown, name: string): void {
+
+function keys(
+  value: Record<string, unknown>,
+  allowed: readonly string[],
+  label: string,
+): void {
+  for (const key of Object.keys(value))
+    if (!allowed.includes(key))
+      throw new Error(`${label}.${key} is not supported`);
+}
+
+function version(value: unknown): void {
+  if (value !== undefined && value !== 1)
+    throw new Error("Config version must be 1");
+}
+
+function string(value: unknown, label: string): void {
+  if (typeof value !== "string" || value.trim() === "")
+    throw new Error(`${label} must be a non-empty string`);
+}
+
+function optionalString(value: unknown, label: string): void {
+  if (value !== undefined) string(value, label);
+}
+
+function optionalStrings(value: unknown, label: string): void {
   if (
-    v !== undefined &&
-    (!Array.isArray(v) || v.some((x) => typeof x !== "string" || x === ""))
+    value !== undefined &&
+    (!Array.isArray(value) ||
+      value.some((item) => typeof item !== "string" || item === ""))
   )
-    throw new Error(`${name} must be an array of strings`);
+    throw new Error(`${label} must be an array of strings`);
 }

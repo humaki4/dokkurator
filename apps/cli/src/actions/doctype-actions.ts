@@ -3,9 +3,9 @@ import {
   loadDocTypes,
   loadDocuments,
 } from "@dokkurator/doctype";
-import { type ActiveConfig } from "@dokkurator/config";
+import type { ResolvedConfig } from "@dokkurator/config";
 
-export async function inspectDocTypes(active: ActiveConfig) {
+export async function inspectDocTypes(active: ResolvedConfig) {
   return Promise.all(
     active.sources.map(async (source) => {
       return {
@@ -19,7 +19,7 @@ export async function inspectDocTypes(active: ActiveConfig) {
   );
 }
 
-export async function inspectDocuments(active: ActiveConfig) {
+export async function inspectDocuments(active: ResolvedConfig) {
   return Promise.all(
     active.sources.map(async (source) => {
       return {

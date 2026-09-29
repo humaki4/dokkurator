@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import type { ActiveConfig } from "@dokkurator/config";
+import type { ResolvedConfig } from "@dokkurator/config";
 import { createConfiguredSource, type SourceDiff } from "@dokkurator/doctype";
 import {
   calculateDocumentDiff,
@@ -10,7 +10,7 @@ import {
 import { syncSource, type SyncSourceResult } from "../sync-source.js";
 
 export async function indexSources(
-  active: ActiveConfig,
+  active: ResolvedConfig,
 ): Promise<readonly { sourceId: string; result: SyncSourceResult }[]> {
   const results = [];
   for (const source of active.sources)
@@ -22,7 +22,7 @@ export async function indexSources(
 }
 
 export async function diffSources(
-  active: ActiveConfig,
+  active: ResolvedConfig,
 ): Promise<readonly { sourceId: string; diff: SourceDiff }[]> {
   const filename = active.knowledge.index;
   const index = existsSync(filename)
@@ -49,7 +49,7 @@ export async function diffSources(
 }
 
 export async function searchIndex(
-  active: ActiveConfig,
+  active: ResolvedConfig,
   query: string,
   limit: number,
 ): Promise<readonly SearchHit[]> {

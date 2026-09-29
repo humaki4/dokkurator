@@ -1,5 +1,4 @@
-import { join } from "node:path";
-import type { ActiveConfig } from "@dokkurator/config";
+import type { ResolvedConfig } from "@dokkurator/config";
 import { beforeEach, expect, test, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -23,11 +22,11 @@ beforeEach(() => vi.clearAllMocks());
 
 test("initially syncs and watches resolved active sources", async () => {
   const root = "/project/docs";
-  const active: ActiveConfig = {
-    loaded: {
-      projectRoot: "/project",
-      filename: join("/project", ".dokkurator", "config.yaml"),
-      config: { sources: [{ id: "docs", path: "docs" }] },
+  const active: ResolvedConfig = {
+    root: "/project",
+    repository: {
+      documents: { directory: "docs", include: ["**/*.md"], exclude: [] },
+      doctypes: { directory: "types" },
     },
     sources: [
       {

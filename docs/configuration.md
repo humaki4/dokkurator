@@ -1,19 +1,13 @@
 # Dokkurator configuration
 
-Dokkurator uses `.dokkurator/config.yaml`. The same format is used at two
-levels: the workspace config selects repositories and operational settings;
 each repository can describe its own documents and DocTypes.
+Dokkurator uses `.dokkurator/config.yaml`. The project-root file contains
+project-wide settings and selects repositories. A repository's own config file
+contains only its document and DocType settings. The root file may also contain
+`documents` and `doctypes` when the project root itself is a repository.
 
 ```yaml
 version: 1
-
-documents:
-  directory: docs
-  include: ["**/*.md"]
-  exclude: ["drafts/**", "**/*.generated.md"]
-
-doctypes:
-  directory: _dokkurator/.doctypes
 
 knowledge:
   index: .dokkurator/index.db
@@ -25,36 +19,46 @@ watch:
   debounce: 300
 
 sources:
-  - id: application
-    path: ../application
+  - id: project
+    path: .
   - id: handbook
     remote:
       url: git@github.com:example/handbook.git
       branch: main
-    config:
-      documents:
-        directory: published
+```
+
+Repository-local config in `../application/.dokkurator/config.yaml` or
+`<checkout>/.dokkurator/config.yaml` can set `documents` and `doctypes`:
+
+```yaml
+documents:
+  directory: docs
+  include: ["**/*.md"]
+  exclude: ["drafts/**", "**/*.generated.md"]
+
+doctypes:
+  directory: _dokkurator/.doctypes
 ```
 
 ## Scope and paths
 
 `knowledge.index`, `checkouts.directory`, and source `path` values are
-relative to the workspace root. Document and DocType directories and patterns
-are relative to the corresponding repository root. A remote source without a
-path is checked out below `checkouts.directory/<source-id>`.
+relative to the project root. Document and DocType directories and patterns
+are relative to their repository root. A remote source without a path is
+checked out below `checkouts.directory/<source-id>`.
 
 ## Resolution order
 
-For every source, Dokkurator resolves values in this order:
+For repository settings, Dokkurator resolves values in this order:
 
 1. built-in defaults;
-2. workspace content defaults;
-3. the repository's own `.dokkurator/config.yaml`;
-4. the source's `config` override in the workspace;
-5. an explicit CLI option.
+2. the active repository's `.dokkurator/config.yaml`;
+3. an explicit CLI option.
 
-Exclude patterns from workspace, repository, and source overrides are combined.
-Other values use the most specific configured value.
+For project-wide settings, the root config is resolved between the built-in
+defaults and CLI options. Repository settings from the project-root file apply
+only when that root is itself the active repository. More-specific values
+replace defaults; exclude patterns are not implicitly combined.
 
 ## Defaults
 
@@ -69,14 +73,14 @@ Other values use the most specific configured value.
 | `watch.debounce`      | `300` ms                                                            |
 
 Include and exclude entries are glob patterns. An exclusion wins over an
-inclusion. Repository configurations may add exclusions but cannot remove
-workspace exclusions.
+inclusion.
 
 ## Local package CLIs
 
-`dokkurator-doctype` and `dokkurator-knowledge` search upward for the same
-configuration file and use its document, DocType, and index settings. Their
-command-line options and environment variables remain temporary overrides.
+`dokkurator-doctype` and `dokkurator-knowledge` search upward for the project
+config and use the active repository's document/DocType settings. The Knowledge
+CLI also uses the project `knowledge.index`. Command-line options and supported
+environment variables are temporary overrides.
 
 ## Credentials
 

@@ -5,7 +5,7 @@ import {
   indexSources,
   searchIndex,
 } from "../actions/knowledge-actions.js";
-import { currentActiveConfig, type ConfirmCheckout } from "../project.js";
+import { prepareConfig, type ConfirmCheckout } from "../project.js";
 import { positiveInteger } from "./options.js";
 
 export function addKnowledgeCommands(
@@ -22,7 +22,7 @@ export function addKnowledgeCommands(
         sourceId: string | undefined,
         options: { documentsDirectory?: string; index?: string },
       ) => {
-        const active = await currentActiveConfig(
+        const active = await prepareConfig(
           command.opts<{ project: string }>().project,
           { sourceId, ...options },
           confirmCheckout,
@@ -44,7 +44,7 @@ export function addKnowledgeCommands(
         sourceId: string | undefined,
         options: { documentsDirectory?: string; index?: string },
       ) => {
-        const active = await currentActiveConfig(
+        const active = await prepareConfig(
           command.opts<{ project: string }>().project,
           { sourceId, ...options },
           confirmCheckout,
@@ -64,7 +64,7 @@ export function addKnowledgeCommands(
     .option("--index <file>", "SQLite index file")
     .action(
       async (parts: string[], options: { limit: number; index?: string }) => {
-        const active = await currentActiveConfig(
+        const active = await prepareConfig(
           command.opts<{ project: string }>().project,
           {
             includeSources: false,

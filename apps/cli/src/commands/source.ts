@@ -6,7 +6,6 @@ import {
   removeSource,
 } from "../actions/source-actions.js";
 import { ask, confirm } from "../prompts.js";
-import { currentConfig } from "../project.js";
 
 export function addSourceCommands(
   command: Command,
@@ -20,7 +19,11 @@ export function addSourceCommands(
     .command("list")
     .option("--json", "output JSON")
     .action(async ({ json }: { json?: boolean }) => {
-      listSources(await currentConfig(command), json === true, writeOut);
+      await listSources(
+        command.opts<{ project: string }>().project,
+        json === true,
+        writeOut,
+      );
     });
 
   source
@@ -34,7 +37,7 @@ export function addSourceCommands(
         options: { id?: string; remote?: string; branch?: string },
       ) => {
         const item = await addSource(
-          await currentConfig(command),
+          command.opts<{ project: string }>().project,
           { path, ...options },
           { ask },
         );
@@ -52,7 +55,7 @@ export function addSourceCommands(
         options: { yes?: boolean; keepIndex?: boolean },
       ) => {
         const result = await removeSource(
-          await currentConfig(command),
+          command.opts<{ project: string }>().project,
           { id, ...options },
           { ask, confirm },
         );

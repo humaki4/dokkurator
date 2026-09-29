@@ -1,6 +1,6 @@
 import { createConfiguredSource } from "@dokkurator/doctype";
 import { indexDocumentChanges, SQLiteIndex } from "@dokkurator/knowledge";
-import type { ActiveSourceConfig } from "@dokkurator/config";
+import type { ResolvedSource } from "@dokkurator/config";
 
 export interface SyncSourceResult {
   readonly indexedDocuments: number;
@@ -8,7 +8,7 @@ export interface SyncSourceResult {
 }
 
 export async function syncSource(
-  source: ActiveSourceConfig,
+  source: ResolvedSource,
   indexFilename: string,
   updateRemote = true,
 ): Promise<SyncSourceResult> {

@@ -4,7 +4,7 @@ import {
   inspectDocTypes,
   inspectDocuments,
 } from "../actions/doctype-actions.js";
-import { currentActiveConfig, type ConfirmCheckout } from "../project.js";
+import { prepareConfig, type ConfirmCheckout } from "../project.js";
 
 export function addDocTypeCommands(
   command: Command,
@@ -22,7 +22,7 @@ export function addDocTypeCommands(
         sourceId: string | undefined,
         { directory }: { directory?: string },
       ) => {
-        const active = await currentActiveConfig(
+        const active = await prepareConfig(
           command.opts<{ project: string }>().project,
           { sourceId, doctypesDirectory: directory },
           confirmCheckout,
@@ -40,7 +40,7 @@ export function addDocTypeCommands(
         sourceId: string | undefined,
         { directory }: { directory?: string },
       ) => {
-        const active = await currentActiveConfig(
+        const active = await prepareConfig(
           command.opts<{ project: string }>().project,
           { sourceId, documentsDirectory: directory },
           confirmCheckout,

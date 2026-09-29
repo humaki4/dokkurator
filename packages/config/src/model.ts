@@ -1,72 +1,70 @@
-//TODO: hier sind nun viele Types, die gar nicht mehr alle aktiv verwendet werden.
-//Überarbeiten und ggf. Synchroniereen!!
+type DocumentsConfig = {
+  readonly directory?: string;
+  readonly include?: readonly string[];
+  readonly exclude?: readonly string[];
+};
 
-//---- TODO: alte Config. erkläre bitte. gefällt mir besser als das neue
-// ich verstehe nur nicht, was loadedConfig sein soll...
-// DokkuratorConfig -> RepositoryConfig (statt sourceConfig) -> DocTypeConfig & DocumentsConfig (statt ContentConfig) fände ich aber sprechender
+type DocTypeConfig = {
+  readonly directory?: string;
+};
 
-export interface ContentConfig {
-  readonly documents?: {
-    readonly directory?: string;
-    readonly include?: readonly string[];
-    readonly exclude?: readonly string[];
-  };
-  readonly doctypes?: { readonly directory?: string };
-}
-export interface SourceConfig {
+export type SourceConfig = {
   readonly id: string;
   readonly path?: string;
   readonly remote?: { readonly url: string; readonly branch?: string };
-  readonly config?: ContentConfig;
-}
-export interface DokkuratorConfig extends ContentConfig {
+};
+
+/** Project config; documents and doctypes also configure the root repository. */
+export type DokkuratorConfig = {
   readonly version?: 1;
+  readonly documents?: DocumentsConfig;
+  readonly doctypes?: DocTypeConfig;
   readonly knowledge?: { readonly index?: string };
   readonly checkouts?: { readonly directory?: string };
   readonly watch?: { readonly debounce?: number };
-  readonly sources: readonly SourceConfig[];
+  readonly sources?: readonly SourceConfig[];
+};
 
-  //readonly documents: readonly DocumentsConfig[];
-}
-export interface LoadedConfig {
-  readonly filename: string;
-  readonly projectRoot: string;
-  readonly config: DokkuratorConfig;
-}
-
-//---- Active configuration types ----
-export interface EffectiveContentConfig {
-  readonly documents: {
-    readonly directory: string;
-    readonly include: readonly string[];
-    readonly exclude: readonly string[];
-  };
-  readonly doctypes: { readonly directory: string };
+/** All settings that may override values loaded from config files. */
+export interface ConfigOptions {
+  readonly root: string;
+  readonly sourceId?: string;
+  readonly includeSources?: boolean;
+  readonly index?: string;
+  readonly documentsDirectory?: string;
+  readonly include?: readonly string[];
+  readonly exclude?: readonly string[];
+  readonly doctypesDirectory?: string;
+  readonly debounce?: number;
 }
 
-export interface ResolvedSourceConfig {
+export type ResolvedSource = {
   readonly id: string;
   readonly root: string;
   readonly remote?: { readonly url: string; readonly branch?: string };
-}
+  readonly documents: Required<DocumentsConfig>;
+  readonly doctypes: Required<DocTypeConfig>;
+};
 
-export interface ActiveSourceConfig extends ResolvedSourceConfig {
-  readonly documents: EffectiveContentConfig["documents"];
-  readonly doctypes: EffectiveContentConfig["doctypes"];
-}
-
-export interface ActiveConfig {
-  readonly loaded: LoadedConfig;
-  readonly sources: readonly ActiveSourceConfig[];
+/** Resolved values for one command invocation; root settings stay separate. */
+export interface ResolvedConfig {
+  readonly root: string;
+  readonly repository: {
+    readonly documents: Required<DocumentsConfig>;
+    readonly doctypes: Required<DocTypeConfig>;
+  };
+  readonly sources: readonly ResolvedSource[];
   readonly knowledge: { readonly index: string };
   readonly watch: { readonly debounce: number };
 }
 
-export interface ActiveConfigOptions {
-  readonly includeSources?: boolean;
-  readonly sourceId?: string;
-  readonly index?: string;
-  readonly documentsDirectory?: string;
-  readonly doctypesDirectory?: string;
-  readonly debounce?: number;
-}
+/** Internal parsed file with its location, never returned by the public API. */
+export type LoadedConfig = {
+  readonly filename: string;
+  readonly projectRoot: string;
+  readonly config: DokkuratorConfig & {
+    readonly sources: readonly SourceConfig[];
+  };
+};
+
+export type RepositoryConfig = Pick<DokkuratorConfig, "documents" | "doctypes">;

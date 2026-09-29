@@ -1,11 +1,11 @@
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { resolveActiveConfig, type LoadedConfig } from "@dokkurator/config";
+import { resolveActiveConfig } from "@dokkurator/config";
 import { describe, expect, test } from "vitest";
 import { diffSources, indexSources, searchIndex } from "./knowledge-actions.js";
 
-async function fixture(): Promise<{ loaded: LoadedConfig; docs: string }> {
+async function fixture(): Promise<{ root: string; docs: string }> {
   const projectRoot = await mkdtemp(join(tmpdir(), "dokkurator-diff-search-"));
   const docs = join(projectRoot, "repo", "docs");
   await mkdir(docs, { recursive: true });
@@ -17,24 +17,25 @@ async function fixture(): Promise<{ loaded: LoadedConfig; docs: string }> {
     join(docs, "second.md"),
     "---\nstatus: draft\n---\n# Sessions\nAuthentication cookies\n",
   );
+  await mkdir(join(projectRoot, ".dokkurator"), { recursive: true });
+  await writeFile(
+    join(projectRoot, ".dokkurator/config.yaml"),
+    "sources:\n  - id: docs\n    path: repo\n",
+  );
   return {
     docs,
-    loaded: {
-      projectRoot,
-      filename: join(projectRoot, ".dokkurator", "config.yaml"),
-      config: { sources: [{ id: "docs", path: "repo" }] },
-    },
+    root: projectRoot,
   };
 }
 
 describe("diffSources", () => {
   test("reports added, modified and deleted documents without mutating the index", async () => {
-    const { loaded, docs } = await fixture();
+    const { root, docs } = await fixture();
     const options = {
       index: ".dokkurator/index.db",
       documentsDirectory: "docs",
     };
-    await indexSources(await resolveActiveConfig(loaded, options));
+    await indexSources(await resolveActiveConfig({ root, ...options }));
     await writeFile(join(docs, "first.md"), "# Changed\n");
     await rm(join(docs, "second.md"));
     await writeFile(join(docs, "third.md"), "# Added\n");
@@ -44,7 +45,8 @@ describe("diffSources", () => {
       { type: "deleted", path: "docs/second.md" },
       { type: "added", path: "docs/third.md" },
     ];
-    const active = await resolveActiveConfig(loaded, {
+    const active = await resolveActiveConfig({
+      root,
       sourceId: "docs",
       ...options,
     });
@@ -60,9 +62,10 @@ describe("diffSources", () => {
   });
 
   test("rejects an unknown source id", async () => {
-    const { loaded } = await fixture();
+    const { root } = await fixture();
     await expect(
-      resolveActiveConfig(loaded, {
+      resolveActiveConfig({
+        root,
         sourceId: "missing",
         index: "index.db",
         documentsDirectory: "docs",
@@ -73,9 +76,10 @@ describe("diffSources", () => {
 
 describe("searchIndex", () => {
   test("supports metadata expressions and result limits", async () => {
-    const { loaded } = await fixture();
+    const { root } = await fixture();
     const index = ".dokkurator/index.db";
-    const active = await resolveActiveConfig(loaded, {
+    const active = await resolveActiveConfig({
+      root,
       index,
       documentsDirectory: "docs",
     });
@@ -90,10 +94,14 @@ describe("searchIndex", () => {
   });
 
   test("rejects invalid search syntax", async () => {
-    const { loaded } = await fixture();
+    const { root } = await fixture();
     await expect(
       searchIndex(
-        await resolveActiveConfig(loaded, { index: "missing.db" }),
+        await resolveActiveConfig({
+          root,
+          includeSources: false,
+          index: "missing.db",
+        }),
         "status:",
         10,
       ),

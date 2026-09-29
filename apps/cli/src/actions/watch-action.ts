@@ -1,16 +1,13 @@
-import type { ActiveConfig, ActiveSourceConfig } from "@dokkurator/config";
+import type { ResolvedConfig, ResolvedSource } from "@dokkurator/config";
 import type { WriteOutput } from "../command.js";
 import { syncSource } from "../sync-source.js";
 import { watchPaths } from "../watch-runtime.js";
 
 export async function watchSources(
-  active: ActiveConfig,
+  active: ResolvedConfig,
   writeOut: WriteOutput,
 ): Promise<void> {
-  const synchronize = async (
-    source: ActiveSourceConfig,
-    updateRemote: boolean,
-  ) => {
+  const synchronize = async (source: ResolvedSource, updateRemote: boolean) => {
     const result = await syncSource(
       source,
       active.knowledge.index,

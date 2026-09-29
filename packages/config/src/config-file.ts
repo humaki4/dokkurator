@@ -2,8 +2,8 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { parse, stringify } from "yaml";
 import { CONFIG_DIRECTORY, CONFIG_FILENAME } from "./defaults.js";
-import type { LoadedConfig } from "./model.js";
-import { validateConfig } from "./validation.js";
+import type { LoadedConfig, RepositoryConfig, SourceConfig } from "./model.js";
+import { validateConfig, validateRepositoryConfig } from "./validation.js";
 /**
  * Loads and validates the Dokkurator configuration below a project root.
  *
@@ -28,6 +28,20 @@ export async function loadConfig(root: string): Promise<LoadedConfig> {
     throw error;
   }
 }
+
+/** Loads only repository-local settings from a non-root source. */
+export async function loadRepositoryConfig(
+  root: string,
+): Promise<RepositoryConfig> {
+  const filename = join(resolve(root), CONFIG_DIRECTORY, CONFIG_FILENAME);
+  try {
+    return validateRepositoryConfig(parse(await readFile(filename, "utf8")));
+  } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT")
+      return {};
+    throw error;
+  }
+}
 /**
  * Serializes and atomically persists a Dokkurator configuration.
  *
@@ -43,4 +57,27 @@ export async function saveConfig(value: LoadedConfig): Promise<void> {
   const temporary = `${value.filename}.tmp-${process.pid}`;
   await writeFile(temporary, stringify(value.config), "utf8");
   await rename(temporary, value.filename);
+}
+
+/** Returns source declarations without exposing the rest of the loaded file. */
+export async function readSources(
+  root: string,
+): Promise<readonly SourceConfig[]> {
+  return (await loadConfig(root)).config.sources;
+}
+
+/** Updates source declarations while preserving every other root setting. */
+export async function updateSources(
+  root: string,
+  update: (sources: readonly SourceConfig[]) => readonly SourceConfig[],
+): Promise<void> {
+  const loaded = await loadConfig(root);
+  const config = validateConfig({
+    ...loaded.config,
+    sources: update(loaded.config.sources),
+  });
+  await saveConfig({
+    ...loaded,
+    config,
+  });
 }

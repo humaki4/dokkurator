@@ -1,10 +1,7 @@
-import { Command } from "commander";
 import {
-  loadConfig,
   resolveActiveConfig,
-  type ActiveConfig,
-  type ActiveConfigOptions,
-  type LoadedConfig,
+  type ConfigOptions,
+  type ResolvedConfig,
 } from "@dokkurator/config";
 import {
   createConfiguredSource,
@@ -14,23 +11,12 @@ import { confirm } from "./prompts.js";
 
 export type ConfirmCheckout = (question: string) => Promise<boolean>;
 
-export async function currentConfig(command: Command): Promise<LoadedConfig> {
-  return loadConfig(command.opts<{ project: string }>().project);
-}
-
-//TODO: warum wird nicht direkt directory übergeben?
-//wenn nun tatsächlich createConfiguredSource überflüssig ist
-//kann im Code (wo diese Funktion verwendet wird)
-//eigentlich direkt resolveActiveConfig aufgerufen werden (die dann auch die currentConfig direkt selbst lädt.
-// dann kann dieser Teil hier weg!!.
-export async function currentActiveConfig(
+export async function prepareConfig(
   root: string,
-  options: ActiveConfigOptions = {},
+  options: Omit<ConfigOptions, "root"> = {},
   confirmCheckout: ConfirmCheckout = confirm,
-): Promise<ActiveConfig | undefined> {
-  //const loaded = await currentConfig(command);
-  const loaded = await loadConfig(root);
-  const active = await resolveActiveConfig(loaded, options);
+): Promise<ResolvedConfig | undefined> {
+  const active = await resolveActiveConfig({ root, ...options });
 
   for (const source of active.sources) {
     if (

@@ -109,7 +109,10 @@ function isIndexedDocument(
   include?: readonly string[],
   exclude?: readonly string[],
 ): boolean {
-  const directory = documentsDirectory.replace(/^\/+|\/+$/gu, "");
+  const directory =
+    documentsDirectory === "."
+      ? ""
+      : documentsDirectory.replace(/^(?:\.\/)+|^\/+|\/+$/gu, "");
   const belowDirectory =
     directory === "" || path === directory || path.startsWith(`${directory}/`);
   return (

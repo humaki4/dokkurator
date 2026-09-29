@@ -2,7 +2,7 @@ export const CONFIG_DIRECTORY = ".dokkurator";
 export const CONFIG_FILENAME = "config.yaml";
 export const DEFAULT_CONFIG = {
   documents: {
-    directory: "",
+    directory: ".",
     include: ["**/*.md"],
     exclude: [
       ".git/**",
