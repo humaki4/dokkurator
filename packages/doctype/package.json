@@ -25,10 +25,12 @@
     "start": "node dist/cli.js"
   },
   "dependencies": {
+    "@dokkurator/config": "workspace:*",
     "@types/mdast": "^4.0.4",
     "ajv": "^8.20.0",
     "commander": "^15.0.0",
     "mdast-util-to-string": "^4.0.0",
+    "minimatch": "^10.2.5",
     "remark-frontmatter": "^5.0.0",
     "remark-parse": "^11.0.0",
     "unified": "^11.0.5",

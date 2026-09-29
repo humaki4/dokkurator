@@ -34,8 +34,12 @@ export type {
 
 export {
   createLocalSource,
+  createConfiguredLocalSource,
+  createConfiguredSource,
+  createGitCheckoutSource,
   FileSystemSource,
   GitSource,
+  isGitRepositoryRoot,
   SourceNotFoundError,
 } from "./source-adapter/index.js";
 export type {
@@ -44,6 +48,8 @@ export type {
   GitFileStatus,
   GitSourceMetadata,
   GitSourceOptions,
+  GitCheckoutOptions,
+  LocalSourceOptions,
   ListOptions,
   ReadOptions,
   SourceAdapter,

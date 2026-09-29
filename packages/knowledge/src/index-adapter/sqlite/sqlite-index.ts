@@ -126,6 +126,22 @@ export class SQLiteIndex implements IncrementalKnowledgeIndex, Disposable {
     });
   }
 
+  /** Atomically removes a source checkpoint and every indexed document. */
+  async deleteSource(sourceId: string): Promise<void> {
+    await this.#transaction(async (transaction) => {
+      const documents = await transaction
+        .selectFrom("documents")
+        .select("id")
+        .where("source_id", "=", sourceId)
+        .execute();
+      for (const { id } of documents) await removeDocument(transaction, id);
+      await transaction
+        .deleteFrom("source_states")
+        .where("source_id", "=", sourceId)
+        .execute();
+    });
+  }
+
   async upsert(document: KnowledgeDocument): Promise<void> {
     await this.#transaction(async (transaction) => {
       const row = toDocumentRow(document);

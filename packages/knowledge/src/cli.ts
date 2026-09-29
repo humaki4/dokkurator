@@ -1,12 +1,20 @@
 #!/usr/bin/env node
 import { createCommand } from "./command.js";
+import { findProjectRoot, resolveActiveConfig } from "@dokkurator/config";
 
 try {
+  const root = findProjectRoot(process.env.INIT_CWD ?? process.cwd());
+  const active = await resolveActiveConfig({
+    root,
+    includeSources: false,
+    documentsDirectory: process.env.DOKKURATOR_DOCUMENTS_DIRECTORY,
+  });
   await createCommand(
     {},
     {
-      cwd: process.env.INIT_CWD ?? process.cwd(),
-      documentsDirectory: process.env.DOKKURATOR_DOCUMENTS_DIRECTORY,
+      cwd: root,
+      documentsDirectory: active.repository.documents.directory,
+      index: active.knowledge.index,
     },
   ).parseAsync(withoutPnpmArgumentSeparator(process.argv));
 } catch (error) {

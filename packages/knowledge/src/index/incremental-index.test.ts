@@ -30,12 +30,12 @@ test("indexes only changed documents and persists the new source state", async (
     filename: join(root, ".dokkurator", "index.db"),
   });
 
-  await indexDocumentChanges({ source, index });
+  await indexDocumentChanges({ source, index, documents: {} });
   await writeFile(join(root, "docs", "changed.md"), "# After\n");
   await writeFile(join(root, "docs", "added.md"), "# Added\n");
   await rm(join(root, "docs", "deleted.md"));
 
-  const result = await indexDocumentChanges({ source, index });
+  const result = await indexDocumentChanges({ source, index, documents: {} });
   expect(result.indexedDocuments).toBe(2);
   expect(result.removedDocuments).toBe(1);
   expect(result.diff.changes.map(({ type, path }) => ({ type, path }))).toEqual(
@@ -54,10 +54,10 @@ test("indexes only changed documents and persists the new source state", async (
     { path: "docs/added.md", content: "# Added\n" },
     { path: "docs/changed.md", content: "# After\n" },
   ]);
-  await expect(calculateDocumentDiff({ source, index })).resolves.toMatchObject(
-    {
-      changes: [],
-    },
-  );
+  await expect(
+    calculateDocumentDiff({ source, index, documents: {} }),
+  ).resolves.toMatchObject({
+    changes: [],
+  });
   index.close();
 });

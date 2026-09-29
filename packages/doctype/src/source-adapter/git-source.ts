@@ -1,5 +1,6 @@
-import { readFile, stat } from "node:fs/promises";
-import { isAbsolute, relative, resolve, sep } from "node:path";
+import { existsSync } from "node:fs";
+import { mkdir, readFile, stat } from "node:fs/promises";
+import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
 import {
   simpleGit,
   type FileStatusResult,
@@ -27,6 +28,34 @@ import { diffFileStates } from "./source-diff.js";
 export interface GitSourceOptions {
   readonly root: string;
   readonly sourceId?: string;
+}
+
+export interface GitCheckoutOptions extends GitSourceOptions {
+  readonly url: string;
+  readonly branch?: string;
+  readonly update?: boolean;
+}
+
+/** Returns whether root itself is a Git repository, not merely inside one. */
+export async function isGitRepositoryRoot(root: string): Promise<boolean> {
+  if (!existsSync(root)) return false;
+  const git = simpleGit({ baseDir: resolve(root) });
+  if (!(await git.checkIsRepo())) return false;
+  return resolve(await git.revparse(["--show-toplevel"])) === resolve(root);
+}
+
+/** Clones or updates a managed checkout and exposes it as a Git source. */
+export async function createGitCheckoutSource({
+  root,
+  url,
+  branch,
+  sourceId,
+  update = true,
+}: GitCheckoutOptions): Promise<SourceAdapter> {
+  await mkdir(resolve(root), { recursive: true });
+  const source = new GitSource({ root, sourceId });
+  await source.checkout({ url, branch, update });
+  return source;
 }
 
 interface RepositoryContext {
@@ -175,6 +204,32 @@ export class GitSource implements SourceAdapter {
       state,
       changes: diffFileStates(before, after),
     };
+  }
+
+  async checkout({
+    update,
+    branch,
+    url,
+  }: {
+    update?: boolean;
+    branch?: string;
+    url: string;
+  }): Promise<void> {
+    if (await isGitRepositoryRoot(this.root)) {
+      if (update) {
+        await this.git.fetch("origin");
+        if (branch !== undefined) await this.git.checkout(branch);
+        if (branch === undefined) await this.git.pull("origin");
+        else await this.git.pull("origin", branch);
+      }
+      return;
+    }
+    await mkdir(dirname(this.root), { recursive: true });
+    await simpleGit().clone(
+      url,
+      this.root,
+      branch === undefined ? [] : ["--branch", branch],
+    );
   }
 
   private async readCommitted(

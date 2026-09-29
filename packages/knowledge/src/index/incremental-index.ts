@@ -12,17 +12,19 @@ import {
 import type { IncrementalKnowledgeIndex } from "../index-adapter/index.js";
 import { buildKnowledgeDocument } from "./documents.js";
 
-export interface CalculateDocumentDiffOptions extends DocumentConfig {
+export interface CalculateDocumentDiffOptions {
   readonly source: SourceAdapter;
   readonly index: Pick<IncrementalKnowledgeIndex, "getSourceState">;
+  readonly documents: DocumentConfig;
 }
 
-export interface IndexDocumentChangesOptions extends DocumentConfig {
+export interface IndexDocumentChangesOptions {
   readonly source: SourceAdapter;
   readonly index: Pick<
     IncrementalKnowledgeIndex,
     "getSourceState" | "applySourceUpdate"
   >;
+  readonly documents: DocumentConfig;
 }
 
 export interface IndexDocumentChangesResult {
@@ -35,9 +37,10 @@ export interface IndexDocumentChangesResult {
 export async function calculateDocumentDiff({
   source,
   index,
-  documentsDirectory,
-  excludeDirectories,
+  documents,
 }: CalculateDocumentDiffOptions): Promise<SourceDiff> {
+  const { documentsDirectory, excludeDirectories, include, exclude } =
+    documents;
   const sourceId = await source.getSourceId();
   const previous = await index.getSourceState(sourceId);
   const diff = await source.diff(previous, {
@@ -48,7 +51,13 @@ export async function calculateDocumentDiff({
   return {
     ...diff,
     changes: diff.changes.filter((change) =>
-      isIndexedDocument(change.path, documentsDirectory, excludeDirectories),
+      isIndexedDocument(
+        change.path,
+        documentsDirectory,
+        excludeDirectories,
+        include,
+        exclude,
+      ),
     ),
   };
 }
@@ -97,9 +106,17 @@ function isIndexedDocument(
   path: string,
   documentsDirectory = DEFAULT_DOCUMENTS_DIRECTORY,
   excludeDirectories: readonly SourceId[] = DEFAULT_EXCLUDED_DOCUMENT_DIRECTORIES,
+  include?: readonly string[],
+  exclude?: readonly string[],
 ): boolean {
-  const directory = documentsDirectory.replace(/^\/+|\/+$/gu, "");
+  const directory =
+    documentsDirectory === "."
+      ? ""
+      : documentsDirectory.replace(/^(?:\.\/)+|^\/+|\/+$/gu, "");
   const belowDirectory =
     directory === "" || path === directory || path.startsWith(`${directory}/`);
-  return belowDirectory && isDocumentationFile(path, excludeDirectories);
+  return (
+    belowDirectory &&
+    isDocumentationFile(path, excludeDirectories, include, exclude)
+  );
 }

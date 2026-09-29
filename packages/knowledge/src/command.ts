@@ -21,6 +21,7 @@ export interface CommandOutput {
 export interface CommandEnvironment {
   cwd?: string;
   documentsDirectory?: string;
+  index?: string;
 }
 
 export function createCommand(
@@ -46,7 +47,7 @@ export function createCommand(
     .option(
       "--index <file>",
       "SQLite index file, relative to the source root",
-      ".dokkurator/index.db",
+      environment.index ?? ".dokkurator/index.db",
     )
     .showHelpAfterError();
 
@@ -73,7 +74,7 @@ export function createCommand(
         const result = await indexDocumentChanges({
           source,
           index,
-          documentsDirectory: options.documentsDirectory,
+          documents: { documentsDirectory: options.documentsDirectory },
         });
         writeOut(
           `${JSON.stringify(
@@ -127,7 +128,7 @@ export function createCommand(
           const diff = await calculateDocumentDiff({
             source,
             index: index ?? { getSourceState: async () => undefined },
-            documentsDirectory: options.documentsDirectory,
+            documents: { documentsDirectory: options.documentsDirectory },
           });
           writeOut(
             diffOptions.format === "json"

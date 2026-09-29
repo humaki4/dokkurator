@@ -1,11 +1,13 @@
 #!/usr/bin/env node
-import type { DocType } from "@dokkurator/doctype";
-import { validateDocument } from "@dokkurator/validator";
+import { createCommand } from "./command.js";
 
-const docType: DocType = {
-  name: "example",
-  requiredFields: ["title", "status"],
-};
-const document = { title: "Dokkurator smoke test" };
-
-console.log(JSON.stringify(validateDocument(docType, document), null, 2));
+try {
+  await createCommand(
+    {},
+    { cwd: process.env.INIT_CWD ?? process.cwd() },
+  ).parseAsync(process.argv);
+} catch (error) {
+  const message = error instanceof Error ? error.message : String(error);
+  process.stderr.write(`error: ${message}\n`);
+  process.exitCode = 1;
+}

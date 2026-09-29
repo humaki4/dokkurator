@@ -63,4 +63,5 @@ export interface SourceIndexUpdate {
 export interface IncrementalKnowledgeIndex extends KnowledgeIndex {
   getSourceState(sourceId: string): Promise<SourceState | undefined>;
   applySourceUpdate(update: SourceIndexUpdate): Promise<void>;
+  deleteSource(sourceId: string): Promise<void>;
 }

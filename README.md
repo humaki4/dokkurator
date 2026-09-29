@@ -14,6 +14,8 @@ The goal is to make distributed documentation easier to maintain, search, analyz
 This repository currently serves both as the implementation workspace and as documentation of the project's architecture, design decisions and planned development.
 
 Further documentation and concepts can be found in [docs-folder](./docs)
+The project configuration format is documented in
+[docs/configuration.md](./docs/configuration.md).
 
 ## Project structure
 
@@ -48,6 +50,8 @@ Dokkurator is organized as a monorepo containing reusable libraries and applicat
 
 - **@dokkurator/cli**
   Command-line interface for using Dokkurator functionality locally, in CI pipelines or from automated tooling.
+  See the [CLI README](./apps/cli/README.md) and the
+  [command reference](./apps/cli/docs/commands.md) for configuration and usage.
 
 - **@dokkurator/hub**
   A prototypical server application built on top of the Dokkurator libraries. It collects documentation from distributed repositories and provides centralized access, search and navigation across the resulting knowledge base.
