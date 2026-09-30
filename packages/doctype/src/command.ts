@@ -1,11 +1,10 @@
 import { Command } from "commander";
 import { createLocalSource } from "./source-adapter/index.js";
+import { DEFAULT_DOCTYPES_DIRECTORY, loadDocTypes } from "./docTypes/index.js";
 import {
   DEFAULT_DOCUMENTS_DIRECTORY,
-  DEFAULT_DOCTYPES_DIRECTORY,
   loadDocuments,
-  loadDocTypes,
-} from "./index.js";
+} from "./documents/index.js";
 
 export interface CommandOutput {
   writeOut?: (text: string) => void;
