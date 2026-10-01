@@ -118,6 +118,11 @@ describe("SQLiteIndex", () => {
     await expect(
       index.search({ text: "authentication", types: ["guide"] }),
     ).resolves.toHaveLength(1);
+    await expect(
+      index.search({ text: "authentication", sourceId: "handbook" }),
+    ).resolves.toMatchObject([
+      { document: { source: { sourceId: "handbook" } } },
+    ]);
     index.close();
   });
 

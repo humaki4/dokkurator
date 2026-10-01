@@ -24,5 +24,8 @@
     "@dokkurator/config": "workspace:*",
     "@dokkurator/knowledge": "workspace:*",
     "@dokkurator/loader": "workspace:*"
+  },
+  "devDependencies": {
+    "simple-git": "^3.36.0"
   }
 }

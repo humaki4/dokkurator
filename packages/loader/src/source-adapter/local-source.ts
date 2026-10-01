@@ -8,6 +8,9 @@ import {
 } from "./git-source.js";
 import type { SourceAdapter } from "./source-adapter.js";
 
+/**
+ * @deprecatedCreates a local source adapter based on the given root directory.
+ */
 export async function createLocalSource(root: string): Promise<SourceAdapter> {
   return createConfiguredLocalSource({ root });
 }
