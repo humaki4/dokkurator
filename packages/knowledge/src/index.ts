@@ -9,6 +9,8 @@ export {
   parseSearchExpression,
   SearchQuerySyntaxError,
 } from "./search/search-query.js";
+export { searchKnowledge } from "./search/search.js";
+export type { KnowledgeSearchOptions } from "./search/search.js";
 export type {
   IndexDocumentsOptions,
   IndexDocumentsResult,
