@@ -1,4 +1,4 @@
-import type { DocType } from "@dokkurator/doctype";
+import type { DocType } from "@dokkurator/loader";
 
 export interface ValidationResult {
   valid: boolean;

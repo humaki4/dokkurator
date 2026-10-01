@@ -4,7 +4,7 @@ Core library for indexing a complete documentation directory into Dokkurator's
 derived Knowledge model.
 
 Knowledge consumes the public `ParsedDocument` model from
-`@dokkurator/doctype`. It does not read or parse Markdown itself and does not
+`@dokkurator/loader`. It does not read or parse Markdown itself and does not
 depend on DocType implementation details.
 
 ## Usage
@@ -39,7 +39,7 @@ combined.
 
 Consumers can import `SQLiteIndex`, `KnowledgeIndex`, and the document/query
 types from `@dokkurator/knowledge`. Source implementations are provided by
-`@dokkurator/doctype`; indexing accepts only DocType's generic `DocumentSource`
+`@dokkurator/loader`; indexing accepts only Loader's generic `DocumentSource`
 contract and does not depend on a concrete source adapter.
 
 ## CLI

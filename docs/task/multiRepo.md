@@ -22,13 +22,13 @@ ausschließlich in `.dokkurator/index.db`.
   Config und Benutzerinteraktion
   Source-Auswahl und Multi-Repo-Orchestrierung
           ↓
-@dokkurator/doctype          @dokkurator/knowledge
+@dokkurator/loader           @dokkurator/knowledge
   Source-Adapter              Index, Diff und Suche
   Dokumente parsen            eine Source pro API-Aufruf
 ```
 
 - `apps/cli` besitzt das Dokkurator-Projektmodell und lädt die YAML-Datei.
-- `@dokkurator/doctype` besitzt weiterhin alle Source-Adapter. Die zentrale CLI
+- `@dokkurator/loader` besitzt weiterhin alle Source-Adapter. Die zentrale CLI
   erzeugt darüber eine konfigurierte `SourceAdapter`-Instanz.
 - `@dokkurator/knowledge` kennt weder YAML noch Projektverzeichnisse und erhält
   pro Operation eine fertige Source.
@@ -117,7 +117,7 @@ Commander-Kommandos werden nicht zwischen Paketen verschachtelt. Geteilt werden
 fachliche Funktionen:
 
 ```ts
-// @dokkurator/doctype
+// @dokkurator/loader
 createConfiguredLocalSource({ root, sourceId });
 loadDocTypes(source, options);
 loadDocuments(source, options);

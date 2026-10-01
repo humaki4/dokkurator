@@ -1,5 +1,5 @@
 {
-  "name": "@dokkurator/doctype",
+  "name": "@dokkurator/loader",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -14,21 +14,15 @@
   "files": [
     "dist"
   ],
-  "bin": {
-    "dokkurator-doctype": "./dist/cli.js"
-  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.check.json",
     "test": "vitest run",
-    "lint": "eslint .",
-    "start": "node dist/cli.js"
+    "lint": "eslint ."
   },
   "dependencies": {
-    "@dokkurator/config": "workspace:*",
     "@types/mdast": "^4.0.4",
     "ajv": "^8.20.0",
-    "commander": "^15.0.0",
     "mdast-util-to-string": "^4.0.0",
     "minimatch": "^10.2.5",
     "remark-frontmatter": "^5.0.0",

@@ -1,4 +1,4 @@
-# @dokkurator/doctype
+# @dokkurator/loader
 
 Core library for loading and parsing Dokkurator DocTypes and Markdown
 documents.
@@ -18,8 +18,8 @@ are owned by DocType and exported from its package root.
 ## Usage
 
 ```ts
-import { loadDocTypes, loadDocuments } from "@dokkurator/doctype";
-import { FileSystemSource } from "@dokkurator/doctype";
+import { loadDocTypes, loadDocuments } from "@dokkurator/loader";
+import { FileSystemSource } from "@dokkurator/loader";
 
 const source = new FileSystemSource({ root: process.cwd() });
 

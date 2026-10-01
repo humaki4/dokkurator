@@ -1,7 +1,7 @@
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { FileSystemSource } from "@dokkurator/doctype";
+import { FileSystemSource } from "@dokkurator/loader";
 import { afterEach, expect, test } from "vitest";
 import { SQLiteIndex } from "../index-adapter/sqlite/sqlite-index.js";
 import {

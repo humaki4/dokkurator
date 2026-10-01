@@ -1,4 +1,4 @@
-import type { SourceState } from "@dokkurator/doctype";
+import type { SourceState } from "@dokkurator/loader";
 import type { KnowledgeDocument } from "./model.js";
 
 export type {

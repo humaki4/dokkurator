@@ -1,4 +1,4 @@
-import type { ParsedDocument } from "@dokkurator/doctype";
+import type { ParsedDocument } from "@dokkurator/loader";
 import type {
   KnowledgeDocument,
   SourceReference,

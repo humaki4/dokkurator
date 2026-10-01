@@ -4,7 +4,7 @@
 
 - Package boundaries are absolute. A package may consume another workspace
   package only through that dependency's public root package API (for example,
-  `@dokkurator/doctype` or `@dokkurator/knowledge`).
+  `@dokkurator/loader` or `@dokkurator/knowledge`).
 - Never import another package's internal files, source directories, generated
   output, or implementation paths. Do not add package export subpaths to evade
   this rule.
@@ -16,7 +16,7 @@
 
 ## Adapter ownership
 
-- Source adapter contracts and implementations belong to `@dokkurator/doctype`.
+- Source adapter contracts and implementations belong to `@dokkurator/loader`.
   This includes `SourceAdapter`, the minimal `DocumentSource` contract,
   `FileSystemSource`, `GitSource`, `createLocalSource`, and normalized source
   metadata. DocType owns their public API and runtime dependencies.

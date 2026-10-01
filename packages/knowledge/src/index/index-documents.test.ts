@@ -2,7 +2,7 @@ import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { KnowledgeDocument } from "../index-adapter/model.js";
-import { FileSystemSource } from "@dokkurator/doctype";
+import { FileSystemSource } from "@dokkurator/loader";
 import { afterEach, expect, test, vi } from "vitest";
 import { indexDocuments } from "./index-documents.js";
 

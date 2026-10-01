@@ -1,4 +1,4 @@
-import type { Heading, Link, Reference } from "@dokkurator/doctype";
+import type { Heading, Link, Reference } from "@dokkurator/loader";
 
 export type DocumentId = string;
 

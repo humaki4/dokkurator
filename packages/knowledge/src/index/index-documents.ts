@@ -2,7 +2,7 @@ import {
   loadDocuments,
   type DocumentConfig,
   type DocumentSource,
-} from "@dokkurator/doctype";
+} from "@dokkurator/loader";
 import type { KnowledgeIndex } from "../index-adapter/index.js";
 import { buildKnowledgeDocuments } from "./documents.js";
 

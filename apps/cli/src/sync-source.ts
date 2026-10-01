@@ -1,4 +1,4 @@
-import { createConfiguredSource } from "@dokkurator/doctype";
+import { createConfiguredSource } from "@dokkurator/loader";
 import { indexDocumentChanges, SQLiteIndex } from "@dokkurator/knowledge";
 import type { ResolvedSource } from "@dokkurator/config";
 

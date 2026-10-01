@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import type { ResolvedConfig } from "@dokkurator/config";
-import { createConfiguredSource, type SourceDiff } from "@dokkurator/doctype";
+import { createConfiguredSource, type SourceDiff } from "@dokkurator/loader";
 import {
   calculateDocumentDiff,
   parseSearchExpression,

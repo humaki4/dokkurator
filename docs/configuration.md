@@ -75,12 +75,12 @@ replace defaults; exclude patterns are not implicitly combined.
 Include and exclude entries are glob patterns. An exclusion wins over an
 inclusion.
 
-## Local package CLIs
+## Local package CLI
 
-`dokkurator-doctype` and `dokkurator-knowledge` search upward for the project
-config and use the active repository's document/DocType settings. The Knowledge
-CLI also uses the project `knowledge.index`. Command-line options and supported
-environment variables are temporary overrides.
+`dokkurator-knowledge` searches upward for the project config and uses the
+active repository's document settings together with the project
+`knowledge.index`. Command-line options and supported environment variables are
+temporary overrides. Loader is a library package and does not expose a CLI.
 
 ## Credentials
 

@@ -63,12 +63,12 @@ importers:
       '@dokkurator/config':
         specifier: workspace:*
         version: link:../../packages/config
-      '@dokkurator/doctype':
-        specifier: workspace:*
-        version: link:../../packages/doctype
       '@dokkurator/knowledge':
         specifier: workspace:*
         version: link:../../packages/knowledge
+      '@dokkurator/loader':
+        specifier: workspace:*
+        version: link:../../packages/loader
       commander:
         specifier: ^15.0.0
         version: 15.0.0
@@ -140,20 +140,33 @@ importers:
         specifier: ^2.9.1
         version: 2.9.1
 
-  packages/doctype:
+  packages/knowledge:
     dependencies:
       '@dokkurator/config':
         specifier: workspace:*
         version: link:../config
+      '@dokkurator/loader':
+        specifier: workspace:*
+        version: link:../loader
+      commander:
+        specifier: ^15.0.0
+        version: 15.0.0
+      kysely:
+        specifier: ^0.29.6
+        version: 0.29.6
+    devDependencies:
+      peggy:
+        specifier: ^5.1.0
+        version: 5.1.0
+
+  packages/loader:
+    dependencies:
       '@types/mdast':
         specifier: ^4.0.4
         version: 4.0.4
       ajv:
         specifier: ^8.20.0
         version: 8.20.0
-      commander:
-        specifier: ^15.0.0
-        version: 15.0.0
       mdast-util-to-string:
         specifier: ^4.0.0
         version: 4.0.0
@@ -179,30 +192,11 @@ importers:
         specifier: ^2.9.1
         version: 2.9.1
 
-  packages/knowledge:
-    dependencies:
-      '@dokkurator/config':
-        specifier: workspace:*
-        version: link:../config
-      '@dokkurator/doctype':
-        specifier: workspace:*
-        version: link:../doctype
-      commander:
-        specifier: ^15.0.0
-        version: 15.0.0
-      kysely:
-        specifier: ^0.29.6
-        version: 0.29.6
-    devDependencies:
-      peggy:
-        specifier: ^5.1.0
-        version: 5.1.0
-
   packages/validator:
     dependencies:
-      '@dokkurator/doctype':
+      '@dokkurator/loader':
         specifier: workspace:*
-        version: link:../doctype
+        version: link:../loader
 
 packages:
 

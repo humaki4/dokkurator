@@ -21,6 +21,6 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@dokkurator/doctype": "workspace:*"
+    "@dokkurator/loader": "workspace:*"
   }
 }

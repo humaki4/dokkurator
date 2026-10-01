@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@dokkurator/config": "workspace:*",
-    "@dokkurator/doctype": "workspace:*",
+    "@dokkurator/loader": "workspace:*",
     "commander": "^15.0.0",
     "kysely": "^0.29.6"
   },

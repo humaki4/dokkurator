@@ -1,4 +1,4 @@
-import type { ParsedDocument } from "@dokkurator/doctype";
+import type { ParsedDocument } from "@dokkurator/loader";
 import { describe, expect, test } from "vitest";
 import {
   buildKnowledgeDocument,

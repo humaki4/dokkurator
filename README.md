@@ -26,7 +26,7 @@ Dokkurator is organized as a monorepo containing reusable libraries and applicat
 ├── apps/
 │ └── cli/
 ├── packages/
-│ ├── doctype/   # source contracts and local source implementations
+│ ├── loader/   # source contracts and local source implementations
 │ ├── validator/
 │ └── knowledge/ # index contract and storage implementations
 ├── docs/
@@ -37,7 +37,7 @@ Dokkurator is organized as a monorepo containing reusable libraries and applicat
 
 ### Packages
 
-- **@dokkurator/doctype**
+- **@dokkurator/loader**
   Defines the basic model for describing document types, metadata, structure and validation requirements.
 
 - **@dokkurator/validator**
@@ -97,7 +97,7 @@ Internal packages use workspace dependencies, for example:
 ```text
 {
     "dependencies": {
-        "@dokkurator/doctype": "workspace:*"
+        "@dokkurator/loader": "workspace:*"
     }
 }
 ```

@@ -2,7 +2,7 @@ import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { Kysely, SqliteDialect, type Transaction } from "kysely";
-import type { SourceState } from "@dokkurator/doctype";
+import type { SourceState } from "@dokkurator/loader";
 import type {
   IncrementalKnowledgeIndex,
   KnowledgeDocument,

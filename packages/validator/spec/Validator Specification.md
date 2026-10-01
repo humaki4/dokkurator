@@ -20,10 +20,10 @@ Its responsibilities are:
 
 ## Dependencies
 
-The validator depends on `@dokkurator/doctype`.
+The validator depends on `@dokkurator/loader`.
 
 ```text
-@dokkurator/doctype
+@dokkurator/loader
         │
         │ ParsedDocument
         │ ResolvedDocType
