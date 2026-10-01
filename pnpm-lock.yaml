@@ -63,15 +63,16 @@ importers:
       '@dokkurator/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@dokkurator/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@dokkurator/knowledge':
         specifier: workspace:*
         version: link:../../packages/knowledge
-      '@dokkurator/loader':
-        specifier: workspace:*
-        version: link:../../packages/loader
       commander:
         specifier: ^15.0.0
         version: 15.0.0
+    devDependencies:
       yaml:
         specifier: ^2.9.1
         version: 2.9.1

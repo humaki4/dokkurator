@@ -1,84 +1,66 @@
 import { Command } from "commander";
 import type { WriteOutput } from "../command.js";
-import {
-  diffSources,
-  indexSources,
-  searchIndex,
-} from "../actions/knowledge-actions.js";
-import { prepareConfig, type ConfirmCheckout } from "../project.js";
+import { withDokkurator, writeSourceErrors } from "../core-runtime.js";
 import { positiveInteger } from "./options.js";
 
 export function addKnowledgeCommands(
   command: Command,
   writeOut: WriteOutput,
-  confirmCheckout: ConfirmCheckout,
+  writeErr: WriteOutput,
 ): void {
-  command
-    .command("index [source-id]")
-    .option("--documents-directory <directory>", "documents directory")
-    .option("--index <file>", "SQLite index file")
-    .action(
-      async (
-        sourceId: string | undefined,
-        options: { documentsDirectory?: string; index?: string },
-      ) => {
-        const active = await prepareConfig(
-          command.opts<{ project: string }>().project,
-          { sourceId, ...options },
-          confirmCheckout,
-        );
-        if (active === undefined) return writeOut("Cancelled.\n");
-        for (const { sourceId: id, result } of await indexSources(active))
+  command.command("index [source-id]").action(async (sourceId?: string) => {
+    await withDokkurator(
+      command.opts<{ project: string }>().project,
+      writeErr,
+      async (app) => {
+        const result = await app.sync({ sourceId });
+        for (const source of result.results)
           writeOut(
-            `${id}: ${result.indexedDocuments} indexed, ${result.removedDocuments} removed\n`,
+            `${source.sourceId}: ${source.indexedDocuments} indexed, ${source.removedDocuments} removed\n`,
           );
+        writeSourceErrors(result.errors, writeErr);
       },
+      { sourceId },
     );
+  });
 
-  command
-    .command("diff [source-id]")
-    .option("--documents-directory <directory>", "documents directory")
-    .option("--index <file>", "SQLite index file")
-    .action(
-      async (
-        sourceId: string | undefined,
-        options: { documentsDirectory?: string; index?: string },
-      ) => {
-        const active = await prepareConfig(
-          command.opts<{ project: string }>().project,
-          { sourceId, ...options },
-          confirmCheckout,
-        );
-        if (active === undefined) return writeOut("Cancelled.\n");
-        for (const { sourceId: id, diff } of await diffSources(active)) {
-          writeOut(`${id}: ${diff.changes.length} changes\n`);
-          for (const change of diff.changes)
+  command.command("diff [source-id]").action(async (sourceId?: string) => {
+    await withDokkurator(
+      command.opts<{ project: string }>().project,
+      writeErr,
+      async (app) => {
+        const result = await app.diff({ sourceId });
+        for (const source of result.results) {
+          writeOut(
+            `${source.sourceId}: ${source.diff.changes.length} changes\n`,
+          );
+          for (const change of source.diff.changes)
             writeOut(`  ${change.type}\t${change.path}\n`);
         }
+        writeSourceErrors(result.errors, writeErr);
       },
+      { sourceId },
     );
+  });
 
   command
     .command("search <query...>")
     .option("--limit <number>", "maximum results", positiveInteger, 20)
-    .option("--index <file>", "SQLite index file")
+    .option("--source <source-id>", "restrict results to one source")
     .action(
-      async (parts: string[], options: { limit: number; index?: string }) => {
-        const active = await prepareConfig(
+      async (parts: string[], options: { limit: number; source?: string }) => {
+        await withDokkurator(
           command.opts<{ project: string }>().project,
-          {
-            includeSources: false,
-            index: options.index,
+          writeErr,
+          async (app) => {
+            const results = await app.search(parts.join(" "), {
+              sourceId: options.source,
+              limit: options.limit,
+            });
+            writeOut(`${JSON.stringify(results, null, 2)}\n`);
           },
-          confirmCheckout,
+          { sourceId: options.source },
         );
-        if (active === undefined) return writeOut("Cancelled.\n");
-        const results = await searchIndex(
-          active,
-          parts.join(" "),
-          options.limit,
-        );
-        writeOut(`${JSON.stringify(results, null, 2)}\n`);
       },
     );
 }
