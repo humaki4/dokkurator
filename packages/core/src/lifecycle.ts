@@ -1,7 +1,10 @@
-import { stat } from "node:fs/promises";
 import { findProjectRoot, resolveProjectConfig } from "@dokkurator/config";
 import { SQLiteIndex } from "@dokkurator/knowledge";
-import { isGitRepositoryRoot } from "@dokkurator/loader";
+import {
+  openConfiguredSource,
+  SourcePreparationRequiredError,
+  type ConfiguredSourceLocation,
+} from "@dokkurator/loader";
 import type {
   DokkuratorApp,
   DokkuratorOptions,
@@ -80,11 +83,7 @@ class DefaultDokkuratorApp implements DokkuratorApp {
     const index = new SQLiteIndex({ filename: project.knowledge.index });
     try {
       const sources = await Promise.all(
-        project.sources.map(async (source) =>
-          source.remote === undefined
-            ? await localSourceStatus(source.id, source.root)
-            : await remoteSourceStatus(source.id, source.root),
-        ),
+        project.sources.map((source) => sourceStatus(source)),
       );
       this.#index = index;
       return { root: project.root, sources };
@@ -106,38 +105,19 @@ class DefaultDokkuratorApp implements DokkuratorApp {
   }
 }
 
-async function localSourceStatus(
-  sourceId: string,
-  root: string,
+async function sourceStatus(
+  source: ConfiguredSourceLocation,
 ): Promise<OpenSourceStatus> {
   try {
-    return (await stat(root)).isDirectory()
-      ? { sourceId, status: "ready" }
-      : {
-          sourceId,
-          status: "preparation-required",
-          reason: "missing-local-source",
-        };
+    await openConfiguredSource(source);
+    return { sourceId: source.id, status: "ready" };
   } catch (error) {
-    if (isFileNotFoundError(error))
+    if (error instanceof SourcePreparationRequiredError)
       return {
-        sourceId,
+        sourceId: error.sourceId,
         status: "preparation-required",
-        reason: "missing-local-source",
+        reason: error.reason,
       };
     throw error;
   }
-}
-
-async function remoteSourceStatus(
-  sourceId: string,
-  root: string,
-): Promise<OpenSourceStatus> {
-  return (await isGitRepositoryRoot(root))
-    ? { sourceId, status: "ready" }
-    : { sourceId, status: "preparation-required", reason: "missing-checkout" };
-}
-
-function isFileNotFoundError(error: unknown): boolean {
-  return error instanceof Error && "code" in error && error.code === "ENOENT";
 }

@@ -10,8 +10,16 @@ export {
   createConfiguredLocalSource,
   createConfiguredSource,
   createLocalSource,
+  openConfiguredSource,
+  prepareConfiguredSource,
+  SourcePreparationRequiredError,
+  updateConfiguredSource,
 } from "./local-source.js";
-export type { LocalSourceOptions } from "./local-source.js";
+export type {
+  ConfiguredSourceLocation,
+  LocalSourceOptions,
+  SourcePreparationReason,
+} from "./local-source.js";
 export { SourceNotFoundError } from "./source-adapter.js";
 export type {
   DocumentSource,

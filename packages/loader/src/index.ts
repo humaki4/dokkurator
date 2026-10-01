@@ -23,13 +23,19 @@ export {
   createConfiguredSource,
   FileSystemSource,
   isGitRepositoryRoot,
+  openConfiguredSource,
+  prepareConfiguredSource,
+  SourcePreparationRequiredError,
+  updateConfiguredSource,
 } from "./source-adapter/index.js";
 export type {
+  ConfiguredSourceLocation,
   DocumentSource,
   SourceAdapter,
   SourceChange,
   SourceDiff,
   SourceId,
+  SourcePreparationReason,
   SourceState,
 } from "./source-adapter/index.js";
 
