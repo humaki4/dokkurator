@@ -8,7 +8,7 @@ import {
   type SourceChange,
   type SourceDiff,
   type SourceId,
-} from "@dokkurator/doctype";
+} from "@dokkurator/loader";
 import type { IncrementalKnowledgeIndex } from "../index-adapter/index.js";
 import { buildKnowledgeDocument } from "./documents.js";
 

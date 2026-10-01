@@ -9,7 +9,7 @@ tags: [doctype, documents, source-adapters, git, incremental]
 
 ## Ausgangslage
 
-Das Paket `@dokkurator/doctype` lädt aktuell entweder einen einzelnen Eintrag
+Das Paket `@dokkurator/loader` lädt aktuell entweder einen einzelnen Eintrag
 über dessen `SourceId` oder alle auffindbaren DocTypes beziehungsweise
 Markdown-Dokumente. Der gemeinsame `SourceAdapter` stellt dafür nur `list()`
 und `read()` bereit.
@@ -325,4 +325,3 @@ Mindestens folgende Tests sind vorzusehen:
   sofort Index und Working Tree?
 - Muss das Ergebnis zusätzlich unverarbeitete beziehungsweise konfliktbehaftete
   Änderungen ausweisen?
-

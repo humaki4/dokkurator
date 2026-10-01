@@ -11,7 +11,7 @@ tags: [sources, adapters]
 `Source Adapters` provide documents and source metadata to Dokkurator without exposing filesystem, Git or provider-specific APIs to the core libraries.
 
 The source contract and local filesystem/Git implementations are owned by
-`@dokkurator/doctype` and exported from its public package root. They are
+`@dokkurator/loader` and exported from its public package root. They are
 organized under a dedicated source-adapter directory so the implementation can
 be extracted deliberately later without creating an incidental package
 boundary. Knowledge consumes DocType's generic loading contract and parsed

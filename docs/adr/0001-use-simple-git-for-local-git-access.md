@@ -17,7 +17,7 @@ repository and per-file Git metadata. Core loading and parsing code must remain
 independent of the concrete adapter.
 
 The source adapter contract and its local implementations are owned by
-`@dokkurator/doctype`, which exports the supported source API from its package
+`@dokkurator/loader`, which exports the supported source API from its package
 root. DocType loading and parsing still depend only on the generic source
 contract. The local adapter needs to:
 

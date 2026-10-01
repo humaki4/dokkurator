@@ -1,121 +1,68 @@
 # Dokkurator
 
-Dokkurator is an open-source toolkit for structuring, validating and making distributed documentation accessible without moving it out of its original repositories.
+Dokkurator is an early-stage toolkit for working with documentation distributed across repositories. It keeps Markdown and YAML in their source repositories and adds loading, DocType definitions, indexing, and search.
 
-The project follows a docs-as-code approach: documentation remains in open formats such as Markdown and YAML, while Dokkurator adds optional structure, validation and indexing on top.
+The project follows a docs-as-code approach: repositories remain the source of truth, while a local Knowledge index provides a derived view for querying documents across sources.
 
-The goal is to make distributed documentation easier to maintain, search, analyze and reuse — by humans, development tools and AI agents.
+> **Development status**: Early development. APIs, package boundaries, data models, and configuration behavior may change. Some workspace applications are scaffolds, and document validation is not yet integrated into indexing.
 
-> **Development status**: Concept / Early Development
->
-> Dokkurator is currently in an early concept and implementation phase.
-> APIs, package boundaries, data models and configuration formats are still subject to change.
+This repository contains the implementation workspace as well as architecture notes, decisions, and development plans. Browse the [documentation](./docs/) or read the [project configuration guide](./docs/configuration.md).
 
-This repository currently serves both as the implementation workspace and as documentation of the project's architecture, design decisions and planned development.
+## Workspace
 
-Further documentation and concepts can be found in [docs-folder](./docs)
-The project configuration format is documented in
-[docs/configuration.md](./docs/configuration.md).
-
-## Project structure
-
-Dokkurator is organized as a monorepo containing reusable libraries and applications.
+The repository is a pnpm monorepo orchestrated with Nx.
 
 ```text
 .
 ├── apps/
-│ └── cli/
+│   ├── catalog-server/
+│   ├── cli/
+│   └── explorer-ui/
 ├── packages/
-│ ├── doctype/   # source contracts and local source implementations
-│ ├── validator/
-│ └── knowledge/ # index contract and storage implementations
-├── docs/
-├── nx.json
-├── package.json
-└── pnpm-workspace.yaml
+│   ├── config/
+│   ├── knowledge/
+│   ├── loader/
+│   └── validator/
+└── docs/
 ```
 
 ### Packages
 
-- **@dokkurator/doctype**
-  Defines the basic model for describing document types, metadata, structure and validation requirements.
+- **@dokkurator/config** loads and validates `.dokkurator/config.yaml`, resolves project and source settings, and supports source configuration updates.
+- **@dokkurator/loader** owns source contracts and adapters, and loads/parses Markdown documents and DocType definitions. A DocType describes document metadata and structure; its definition may also provide rules and a template.
+- **@dokkurator/knowledge** builds and updates the derived document index, provides SQLite storage, and exposes document queries and search.
+- **@dokkurator/validator** is currently a minimal placeholder. It is not yet connected to Knowledge indexing and should not be considered a complete document-validation workflow.
 
-- **@dokkurator/validator**
-  Validates documents against DocType definitions and rules.
-
-- **@dokkurator/knowledge**
-  Provides the foundation for indexing, relationships and querying distributed documentation.
+Each package can be consumed through its public package root. Package responsibilities and dependency rules are described in [AGENTS.md](./AGENTS.md).
 
 ### Applications
 
-- **@dokkurator/cli**
-  Command-line interface for using Dokkurator functionality locally, in CI pipelines or from automated tooling.
-  See the [CLI README](./apps/cli/README.md) and the
-  [command reference](./apps/cli/docs/commands.md) for configuration and usage.
+- **@dokkurator/cli** is the current local project interface. It manages configured sources and offers commands for indexing, diffing, searching, inspecting DocTypes/documents, and watching sources. See the [CLI README](./apps/cli/README.md) and [command reference](./apps/cli/docs/commands.md).
+- **@dokkurator/catalog-server** is a Fastify service that currently exposes its OpenAPI contract. Catalog routes are not implemented yet; see the [server README](./apps/catalog-server/README.md).
+- **explorer-ui** is currently the React/Vite starter application. It is not yet connected to Dokkurator catalog workflows.
 
-- **@dokkurator/hub**
-  A prototypical server application built on top of the Dokkurator libraries. It collects documentation from distributed repositories and provides centralized access, search and navigation across the resulting knowledge base.
+## Project configuration
 
-### Development
+The CLI discovers `.dokkurator/config.yaml` from the current directory or accepts a project root with `--project`. The configuration describes local or remote sources, document and DocType directories, the Knowledge index, and watch settings. See [docs/configuration.md](./docs/configuration.md) for the current format and defaults.
 
-#### Requirements
+## Development
 
-- Node.js
-- pnpm
+Requirements: Node.js `>=22.13.0 <23` or `>=24.0.0`, and pnpm `>=10 <11`.
 
-#### Install dependencies:
-
-`pnpm install`
-
-#### Common commands
-
-`pnpm build` - Build all projects
-
-`pnpm test` - Run tests
-
-`pnpm typecheck` - Run TypeScript checks
-
-`pnpm lint` - Run linting
-
-`pnpm check` - Run the main checks together
-
-`pnpm format` - Format the repository
-
-### Monorepo
-
-The repository uses:
-
-- **pnpm workspaces** for dependency and workspace management
-- **Nx** for task orchestration, dependency graphs and caching
-- **TypeScript** for implementation
-- **Vitest** for testing
-- **ESLint** for static analysis
-- **Prettier** for formatting
-
-Internal packages use workspace dependencies, for example:
-
-```text
-{
-    "dependencies": {
-        "@dokkurator/doctype": "workspace:*"
-    }
-}
+```sh
+pnpm install
+pnpm build       # build all workspace projects
+pnpm test        # run tests
+pnpm typecheck   # run TypeScript checks
+pnpm lint        # run ESLint
+pnpm check       # typecheck, lint, and test
+pnpm format:check
 ```
 
-Nx derives the project dependency graph from these package relationships.
+Nx derives the project graph from workspace package relationships. To inspect it:
 
-Package boundaries are strict. Cross-package imports must use the dependency's
-public root API; implementation folders are not separate packages unless
-explicitly extracted by an architectural decision. See [AGENTS.md](./AGENTS.md)
-for package-boundary and adapter-ownership rules.
-
-The graph can be inspected with:
+```sh
 pnpm nx graph
+```
 
-## Contributing
-
-Dokkurator is currently in an early development phase and contribution processes are still being established.
-
-Contribution guidelines, public APIs and release processes will be documented as the project matures.
-
-For now, architectural decisions and open questions are intentionally documented in the repository to make the development process transparent.
+Architectural decisions and open questions are documented in [`docs/`](./docs/).

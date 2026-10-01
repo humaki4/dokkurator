@@ -6,7 +6,7 @@ import {
 import {
   createConfiguredSource,
   isGitRepositoryRoot,
-} from "@dokkurator/doctype";
+} from "@dokkurator/loader";
 import { confirm } from "./prompts.js";
 
 export type ConfirmCheckout = (question: string) => Promise<boolean>;

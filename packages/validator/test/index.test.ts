@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import type { DocType } from "@dokkurator/doctype";
+import type { DocType } from "@dokkurator/loader";
 import { validateDocument } from "../src/index.js";
 
 const docType: DocType = {

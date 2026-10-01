@@ -4,7 +4,7 @@ import {
   createLocalSource,
   DEFAULT_DOCUMENTS_DIRECTORY,
   type SourceDiff,
-} from "@dokkurator/doctype";
+} from "@dokkurator/loader";
 import { Command } from "commander";
 import {
   calculateDocumentDiff,

@@ -25,7 +25,7 @@
     "dokkurator": "./dist/index.js"
   },
   "dependencies": {
-    "@dokkurator/doctype": "workspace:*",
+    "@dokkurator/loader": "workspace:*",
     "@dokkurator/config": "workspace:*",
     "@dokkurator/knowledge": "workspace:*",
     "commander": "^15.0.0",

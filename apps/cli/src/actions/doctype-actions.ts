@@ -2,7 +2,7 @@ import {
   createConfiguredSource,
   loadDocTypes,
   loadDocuments,
-} from "@dokkurator/doctype";
+} from "@dokkurator/loader";
 import type { ResolvedConfig } from "@dokkurator/config";
 
 export async function inspectDocTypes(active: ResolvedConfig) {

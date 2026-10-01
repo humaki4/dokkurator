@@ -1,14 +1,18 @@
 ---
 doctype: architecture
-title: DocType
+title: Loader
 status: draft
-component: doctype
+component: loader
 tags: [markdown, metadata]
 ---
 
-# DocType
+# Loader
 
-`DocType` is the core library for loading, parsing and representing document type definitions and for parsing documents according to those definitions.
+`@dokkurator/loader` is the core library for loading, parsing and representing
+document type definitions and for parsing documents according to those
+definitions. It was renamed from `@dokkurator/doctype` to distinguish the
+library component from the `DocType` domain concept; public domain types and
+function names remain unchanged.
 
 It therefore has two distinct responsibilities:
 
@@ -169,7 +173,7 @@ by Validator rather than rejected by DocType.
 
 ## Boundaries
 
-DocType handles parsing and normalization.
+Loader handles parsing and normalization.
 
 It does not:
 

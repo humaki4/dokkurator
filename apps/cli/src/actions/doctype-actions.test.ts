@@ -7,7 +7,7 @@ import { inspectDocTypes, inspectDocuments } from "./doctype-actions.js";
 
 test("inspects DocTypes and documents for a configured source", async () => {
   const projectRoot = await mkdtemp(
-    join(tmpdir(), "dokkurator-doctype-actions-"),
+    join(tmpdir(), "dokkurator-loader-actions-"),
   );
   const root = join(projectRoot, "repo");
   await mkdir(join(root, "types", "decision"), { recursive: true });
