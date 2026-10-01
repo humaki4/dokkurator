@@ -59,10 +59,11 @@ Eigenschaften einer Source:
 | `remote.branch` | nein    | Auszucheckender Branch                                                                        |
 
 Remote-Sources ohne `path` werden unter
-`.dokkurator/checkouts/<source-id>` verwaltet. Bei einem fehlenden Checkout
-fragt ein Source-verarbeitender Befehl vor dem Klonen nach; bei Ablehnung wird
-der Befehl abgebrochen. Wird eine `source-id` angegeben, betrifft die Prüfung
-nur diese Source. Vorhandene Checkouts werden wie bisher vom Remote aktualisiert.
+`.dokkurator/checkouts/<source-id>` verwaltet. Ausschließlich `prepare` klont
+einen fehlenden Checkout. Andere Source-verarbeitende Befehle verändern einen
+fehlenden Checkout nicht, sondern verweisen auf den passenden Prepare-Aufruf.
+`prepare` fragt nicht interaktiv nach einer Bestätigung. `index` und `watch`
+aktualisieren vorhandene Remote-Checkouts vor der inkrementellen Indexierung.
 
 ### Authentifizierung für Remote-Sources
 
@@ -127,18 +128,37 @@ dokkurator source remove handbook --yes
 dokkurator source remove handbook --keep-index --yes
 ```
 
-| Argument/Option  | Pflicht             | Bedeutung                                                  |
-| ---------------- | ------------------- | ---------------------------------------------------------- |
-| `[id]`           | interaktiv optional | ID der zu entfernenden Source                              |
-| `--yes`          | nein                | Überspringt die Sicherheitsabfrage, beispielsweise in CI   |
-| `--keep-index`   | nein                | Behält bereits indexierte Dokumente und den Source-Zustand |
-| `--index <file>` | nein                | Zu bereinigender Index; Standard `.dokkurator/index.db`    |
+| Argument/Option | Pflicht             | Bedeutung                                                  |
+| --------------- | ------------------- | ---------------------------------------------------------- |
+| `[id]`          | interaktiv optional | ID der zu entfernenden Source                              |
+| `--yes`         | nein                | Überspringt die Sicherheitsabfrage, beispielsweise in CI   |
+| `--keep-index`  | nein                | Behält bereits indexierte Dokumente und den Source-Zustand |
 
 Standardmäßig entfernt der Befehl den Config-Eintrag und die Source atomisch
 aus dem Knowledge-Index. Interaktiv werden beide Schritte bestätigt. Mit
 `--yes` werden Config und Index ohne Rückfrage bereinigt; `--keep-index`
 verhindert das Löschen aus dem Index. Das Repository beziehungsweise ein
 verwalteter Checkout wird nie vom Dateisystem gelöscht.
+
+## `prepare [source-id]`
+
+Bereitet fehlende Checkouts vor und initialisiert Sources, für die noch kein
+Knowledge-Indexzustand existiert. Ohne `source-id` werden alle Sources
+nacheinander verarbeitet. Bereits vorhandene Remote-Checkouts werden dabei
+nicht aktualisiert.
+
+```bash
+dokkurator prepare
+dokkurator prepare handbook
+```
+
+| Argument/Option | Bedeutung                                          | Standard |
+| --------------- | -------------------------------------------------- | -------- |
+| `[source-id]`   | Nur diese Source vorbereiten; ohne ID alle Sources | alle     |
+
+Fehlende lokale Sources werden nicht erzeugt. Fehler einer Source verhindern
+nicht die Vorbereitung der folgenden Sources. Die CLI gibt Fehler und passende
+Hinweise zur Korrektur gesammelt aus.
 
 ## `index [source-id]`
 
@@ -148,15 +168,11 @@ Indexiert Änderungen aus einer oder allen konfigurierten Sources. Ohne
 ```bash
 dokkurator index
 dokkurator index handbook
-dokkurator index handbook --documents-directory docs
-dokkurator index --index .cache/project.db
 ```
 
-| Argument/Option                     | Bedeutung                                           | Standard               |
-| ----------------------------------- | --------------------------------------------------- | ---------------------- |
-| `[source-id]`                       | Nur diese Source indexieren; ohne ID alle Sources   | alle                   |
-| `--documents-directory <directory>` | Dokumentverzeichnis relativ zur jeweiligen Source   | kompletter Source-Root |
-| `--index <file>`                    | SQLite-Datei, relativ zum Projekt-Root oder absolut | `.dokkurator/index.db` |
+| Argument/Option | Bedeutung                                         | Standard |
+| --------------- | ------------------------------------------------- | -------- |
+| `[source-id]`   | Nur diese Source indexieren; ohne ID alle Sources | alle     |
 
 Die Ausgabe nennt pro Source die Anzahl neu oder erneut indexierter sowie
 entfernter Dokumente. `.git`, `.dokkurator`, `.nx`, `node_modules` und `dist`
@@ -172,11 +188,9 @@ dokkurator diff
 dokkurator diff handbook
 ```
 
-| Argument/Option                     | Bedeutung                                     | Standard               |
-| ----------------------------------- | --------------------------------------------- | ---------------------- |
-| `[source-id]`                       | Nur diese Source prüfen; ohne ID alle Sources | alle                   |
-| `--documents-directory <directory>` | Dokumentverzeichnis relativ zur Source        | kompletter Source-Root |
-| `--index <file>`                    | Zu vergleichende SQLite-Datei                 | `.dokkurator/index.db` |
+| Argument/Option | Bedeutung                                     | Standard |
+| --------------- | --------------------------------------------- | -------- |
+| `[source-id]`   | Nur diese Source prüfen; ohne ID alle Sources | alle     |
 
 Die Ausgabe unterscheidet `added`, `modified` und `deleted`. Existiert noch kein
 Index, erscheinen alle erkannten Dokumente als neu.
@@ -190,13 +204,14 @@ dokkurator search authentication
 dokkurator search status:accepted AND "access token"
 dokkurator search owner.team:platform OR tags:security
 dokkurator search "(draft OR proposed) AND owner:platform" --limit 50
+dokkurator search authentication --source handbook
 ```
 
-| Argument/Option    | Bedeutung                               | Standard               |
-| ------------------ | --------------------------------------- | ---------------------- |
-| `<query...>`       | Volltext- und/oder Metadatenabfrage     | erforderlich           |
-| `--limit <number>` | Maximale Trefferzahl, positive Ganzzahl | `20`                   |
-| `--index <file>`   | Zu durchsuchende SQLite-Datei           | `.dokkurator/index.db` |
+| Argument/Option        | Bedeutung                                       | Standard     |
+| ---------------------- | ----------------------------------------------- | ------------ |
+| `<query...>`           | Volltext- und/oder Metadatenabfrage             | erforderlich |
+| `--limit <number>`     | Maximale Trefferzahl, positive Ganzzahl         | `20`         |
+| `--source <source-id>` | Treffer auf eine konfigurierte Source begrenzen | alle         |
 
 Leerzeichen zwischen Suchausdrücken wirken wie `AND`. Unterstützt werden
 ausdrückliches `AND`, `OR`, Klammern, Anführungszeichen und Metadatenfilter in
@@ -210,13 +225,11 @@ Ausgabe erfolgt als JSON und enthält die jeweilige Source-ID.
 ```bash
 dokkurator doctype list
 dokkurator doctype list handbook
-dokkurator doctype list handbook --directory config/types
 ```
 
-| Argument/Option           | Bedeutung                                    | Standard                |
-| ------------------------- | -------------------------------------------- | ----------------------- |
-| `[source-id]`             | Nur diese Source laden; ohne ID alle Sources | alle                    |
-| `--directory <directory>` | DocType-Verzeichnis relativ zur Source       | `_dokkurator/.doctypes` |
+| Argument/Option | Bedeutung                                    | Standard |
+| --------------- | -------------------------------------------- | -------- |
+| `[source-id]`   | Nur diese Source laden; ohne ID alle Sources | alle     |
 
 ## `doctype documents [source-id]`
 
@@ -226,13 +239,12 @@ Referenzen und Source-Metadaten.
 
 ```bash
 dokkurator doctype documents
-dokkurator doctype documents handbook --directory docs
+dokkurator doctype documents handbook
 ```
 
-| Argument/Option           | Bedeutung                                    | Standard               |
-| ------------------------- | -------------------------------------------- | ---------------------- |
-| `[source-id]`             | Nur diese Source laden; ohne ID alle Sources | alle                   |
-| `--directory <directory>` | Dokumentverzeichnis relativ zur Source       | kompletter Source-Root |
+| Argument/Option | Bedeutung                                    | Standard |
+| --------------- | -------------------------------------------- | -------- |
+| `[source-id]`   | Nur diese Source laden; ohne ID alle Sources | alle     |
 
 ## `watch [source-id]`
 
@@ -242,18 +254,17 @@ hash-basierte inkrementelle Indexierung aus.
 
 ```bash
 dokkurator watch
-dokkurator watch handbook --debounce 500
+dokkurator watch handbook
 ```
 
-| Argument/Option                     | Bedeutung                                         | Standard               |
-| ----------------------------------- | ------------------------------------------------- | ---------------------- |
-| `[source-id]`                       | Nur diese Source beobachten; ohne ID alle Sources | alle                   |
-| `--debounce <milliseconds>`         | Ruhezeit vor der Synchronisierung                 | `300`                  |
-| `--documents-directory <directory>` | Dokumentverzeichnis relativ zur Source            | kompletter Source-Root |
-| `--index <file>`                    | Zu aktualisierende SQLite-Datei                   | `.dokkurator/index.db` |
+| Argument/Option | Bedeutung                                         | Standard |
+| --------------- | ------------------------------------------------- | -------- |
+| `[source-id]`   | Nur diese Source beobachten; ohne ID alle Sources | alle     |
 
 Der Watcher läuft bis `Ctrl+C` beziehungsweise `SIGTERM`. Remote-Sources werden
-beim Start aktualisiert; danach wird der lokale Checkout beobachtet.
+beim Start aktualisiert; danach wird der lokale Checkout beobachtet. Debounce,
+Dokumentverzeichnis und Indexdatei stammen ausschließlich aus der Projekt- und
+Repository-Konfiguration.
 
 ## Interaktive und automatisierte Verwendung
 

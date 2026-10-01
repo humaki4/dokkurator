@@ -84,12 +84,16 @@ export async function searchDocuments(
     types.length === 0
       ? sql``
       : sql`AND d.type IN (${sql.join(types.map((type) => sql`${type}`))})`;
+  const sourceFilter =
+    query.sourceId === undefined
+      ? sql``
+      : sql`AND d.source_id = ${query.sourceId}`;
   const result = await sql<SearchDocumentRow>`
     SELECT d.*, matches.score AS rank,
            substr(d.content, 1, 240) AS snippet
       FROM (${matches}) AS matches
       JOIN documents AS d ON d.id = matches.document_id
-     WHERE 1 = 1 ${typeFilter}
+     WHERE 1 = 1 ${typeFilter} ${sourceFilter}
      ORDER BY matches.score DESC, d.id
      LIMIT ${limit(query.limit)} OFFSET ${offset(query.offset)}
   `.execute(queries);

@@ -93,22 +93,19 @@ incremental run cannot assume an unrelated state was indexed.
 
 ## CLI behavior
 
-The first implementation lives in the Knowledge package CLI; the global
-`dokkurator` CLI is intentionally unchanged.
+The global CLI exposes the Core workflows:
 
 ```bash
-dokkurator-knowledge diff [source] [--format text|json] [--exit-code]
-dokkurator-knowledge index [source]
+dokkurator diff [source-id]
+dokkurator index [source-id]
 ```
 
-The source defaults to the configured root/current directory. Both commands use
-the same `calculateDocumentDiff()` service.
+Without a Source ID both commands process all configured Sources. Core delegates
+the underlying comparison to `calculateDocumentDiff()`.
 
-`diff` opens an existing SQLite index read-only and never stores the newly
-calculated state. If no index exists, it compares the source with an empty
-state. Normal changes exit with status 0. With `--exit-code`, changes set status
-
-1. Execution and configuration failures are errors.
+`diff` never stores the newly calculated state. If no checkpoint exists, it
+compares the source with an empty state. Execution and configuration failures
+are reported per Source.
 
 `index` applies the diff and advances the checkpoint only on success. Repeating
 `diff` before indexing reports the same changes; repeating `index` without

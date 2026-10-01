@@ -31,6 +31,7 @@ export interface SearchQuery {
   /** Backwards-compatible shorthand for an AND search across all fields. */
   readonly text?: string;
   readonly types?: readonly string[];
+  readonly sourceId?: string;
   readonly limit?: number;
   readonly offset?: number;
 }

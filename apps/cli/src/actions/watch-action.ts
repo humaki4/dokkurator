@@ -1,30 +1,31 @@
-import type { ResolvedConfig, ResolvedSource } from "@dokkurator/config";
+import type { ResolvedProjectConfig } from "@dokkurator/config";
+import type { DokkuratorApp } from "@dokkurator/core";
 import type { WriteOutput } from "../command.js";
-import { syncSource } from "../sync-source.js";
+import { writeSourceErrors } from "../core-runtime.js";
 import { watchPaths } from "../watch-runtime.js";
 
 export async function watchSources(
-  active: ResolvedConfig,
+  app: DokkuratorApp,
+  project: ResolvedProjectConfig,
   writeOut: WriteOutput,
+  writeErr: WriteOutput,
 ): Promise<void> {
-  const synchronize = async (source: ResolvedSource, updateRemote: boolean) => {
-    const result = await syncSource(
-      source,
-      active.knowledge.index,
-      updateRemote,
-    );
-    writeOut(
-      `${source.id}: ${result.indexedDocuments} indexed, ${result.removedDocuments} removed\n`,
-    );
+  const synchronize = async (sourceId: string) => {
+    const result = await app.sync({ sourceId });
+    for (const source of result.results)
+      writeOut(
+        `${source.sourceId}: ${source.indexedDocuments} indexed, ${source.removedDocuments} removed\n`,
+      );
+    writeSourceErrors(result.errors, writeErr);
   };
-  for (const source of active.sources) await synchronize(source, false);
-  writeOut(`Watching ${active.sources.map(({ id }) => id).join(", ")}...\n`);
+  for (const source of project.sources) await synchronize(source.id);
+  writeOut(`Watching ${project.sources.map(({ id }) => id).join(", ")}...\n`);
   await watchPaths(
-    active.sources.map((source) => ({
+    project.sources.map((source) => ({
       key: source.id,
       path: source.root,
-      onChange: () => synchronize(source, false),
+      onChange: () => synchronize(source.id),
     })),
-    active.watch.debounce,
+    project.watch.debounce,
   );
 }

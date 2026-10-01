@@ -1,13 +1,16 @@
+/** Document discovery settings shared by project and source repositories. */
 type DocumentsConfig = {
   readonly directory?: string;
   readonly include?: readonly string[];
   readonly exclude?: readonly string[];
 };
 
+/** Directory containing DocType definitions within a repository. */
 type DocTypeConfig = {
   readonly directory?: string;
 };
 
+/** One local or managed remote source declared by the project. */
 export type SourceConfig = {
   readonly id: string;
   readonly path?: string;
@@ -38,6 +41,7 @@ export interface ConfigOptions {
   readonly debounce?: number;
 }
 
+/** Fully resolved source including its repository-local settings. */
 export type ResolvedSource = {
   readonly id: string;
   readonly root: string;
@@ -46,7 +50,23 @@ export type ResolvedSource = {
   readonly doctypes: Required<DocTypeConfig>;
 };
 
+/** Source declaration with its resolved checkout path, before repo config. */
+export type ResolvedProjectSource = Pick<
+  ResolvedSource,
+  "id" | "root" | "remote"
+>;
+
+/** Project-level values that can be resolved without opening source repos. */
+export interface ResolvedProjectConfig {
+  readonly root: string;
+  readonly repository: ResolvedConfig["repository"];
+  readonly sources: readonly ResolvedProjectSource[];
+  readonly knowledge: ResolvedConfig["knowledge"];
+  readonly watch: ResolvedConfig["watch"];
+}
+
 /** Resolved values for one command invocation; root settings stay separate. */
+/** Fully resolved project and all selected, available source repositories. */
 export interface ResolvedConfig {
   readonly root: string;
   readonly repository: {
@@ -67,4 +87,5 @@ export type LoadedConfig = {
   };
 };
 
+/** Repository-local subset of the Dokkurator configuration. */
 export type RepositoryConfig = Pick<DokkuratorConfig, "documents" | "doctypes">;

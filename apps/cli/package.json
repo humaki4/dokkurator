@@ -25,10 +25,12 @@
     "dokkurator": "./dist/index.js"
   },
   "dependencies": {
-    "@dokkurator/loader": "workspace:*",
+    "@dokkurator/core": "workspace:*",
     "@dokkurator/config": "workspace:*",
     "@dokkurator/knowledge": "workspace:*",
-    "commander": "^15.0.0",
+    "commander": "^15.0.0"
+  },
+  "devDependencies": {
     "yaml": "^2.9.1"
   }
 }

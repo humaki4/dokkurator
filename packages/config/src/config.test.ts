@@ -4,7 +4,11 @@ import { join } from "node:path";
 import { expect, test } from "vitest";
 import { findProjectRoot } from "./discovery.js";
 import { loadConfig, saveConfig } from "./config-file.js";
-import { resolveActiveConfig } from "./resolution.js";
+import {
+  resolveActiveConfig,
+  resolveProjectConfig,
+  resolveSourceConfig,
+} from "./resolution.js";
 import { validateConfig } from "./validation.js";
 
 async function writeProjectConfig(root: string, text: string): Promise<void> {
@@ -105,6 +109,46 @@ test("resolves managed checkout paths and default settings", async () => {
   );
   expect(config.repository.documents.directory).toBe(".");
   expect(config.repository.doctypes.directory).toBe("_dokkurator/.doctypes");
+});
+
+test("resolves project config before a remote checkout exists", async () => {
+  const root = await mkdtemp(join(tmpdir(), "config-project-phase-"));
+  await writeProjectConfig(
+    root,
+    "documents:\n  directory: project-docs\nsources:\n  - id: docs\n    remote:\n      url: https://example.test/docs\n",
+  );
+
+  const project = await resolveProjectConfig({ root });
+
+  expect(project.sources).toEqual([
+    {
+      id: "docs",
+      root: join(root, ".dokkurator/checkouts/docs"),
+      remote: { url: "https://example.test/docs" },
+    },
+  ]);
+  expect(project.sources[0]).not.toHaveProperty("documents");
+});
+
+test("loads repository config only when a source is resolved", async () => {
+  const root = await mkdtemp(join(tmpdir(), "config-source-phase-"));
+  const repository = join(root, "repository");
+  await writeProjectConfig(
+    root,
+    "sources:\n  - id: docs\n    path: repository\n",
+  );
+  const project = await resolveProjectConfig({ root });
+  const source = project.sources[0];
+  expect(source).toBeDefined();
+
+  await writeProjectConfig(
+    repository,
+    "documents:\n  directory: cloned-docs\ndoctypes:\n  directory: cloned-types\n",
+  );
+  const resolved = await resolveSourceConfig(project, source!);
+
+  expect(resolved.documents.directory).toBe("cloned-docs");
+  expect(resolved.doctypes.directory).toBe("cloned-types");
 });
 
 test("lets invocation options replace repository values", async () => {

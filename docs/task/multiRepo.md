@@ -60,7 +60,7 @@ bleiben Aufrufe aus Unterverzeichnissen deterministisch.
 
 Remote-Repositories können per Git-URL und optionalem Branch konfiguriert
 werden. Verwaltete Checkouts liegen standardmäßig unter
-`.dokkurator/repos/<source-id>`. Zugangsdaten werden nicht in der Config
+`.dokkurator/checkouts/<source-id>`. Zugangsdaten werden nicht in der Config
 gespeichert; Git verwendet die lokal eingerichtete Credential-Lösung.
 Dokkurator besitzt dabei keinen eigenen Login: SSH-Agent und Git Credential
 Helper bleiben die verantwortlichen Mechanismen. Secrets dürfen nicht Teil der
@@ -75,6 +75,8 @@ dokkurator source add ../documentation --id documentation
 dokkurator source list
 dokkurator source remove documentation
 
+dokkurator prepare
+dokkurator prepare documentation
 dokkurator index
 dokkurator index documentation
 dokkurator diff
@@ -85,8 +87,9 @@ dokkurator doctype list
 dokkurator doctype documents documentation
 ```
 
-Ohne Source-ID verarbeiten `index`, `diff` und die DocType-Kommandos alle
-konfigurierten Sources. Mit ID verarbeiten sie genau eine Source.
+Ohne Source-ID verarbeiten `prepare`, `index`, `diff` und die
+DocType-Kommandos alle konfigurierten Sources. Mit ID verarbeiten sie genau eine
+Source.
 
 ### Interaktive Bedienung
 
