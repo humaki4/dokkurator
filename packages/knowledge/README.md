@@ -19,9 +19,8 @@ const result = await indexDocuments({
 });
 ```
 
-`indexDocuments` is the single public indexing operation. It recursively loads
-the complete configured directory, transforms every parsed document and
-atomically replaces the index contents.
+`indexDocuments` performs a complete rebuild. `indexDocumentChanges` and
+`calculateDocumentDiff` provide the incremental workflow used by Core.
 
 The Knowledge document preserves normalized metadata, a stable source
 reference, Markdown content, headings, links, and references. Transient adapter
@@ -42,25 +41,6 @@ types from `@dokkurator/knowledge`. Source implementations are provided by
 `@dokkurator/loader`; indexing accepts only Loader's generic `DocumentSource`
 contract and does not depend on a concrete source adapter.
 
-## CLI
-
-The package also provides the same operation as a command:
-
-```text
-dokkurator-knowledge \
-  --root <directory> \
-  --documents-directory <directory> \
-  --index .dokkurator/index.db \
-  index
-```
-
-Search an existing index:
-
-```text
-dokkurator-knowledge search authentication
-dokkurator-knowledge search status:accepted AND "access token"
-dokkurator-knowledge search owner.team:platform OR tags:security
-```
-
-`--documents-directory` and `--index` are relative to `--root`. The defaults
-index the complete root into `.dokkurator/index.db`.
+Knowledge is a library package and has no standalone CLI. User-facing index,
+diff and search commands are provided by the global `dokkurator` CLI through
+`@dokkurator/core`.

@@ -20,9 +20,7 @@ export type {
 
 export {
   createLocalSource,
-  createConfiguredSource,
   FileSystemSource,
-  isGitRepositoryRoot,
   openConfiguredSource,
   prepareConfiguredSource,
   SourcePreparationRequiredError,

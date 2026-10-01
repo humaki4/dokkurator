@@ -102,29 +102,6 @@ export async function updateConfiguredSource(
   });
 }
 
-/**
- * Creates a configured source with the legacy implicit checkout behavior.
- * @deprecated Select side effects explicitly with openConfiguredSource,
- * prepareConfiguredSource or updateConfiguredSource.
- */
-export async function createConfiguredSource(
-  source: ConfiguredSourceLocation,
-  update = true,
-): Promise<SourceAdapter> {
-  if (source.remote !== undefined)
-    return createGitCheckoutSource({
-      root: source.root,
-      sourceId: source.id,
-      url: source.remote.url,
-      branch: source.remote.branch,
-      update,
-    });
-  return createConfiguredLocalSource({
-    root: source.root,
-    sourceId: source.id,
-  });
-}
-
 async function isDirectory(root: string): Promise<boolean> {
   try {
     return (await stat(root)).isDirectory();

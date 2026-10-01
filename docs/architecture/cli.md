@@ -8,7 +8,8 @@ tags: [cli]
 
 # CLI architecture
 
-The CLI operates directly on accessible sources.
+The CLI delegates application workflows to `@dokkurator/core`. Core coordinates
+accessible sources and the Knowledge index through the public package APIs.
 
 Typical sources are:
 
@@ -23,6 +24,7 @@ flowchart LR
     User["User / CI"]
 
     CLI["Dokkurator CLI"]
+    Core["Dokkurator Core"]
 
     Source["Local Filesystem / Git Repository"]
 
@@ -37,7 +39,9 @@ flowchart LR
     LocalIndex[("Local Index")]
 
     User --> CLI
-    CLI --> SourceAdapter
+    CLI --> Core
+    Core --> SourceAdapter
+    Core --> Knowledge
     SourceAdapter --> Source
 
     SourceAdapter --> DocType
@@ -69,9 +73,9 @@ input to Knowledge and only formats results; parsing and storage translation do
 not belong to the CLI layer.
 
 ```text
-dokkurator-knowledge search authentication
-dokkurator-knowledge search status:accepted
-dokkurator-knowledge search "authentication AND owner.team:platform"
+dokkurator search authentication
+dokkurator search status:accepted
+dokkurator search "authentication AND owner.team:platform"
 ```
 
 The local index is derived data and can be rebuilt from the repository.

@@ -5,10 +5,7 @@ export {
   calculateDocumentDiff,
   indexDocumentChanges,
 } from "./index/incremental-index.js";
-export {
-  parseSearchExpression,
-  SearchQuerySyntaxError,
-} from "./search/search-query.js";
+export { SearchQuerySyntaxError } from "./search/search-query.js";
 export { searchKnowledge } from "./search/search.js";
 export type { KnowledgeSearchOptions } from "./search/search.js";
 export type {
@@ -33,5 +30,5 @@ export type {
   SourceReference,
   SourceIndexUpdate,
 } from "./index-adapter/index.js";
-export { SQLiteIndex, SCHEMA_VERSION } from "./index-adapter/sqlite/index.js";
+export { SQLiteIndex } from "./index-adapter/sqlite/index.js";
 export type { SQLiteIndexOptions } from "./index-adapter/sqlite/index.js";

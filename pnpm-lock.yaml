@@ -159,15 +159,9 @@ importers:
 
   packages/knowledge:
     dependencies:
-      '@dokkurator/config':
-        specifier: workspace:*
-        version: link:../config
       '@dokkurator/loader':
         specifier: workspace:*
         version: link:../loader
-      commander:
-        specifier: ^15.0.0
-        version: 15.0.0
       kysely:
         specifier: ^0.29.6
         version: 0.29.6

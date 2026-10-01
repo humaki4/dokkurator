@@ -8,7 +8,6 @@ export {
 export type { GitCheckoutOptions, GitSourceOptions } from "./git-source.js";
 export {
   createConfiguredLocalSource,
-  createConfiguredSource,
   createLocalSource,
   openConfiguredSource,
   prepareConfiguredSource,

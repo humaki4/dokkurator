@@ -243,9 +243,10 @@ vom Aufrufer nachvollziehbar behandelt werden.
 
 ## Akzeptanzkriterien
 
-- `@dokkurator/knowledge` exportiert weiterhin nur die öffentliche
-  Indexierungsoperation `indexDocuments`.
-- Der CLI-Befehl `dokkurator-knowledge index` funktioniert unverändert.
+- `@dokkurator/knowledge` exportiert vollständige und inkrementelle
+  Indexierungsoperationen über seine Root-API.
+- Die globale CLI verwendet `dokkurator index [source-id]` über Core; Knowledge
+  besitzt keine eigene CLI mehr.
 - Der SQLite-Adapter enthält für reguläre CRUD-Operationen keine manuell
   zusammengesetzten SQL-Statements mehr.
 - Optionale Filter können frei kombiniert werden, ohne für jede Kombination

@@ -1,7 +1,7 @@
 # Dokkurator Core und Loader: Abgrenzung auf Basis des aktuellen Projekts
 
-Status: Architekturentwurf, keine Umsetzungsfreigabe  
-Stand: 2026-10-01
+Status: Erster Core-Zuschnitt umgesetzt
+Stand: 2026-10-02
 
 ## Ziel
 
@@ -28,6 +28,9 @@ Im derzeitigen Code ist dieses Modell nur teilweise in `ParsedDocType` abgebilde
 
 ### Pakete
 
+- `@dokkurator/core` stellt den App-Lifecycle und die wiederverwendbaren
+  Use-Cases `prepare`, `sync`, `diff`, `search`, `listDocTypes` und
+  `listDocuments` bereit.
 - `@dokkurator/loader` besitzt Source-Adapter und Lade-/Parse-Abläufe. Der
   abgeschlossene Package-Rename und die Entfernung der Demo-CLI sind separat in
   `renameDocType.md` beschrieben.
@@ -35,19 +38,20 @@ Im derzeitigen Code ist dieses Modell nur teilweise in `ParsedDocType` abgebilde
 - `@dokkurator/config` lädt und validiert Projektkonfiguration und liefert über `resolveActiveConfig` ein `ResolvedConfig` einschließlich Sources, Dokumentfiltern, DocType-Verzeichnissen und Indexpfad.
 - `@dokkurator/validator` bietet derzeit nur eine minimale, als temporär markierte API. Die aktuelle Knowledge-Indexierung ruft Validator nicht auf.
 
-### Aufgaben in `apps/cli`
+### Umgesetzte Aufgaben in `apps/cli`
 
-| CLI-Code                                      | Heutige Funktion                                                                                                                                                  | Vorläufige Zuständigkeit                                                                                                                                                        |
-| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `actions/knowledge-actions.ts`                | Führt Index-/Diff-/Search-Abläufe für konfigurierte Sources aus; öffnet SQLite und orchestriert Aufrufe an Knowledge                                              | Die Use-Cases `sync`, `diff` und `search` werden Core-Methoden. Formatierung und Commander-Optionen bleiben im CLI                                                              |
-| `sync-source.ts`                              | Erzeugt einen konfigurierten Source-Adapter, ruft `indexDocumentChanges` auf und schließt SQLite                                                                  | Core koordiniert Sources und Ressourcen; `indexDocumentChanges` und die eigentliche Diff-/Indexlogik bleiben in Knowledge                                                       |
-| `actions/doctype-actions.ts`                  | Lädt und parst DocTypes oder Dokumente je Source                                                                                                                  | `listDocTypes` und `listDocuments` werden Core-Methoden, die an Loader delegieren. Core führt dabei keine Validierung aus                                                       |
-| `project.ts`                                  | Ruft `resolveActiveConfig` auf, fragt interaktiv nach Checkout-Erlaubnis und erzeugt konfigurierte Sources; diese Source-Erzeugung kann klonen oder aktualisieren | Checkout-Prompt und Source-Materialisierung entfallen aus diesem CLI-Pfad. Core lädt die Config über Config und löst Checkout/Sync nur in den expliziten Lifecycle-Methoden aus |
-| `commands/*.ts`, `command.ts`                 | Commander-Registrierung, Flags, Prompts, Ausgabe und Cancel-Verhalten                                                                                             | Bleibt im CLI-Host                                                                                                                                                              |
-| `actions/source-actions.ts`                   | Liest/ändert Source-Konfiguration, fragt nach IDs und Bestätigung; optionales Löschen von Indexdaten                                                              | Bleibt CLI-/Projektverwaltung. Konfigurationsmutation und interaktive/destruktive Entscheidungen sind keine Core-Orchestrierung                                                 |
-| `actions/watch-action.ts`, `watch-runtime.ts` | Startet Dateiwatcher und synchronisiert bei Änderungen                                                                                                            | Watcher, Timer und Prozessdauer bleiben Host-Verhalten; die Callback-Synchronisation ruft `app.sync()` auf                                                                      |
+| CLI-Code                                      | Zuständigkeit                                                                                                                                              |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `core-runtime.ts`                             | Erzeugt die Core-App pro Einmal-Aufruf, öffnet sie und garantiert `close()` über `finally`; formatiert Readiness- und Recovery-Hinweise                    |
+| `commands/prepare.ts`                         | Stellt `dokkurator prepare [source-id]` ohne Checkout-Prompt bereit                                                                                        |
+| `commands/knowledge.ts`                       | Delegiert Index/Sync, Diff und Search an Core; formatiert Ergebnisse                                                                                       |
+| `commands/doctype.ts`                         | Delegiert DocType- und Dokumentinspektion an Core                                                                                                          |
+| `commands/*.ts`, `command.ts`                 | Commander-Registrierung, Host-Argumente und Ausgabe                                                                                                        |
+| `prompts.ts`, `actions/source-actions.ts`     | Ausschließlich Source-Verwaltung: fehlende Eingaben, Bestätigung der Konfigurationsänderung und optionales Löschen von Indexdaten                          |
+| `actions/watch-action.ts`, `watch-runtime.ts` | Hält eine Core-App über die Watch-Laufzeit offen; Watcher, Debounce und Prozessdauer bleiben Host-Verhalten, Änderungen rufen `app.sync({ sourceId })` auf |
 
-Die Tabelle beschreibt Kandidaten und Grenzen, keine bereits beschlossene API.
+Die frühere CLI-Orchestrierung in `project.ts`, `sync-source.ts`,
+`actions/knowledge-actions.ts` und `actions/doctype-actions.ts` wurde entfernt.
 
 ### CLI-zu-Core-Zuordnung
 
@@ -55,10 +59,10 @@ Die Tabelle beschreibt Kandidaten und Grenzen, keine bereits beschlossene API.
 | ------------------------------------------------- | ------------------------------------- | ----------------------------------------------------- |
 | `doctype list [source-id]`                        | `app.listDocTypes({ sourceId })`      | JSON/Text-Ausgabe und Argumentdarstellung             |
 | `doctype documents [source-id]`                   | `app.listDocuments({ sourceId })`     | JSON/Text-Ausgabe und Argumentdarstellung             |
-| `knowledge diff [source-id]`                      | `app.diff({ sourceId })`              | Darstellung der Änderungen und Exit-Code-Entscheidung |
-| `knowledge index [source-id]`                     | `app.sync({ sourceId })`              | Manuelles Auslösen und Sync-Bericht formatieren       |
+| `diff [source-id]`                                | `app.diff({ sourceId })`              | Darstellung der Änderungen und Exit-Code-Entscheidung |
+| `index [source-id]`                               | `app.sync({ sourceId })`              | Manuelles Auslösen und Sync-Bericht formatieren       |
 | Vorbereitung fehlender Repositories/Indexzustände | `app.prepare()`                       | Expliziter CLI-Command; keine Zustimmungsprompts      |
-| `knowledge search <query>`                        | `app.search(query)`                   | Query-Argument parsen, Resultate formatieren          |
+| `search <query>`                                  | `app.search(query)`                   | Query-Argument übernehmen, Resultate formatieren      |
 | `watch [source-id]`                               | `app.sync({ sourceId })` als Callback | Dateiwatcher, Debounce und Laufzeitsteuerung          |
 | `source add/remove`                               | Keine Core-Methode im ersten Umfang   | Konfigurationsdatei ändern, Prompts und Bestätigung   |
 
@@ -70,7 +74,7 @@ Core bietet wiederverwendbare Abläufe über die bestehenden Libraries an. Er ko
 
 Die Konfigurationsquelle ist zunächst ausschließlich die vorhandene Datei `.dokkurator/config.yaml` im ermittelten Projekt. `createDokkurator()` erhält als einzige Option einen Projektpfad beziehungsweise einen Startpunkt für die Projektsuche. Wird kein anderer Ort benötigt, kann der Aufrufer `.` übergeben. Der Pfad bestimmt nur, wo die Projektkonfiguration gesucht wird; er ist kein Konfigurations-Override. CLI-Flags, Umgebungsvariablen oder frei zusammengestellte Konfigurationsobjekte überschreiben die Datei nicht. Format, Parser, Defaults und Validierung bleiben bei `@dokkurator/config`. Core nutzt dessen bestehende Auflösung statt ein zweites Schema einzuführen.
 
-`resolveActiveConfig()` führt selbst keinen Checkout aus. Die heutige Funktion lädt jedoch neben der Projektkonfiguration auch repository-lokale Konfigurationen. Diese beiden Schritte müssen getrennt werden, weil eine repository-lokale `.dokkurator/config.yaml` vor dem ersten Checkout noch nicht gelesen werden kann. Der aktuelle Checkout-/Update-Seiteneffekt entsteht anschließend im CLI, weil `prepareConfig()` für jede Source `createConfiguredSource()` aufruft; diese Loader-Funktion kann fehlende Repositories klonen und vorhandene aktualisieren. Checkout und Konfigurationsauflösung dürfen nicht wieder in einer Funktion mit versteckten Seiteneffekten zusammengezogen werden.
+Die Config-Auflösung ist in zwei öffentliche Schritte getrennt. `resolveProjectConfig()` lädt die Projektkonfiguration und löst Source- sowie Indexpfade auf, ohne Source-Repositories zu lesen. `resolveSourceConfig()` lädt die repository-lokale Konfiguration erst für eine verfügbare Source. `resolveActiveConfig()` bleibt als kompatible Kombination beider Schritte für bestehende direkte Nutzer erhalten. Keine dieser Funktionen führt einen Checkout aus.
 
 Core löst beim Öffnen ausschließlich die Projektkonfiguration und die darin deklarierten Sources, Checkout-Pfade und den Indexpfad auf. Dabei hält Core pro Source fest, ob der benötigte lokale Zustand vorhanden ist. Fehlende oder noch nicht nutzbare Sources verhindern `open()` nicht; sie werden als nicht vorbereitet gemeldet. Repository-lokale Konfigurationen werden erst geladen, nachdem die jeweilige Source bereits vorhanden ist oder durch `prepare()` hergestellt wurde. Dadurch kann eine neu geklonte Source noch im selben `prepare()`-Aufruf mit ihrer eigenen Konfiguration initial indexiert werden.
 
@@ -89,7 +93,7 @@ Core öffnet und schließt die von ihm erzeugte Indexressource. Der Lifecycle is
 
 Ein langlebiger Host lädt die Projektkonfiguration einmal beim Öffnen der App. Repository-lokale Konfiguration wird für eine Source geladen, sobald sie verfügbar ist, spätestens nach einem erfolgreichen Checkout in `prepare()`. Spätere Änderungen an einer bereits geladenen `.dokkurator/config.yaml` erfordern zunächst einen Neustart beziehungsweise `close()` und erneutes `open()`; Hot-Reload ist nicht Teil dieses Zuschnitts.
 
-## Vorläufige API-Richtung
+## Umgesetzte API-Richtung
 
 Die API erhält keine Konfigurationsparameter und verwendet die vorhandene Projektdatei. Ein möglicher Aufruf sieht so aus:
 
@@ -106,7 +110,7 @@ try {
 }
 ```
 
-Das Beispiel ist ein Diskussionsanker, kein festgelegter TypeScript-Vertrag. `createDokkurator({ root })` bleibt ohne I/O; `open()` liest die Projektdatei `.dokkurator/config.yaml` über `@dokkurator/config` und öffnet den Index. `prepare()` klont fehlende Remote-Checkouts und initialisiert noch nicht indexierte Quellen. `sync()` aktualisiert vorhandene Checkouts und verarbeitet Änderungen. Alle Use-Case-Methoden außer `open()` und `close()` können optional auf eine `sourceId` eingeschränkt werden. Das gilt auch für `search()`, dessen Ergebnisse dann auf diese Source begrenzt werden. Ohne `sourceId` bearbeiten beziehungsweise berücksichtigen sie alle konfigurierten Sources.
+`createDokkurator({ root })` bleibt ohne I/O; `open()` liest die Projektdatei `.dokkurator/config.yaml` über `@dokkurator/config` und öffnet den Index. `prepare()` klont fehlende Remote-Checkouts und initialisiert noch nicht indexierte Quellen. `sync()` aktualisiert vorhandene Checkouts und verarbeitet Änderungen. Alle Use-Case-Methoden außer `open()` und `close()` können optional auf eine `sourceId` eingeschränkt werden. Das gilt auch für `search()`, dessen Ergebnisse dann auf diese Source begrenzt werden. Ohne `sourceId` bearbeiten beziehungsweise berücksichtigen sie alle konfigurierten Sources.
 
 Die CLI bietet `dokkurator prepare [source-id]` als Top-Level-Command an. So können Repositories bewusst nach und nach ausgecheckt und indexiert werden. Ein Server kann beim Start `open()` und `prepare()` aufrufen und danach `sync()` über einen eigenen Timer wiederholen.
 
@@ -133,7 +137,7 @@ Core stellt die für die Anwendung unterstützten Use-Cases bereit, nicht zwinge
 | AK07 | `prepare()` trifft auf eine Source ohne initialen Indexzustand                     | Die Source wird initial indexiert. Bereits initialisierte Sources werden nicht pauschal vollständig ersetzt oder unnötig neu indexiert.                                                                                                                                                                                                                                    |
 | AK08 | `sync()` trifft auf einen fehlenden Checkout                                       | Es erfolgt kein impliziter Clone. Der Aufruf meldet, dass zuerst `prepare()` erforderlich ist.                                                                                                                                                                                                                                                                             |
 | AK09 | `sync()` trifft auf vorhandene Sources                                             | Remote-Checkouts werden aktualisiert; Dokumentänderungen werden über den vorhandenen Knowledge-Abgleich verarbeitet. Core implementiert keine zweite Diff- oder Indexierungslogik.                                                                                                                                                                                         |
-| AK10 | Ein bestehender CLI-Use-Case wird ausgeführt                                       | `doctype list/documents`, `knowledge diff/index/search` verwenden die zugeordneten Core-Methoden. Commander, Text-/JSON-Ausgabe, Prompts für andere Source-Verwaltung und Exit-Codes bleiben im CLI.                                                                                                                                                                       |
+| AK10 | Ein bestehender CLI-Use-Case wird ausgeführt                                       | `doctype list/documents` sowie `diff`, `index` und `search` verwenden die zugeordneten Core-Methoden. Commander, Text-/JSON-Ausgabe, Prompts für die Source-Verwaltung und Exit-Codes bleiben im CLI.                                                                                                                                                                      |
 | AK11 | Ein langlebiger Host betreibt die App                                              | Der Host kann beim Start `open()` und `prepare()` und danach `sync()` nach eigenem Timer aufrufen. Core startet keinen eigenen Timer oder Hintergrund-Sync.                                                                                                                                                                                                                |
 | AK12 | App wird geschlossen                                                               | Von Core erzeugte Ressourcen werden geschlossen; wiederholtes `close()` bleibt unschädlich.                                                                                                                                                                                                                                                                                |
 | AK13 | Eine Operation verarbeitet mehrere Sources und einzelne Sources schlagen fehl      | Erfolgreiche Änderungen bleiben bestehen, weitere Sources werden verarbeitet und das Ergebnis enthält Erfolge und Fehler pro Source. Die CLI gibt Fehler mit einer passenden Handlungsempfehlung gesammelt am Ende aus.                                                                                                                                                    |
@@ -150,20 +154,19 @@ Core stellt die für die Anwendung unterstützten Use-Cases bereit, nicht zwinge
 - Validator-Redesign oder eine zweite Regel-Engine.
 - Generische Plugin-, Connector- oder Ressourcen-Frameworks ohne konkreten zweiten Anwendungsfall.
 
-## Vorschlag für die Reihenfolge
+## Umsetzungsstand
 
-1. Die abgeschlossene Package-Umbenennung zu `@dokkurator/loader` und Entfernung
-   der Demo-CLI bilden die Grundlage für die weiteren Schritte.
-2. Config-Anbindung auf die vorhandene `.dokkurator/config.yaml` begrenzen; Config-Format und Auflösung bleiben in `@dokkurator/config`.
-3. Projekt- und repository-lokale Config-Auflösung trennen. `open()` lädt die Projektkonfiguration; repository-lokale Konfiguration wird erst für eine vorhandene oder erfolgreich vorbereitete Source geladen.
-4. Den Core-Lifecycle `open()` / `prepare()` / `sync()` / `diff()` / `search()` / `close()` anhand der vorhandenen Config-, Source- und Knowledge-APIs festlegen. `prepare()` klont fehlende Remote-Checkouts und initialisiert noch nicht indexierte Quellen; `sync()` aktualisiert nur vorhandene Checkouts.
-5. Im CLI `dokkurator prepare [source-id]` und eine explizite Sync-Aktion anbieten. Normale Loader-, Diff- und Search-Commands lösen weder Checkout noch Indexierung aus; fehlt ein erforderlicher Checkout, melden sie „Source nicht vorbereitet“ und nennen den passenden Prepare-Aufruf.
-6. Ein langlebiger Host kann beim Start `open()` und `prepare()` aufrufen und anschließend `sync()` über einen eigenen Timer auslösen. Der Timer und dessen Intervall gehören zum Host; Core stellt den wiederverwendbaren Sync-Aufruf bereit.
-7. Validator-Integration, Watch und weitere Hosts separat bewerten, wenn konkrete Anforderungen und belastbare Verträge dafür vorliegen.
+1. Die Package-Umbenennung zu `@dokkurator/loader` und die Entfernung der Demo-CLI sind abgeschlossen.
+2. Projekt- und repository-lokale Config-Auflösung sind getrennt.
+3. Der Core-Lifecycle und die vorgesehenen Use-Cases sind umgesetzt.
+4. Loader bietet getrennte Operationen zum Öffnen, Vorbereiten und Aktualisieren konfigurierter Sources.
+5. Die globale CLI verwendet Core und bietet `dokkurator prepare [source-id]` an.
+6. Watch bleibt Host-Verhalten und verwendet `app.sync({ sourceId })` als Callback.
+7. Git-Policy, interaktiver CLI-Modus und Validator-Integration bleiben separate Nachfolgeaufgaben.
 
 ## CLI-Lifecycle
 
-Die globale CLI bleibt im ersten Zuschnitt eine nicht-interaktive CLI mit einzelnen Aufrufen wie `dokkurator prepare docs` oder `dokkurator knowledge search ...`. Pro Aufruf erzeugt der CLI-Host eine Core-App, ruft vor der fachlichen Aktion `open()` auf und garantiert anschließend in einem zentralen `finally`-Cleanup `close()`. CLI-Nutzer rufen `open()` und `close()` nicht selbst auf. Signale wie `SIGINT` oder `SIGTERM` dürfen ebenfalls das zentrale Cleanup anstoßen; die Wiederholbarkeit von `close()` verhindert dabei Fehler durch doppeltes Aufräumen.
+Die globale CLI bleibt im ersten Zuschnitt eine nicht-interaktive CLI mit einzelnen Aufrufen wie `dokkurator prepare docs` oder `dokkurator search "access token"`. Pro Aufruf erzeugt der CLI-Host eine Core-App, ruft vor der fachlichen Aktion `open()` auf und garantiert anschließend in einem zentralen `finally`-Cleanup `close()`. CLI-Nutzer rufen `open()` und `close()` nicht selbst auf. Signale wie `SIGINT` oder `SIGTERM` dürfen ebenfalls das zentrale Cleanup anstoßen; die Wiederholbarkeit von `close()` verhindert dabei Fehler durch doppeltes Aufräumen.
 
 Ein interaktiver Modus, der wie eine Shell geöffnet bleibt und mehrere Kommandos auf derselben App-Instanz entgegennimmt, gehört nicht zum ersten Zuschnitt. Er wird in einem nachgelagerten Task konzipiert. Die Core-API verhindert einen solchen langlebigen Host nicht, koppelt ihren ersten Entwurf aber auch nicht an dessen Prompt-, Abbruch- oder Eingabeschleifen-Semantik.
 
@@ -171,8 +174,9 @@ Die genaue Validierung vorhandener Git-Checkouts und die Semantik des Remote-Upd
 
 ## Repo-Anker
 
-- Loader-/DocType-Modell: `packages/loader/src/index.ts`, `packages/loader/src/docTypes/types.ts`, `packages/loader/src/docTypes/read.ts`
-- Knowledge-Sync und Suche: `packages/knowledge/src/index/incremental-index.ts`, `packages/knowledge/src/index-adapter/sqlite/sqlite-index.ts`
+- Core-Lifecycle und Use-Cases: `packages/core/src/lifecycle.ts`, `packages/core/src/use-cases.ts`, `packages/core/src/source-operations.ts`
+- Loader-/DocType-Modell: `packages/loader/src/index.ts`, `packages/loader/src/source-adapter/local-source.ts`, `packages/loader/src/docTypes/types.ts`
+- Knowledge-Sync und Suche: `packages/knowledge/src/index/incremental-index.ts`, `packages/knowledge/src/search/search.ts`, `packages/knowledge/src/index-adapter/sqlite/sqlite-index.ts`
 - Config-Auflösung: `packages/config/src/resolution.ts`, `packages/config/src/model.ts`
-- CLI-Orchestrierung und Host-Grenzen: `apps/cli/src/actions/knowledge-actions.ts`, `apps/cli/src/actions/doctype-actions.ts`, `apps/cli/src/project.ts`, `apps/cli/src/actions/source-actions.ts`, `apps/cli/src/actions/watch-action.ts`
+- CLI-Orchestrierung und Host-Grenzen: `apps/cli/src/core-runtime.ts`, `apps/cli/src/commands/prepare.ts`, `apps/cli/src/actions/source-actions.ts`, `apps/cli/src/actions/watch-action.ts`
 - Der Loader-Package-Rename: `docs/task/renameDocType.md`

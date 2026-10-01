@@ -20,6 +20,7 @@ Ein Projekt mit zwei lokalen Repositories konfigurieren und indexieren:
 dokkurator source add . --id project
 dokkurator source add ../shared-docs --id shared-docs
 dokkurator source list
+dokkurator prepare
 dokkurator index
 dokkurator search "architecture decision"
 ```
@@ -59,6 +60,10 @@ Der abgeleitete Knowledge-Index liegt standardmäßig in:
 `.dokkurator/config.yaml` ist Benutzerkonfiguration. `index.db` sowie dessen
 SQLite-Begleitdateien sind erzeugte Daten und sollten normalerweise nicht
 versioniert werden.
+
+Dokument- und DocType-Verzeichnisse, Indexpfad und Watch-Debounce werden nur
+über die Projekt- beziehungsweise Repository-Konfiguration gesteuert. Die CLI
+bietet dafür keine temporären Override-Optionen.
 
 ## Dokumentation
 

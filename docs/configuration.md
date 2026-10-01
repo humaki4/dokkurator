@@ -49,16 +49,17 @@ checked out below `checkouts.directory/<source-id>`.
 
 ## Resolution order
 
-For repository settings, Dokkurator resolves values in this order:
+For repository settings, the central Dokkurator application resolves values in
+this order:
 
 1. built-in defaults;
-2. the active repository's `.dokkurator/config.yaml`;
-3. an explicit CLI option.
+2. the active repository's `.dokkurator/config.yaml`.
 
-For project-wide settings, the root config is resolved between the built-in
-defaults and CLI options. Repository settings from the project-root file apply
-only when that root is itself the active repository. More-specific values
-replace defaults; exclude patterns are not implicitly combined.
+For project-wide settings, the root config replaces built-in defaults.
+Repository settings from the project-root file apply only when that root is
+itself the active repository. More-specific values replace defaults; exclude
+patterns are not implicitly combined. The central `dokkurator` CLI does not
+override these settings with command-line options.
 
 ## Defaults
 
@@ -75,12 +76,11 @@ replace defaults; exclude patterns are not implicitly combined.
 Include and exclude entries are glob patterns. An exclusion wins over an
 inclusion.
 
-## Local package CLI
+## Library packages
 
-`dokkurator-knowledge` searches upward for the project config and uses the
-active repository's document settings together with the project
-`knowledge.index`. Command-line options and supported environment variables are
-temporary overrides. Loader is a library package and does not expose a CLI.
+Loader and Knowledge do not expose standalone CLIs. The global `dokkurator`
+CLI reads this configuration through Core and does not provide temporary
+overrides for these settings.
 
 ## Credentials
 

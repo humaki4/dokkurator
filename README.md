@@ -37,7 +37,7 @@ Each package can be consumed through its public package root. Package responsibi
 
 ### Applications
 
-- **@dokkurator/cli** is the current local project interface. It manages configured sources and offers commands for indexing, diffing, searching, inspecting DocTypes/documents, and watching sources. See the [CLI README](./apps/cli/README.md) and [command reference](./apps/cli/docs/commands.md).
+- **@dokkurator/cli** is the current local project interface. It manages and prepares configured sources and offers commands for indexing, diffing, searching, inspecting DocTypes/documents, and watching sources. See the [CLI README](./apps/cli/README.md) and [command reference](./apps/cli/docs/commands.md).
 - **@dokkurator/catalog-server** is a Fastify service that currently exposes its OpenAPI contract. Catalog routes are not implemented yet; see the [server README](./apps/catalog-server/README.md).
 - **explorer-ui** is currently the React/Vite starter application. It is not yet connected to Dokkurator catalog workflows.
 
