@@ -5,6 +5,9 @@ import type {
   ConfigOptions,
   RepositoryConfig,
   ResolvedConfig,
+  ResolvedProjectConfig,
+  ResolvedProjectSource,
+  ResolvedSource,
 } from "./model.js";
 import { resolveIndexPath, resolveSourcePath } from "./paths.js";
 import { selectSources } from "./sources.js";
@@ -40,6 +43,19 @@ function resolveRepositoryValues(
 export async function resolveActiveConfig(
   options: ConfigOptions,
 ): Promise<ResolvedConfig> {
+  const project = await resolveProjectConfig(options);
+  const sources = await Promise.all(
+    project.sources.map((source) =>
+      resolveSourceConfig(project, source, options),
+    ),
+  );
+  return { ...project, sources };
+}
+
+/** Resolves project-level config without reading configured source repos. */
+export async function resolveProjectConfig(
+  options: ConfigOptions,
+): Promise<ResolvedProjectConfig> {
   const loaded = await loadConfig(options.root);
   const projectConfig = validateConfig({
     ...loaded.config,
@@ -63,22 +79,11 @@ export async function resolveActiveConfig(
     options.includeSources === false
       ? []
       : selectSources(project, options.sourceId);
-  const sources = await Promise.all(
-    selected.map(async (source) => {
-      const root = resolveSourcePath(project, source);
-      const repositoryConfig =
-        root === project.projectRoot
-          ? project.config
-          : await loadRepositoryConfig(root);
-      const repository = resolveRepositoryValues(repositoryConfig, options);
-      return {
-        id: source.id,
-        root,
-        ...(source.remote === undefined ? {} : { remote: source.remote }),
-        ...repository,
-      };
-    }),
-  );
+  const sources = selected.map((source) => ({
+    id: source.id,
+    root: resolveSourcePath(project, source),
+    ...(source.remote === undefined ? {} : { remote: source.remote }),
+  }));
   return {
     root: project.projectRoot,
     repository: resolveRepositoryValues(project.config, options),
@@ -87,5 +92,24 @@ export async function resolveActiveConfig(
     watch: {
       debounce: project.config.watch?.debounce ?? DEFAULT_CONFIG.watch.debounce,
     },
+  };
+}
+
+/** Loads and resolves the repository-local settings for one available source. */
+export async function resolveSourceConfig(
+  project: ResolvedProjectConfig,
+  source: ResolvedProjectSource,
+  options: Omit<ConfigOptions, "root"> = {},
+): Promise<ResolvedSource> {
+  const repositoryConfig =
+    source.root === project.root
+      ? project.repository
+      : await loadRepositoryConfig(source.root);
+  return {
+    ...source,
+    ...resolveRepositoryValues(repositoryConfig, {
+      root: project.root,
+      ...options,
+    }),
   };
 }
