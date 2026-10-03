@@ -1,0 +1,18 @@
+name: decision
+description: Architekturentscheidung mit bedingter Begründung.
+metadata:
+  type: object
+  required: [doctype, title, status]
+  properties:
+    doctype: { const: decision }
+    title: { type: string, minLength: 1 }
+    status: { enum: [draft, accepted, rejected] }
+    rationale: { type: string, minLength: 10 }
+  if:
+    required: [status]
+    properties:
+      status: { enum: [accepted, rejected] }
+  then:
+    required: [rationale]
+structure:
+  requiredHeadings: [Kontext, Entscheidung]

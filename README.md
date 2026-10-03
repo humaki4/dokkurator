@@ -23,6 +23,8 @@ The repository is a pnpm monorepo orchestrated with Nx.
 │   ├── knowledge/
 │   ├── loader/
 │   └── validator/
+├── examples/
+│   └── validator/
 └── docs/
 ```
 
@@ -31,9 +33,14 @@ The repository is a pnpm monorepo orchestrated with Nx.
 - **@dokkurator/config** loads and validates `.dokkurator/config.yaml`, resolves project and source settings, and supports source configuration updates.
 - **@dokkurator/loader** owns source contracts and adapters, and loads/parses Markdown documents and DocType definitions. A DocType describes document metadata and structure; its definition may also provide rules and a template.
 - **@dokkurator/knowledge** builds and updates the derived document index, provides SQLite storage, and exposes document queries and search.
-- **@dokkurator/validator** is currently a minimal placeholder. It is not yet connected to Knowledge indexing and should not be considered a complete document-validation workflow.
+- **@dokkurator/validator** provides synchronous Markdown validation through ESLint: DocType association, metadata schemas, required headings, and recommended Markdown rules. It is not yet connected to Knowledge indexing.
 
 Each package can be consumed through its public package root. Package responsibilities and dependency rules are described in [AGENTS.md](./AGENTS.md).
+
+Runnable [Validator examples](./examples/validator/README.md) demonstrate eight
+DocTypes, compact and full JSON Schemas, valid and invalid documents, a custom
+rule, and direct ESLint integration. See [examples](./examples/README.md) for the
+example collection; Knowledge examples are planned separately.
 
 ### Applications
 

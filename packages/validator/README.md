@@ -3,6 +3,11 @@
 Der Validator prüft Markdown synchron mit ESLint. DocTypes bleiben YAML;
 ESLint-Regeln und Plugins werden in JavaScript konfiguriert.
 
+Ein ausführbares [Beispielprojekt](../../examples/validator/README.md) enthält
+acht DocTypes, gültige und fehlerhafte Dokumente sowie Library-, ESLint- und
+Plugin-Aufrufe. Es dokumentiert auch die Migration von der entfernten temporären
+`validateDocument`-API auf `prepareLintConfiguration` und `lint`.
+
 ## Ablauf und Zuständigkeiten
 
 Es gibt zwei getrennte Phasen:

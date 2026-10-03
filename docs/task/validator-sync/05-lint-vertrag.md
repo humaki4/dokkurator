@@ -27,8 +27,9 @@ const result = lint({
 
 Die Root-API erhält nur `lint` und `LintRuntimeError` hinzu. Keine zusätzlichen
 Root-Typ-Exports: Eingabe und Ergebnis sind über `Parameters<typeof lint>[0]`
-und `ReturnType<typeof lint>` ableitbar. Die bisherige Pflichtfeld-API
-`validateDocument` bleibt unverändert.
+und `ReturnType<typeof lint>` ableitbar. Die temporäre Pflichtfeld-API
+`validateDocument` wurde inzwischen entfernt. Die [Beispielanleitung](../../../examples/validator/README.md#migration-vom-temporären-validator)
+beschreibt den Wechsel auf Schema-Definitionen und `lint`.
 
 ## Profil und Ergebnis
 

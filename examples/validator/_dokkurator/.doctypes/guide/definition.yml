@@ -1,0 +1,12 @@
+name: guide
+description: Kompakte Anleitung mit Zielgruppe und Pflichtüberschrift.
+metadata:
+  doctype: { const: guide, required: true }
+  title: { type: string, minLength: 5, required: true }
+  audience: { type: string, enum: [developer, operator, user], required: true }
+  tags:
+    type: array
+    uniqueItems: true
+    items: { type: string, pattern: "^[a-z][a-z-]*$" }
+structure:
+  requiredHeadings: [Einstieg]

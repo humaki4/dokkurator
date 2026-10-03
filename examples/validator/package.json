@@ -1,0 +1,31 @@
+{
+  "name": "@dokkurator/example-validator",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "demo": "node src/run.mjs",
+    "demo:valid": "node src/run.mjs valid",
+    "demo:invalid": "node src/run.mjs invalid",
+    "demo:virtual": "node src/virtual.mjs",
+    "demo:eslint": "eslint --config eslint.config.mjs documents",
+    "demo:plugin": "eslint --config eslint-plugin.config.mjs documents",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.check.json",
+    "lint": "eslint --config ../../eslint.config.mjs src eslint.config.mjs eslint-plugin.config.mjs"
+  },
+  "dependencies": {
+    "@dokkurator/loader": "workspace:*",
+    "@dokkurator/validator": "workspace:*",
+    "@eslint/markdown": "8.0.3",
+    "eslint": "10.10.0"
+  },
+  "nx": {
+    "targets": {
+      "test": {
+        "dependsOn": [
+          "^build"
+        ]
+      }
+    }
+  }
+}

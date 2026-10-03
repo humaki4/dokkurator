@@ -139,13 +139,14 @@ liefern. Wiederholte Aufrufe dürfen keinen Suppressions- oder Dokumentzustand t
 
 ## Migration
 
-`validateDocument(docType, document): ValidationResult` bleibt unverändert
-exportiert, einschließlich `valid` und `missingFields`. Bestehende Aufrufer und
-Tests bleiben gültig. Die neue `lint`-Operation wird in Aufgabe 05 zusätzlich
-exportiert; `ValidationResult` wird nicht für das neue Ergebnis umdefiniert.
-Die bisherige Pflichtfeldprüfung wird weder automatisch auf ESLint umgeleitet
-noch als vollständige Schema-Validierung ausgegeben. Eine spätere Entfernung
-braucht eine eigene Migration mit aktualisierten Aufrufern.
+Die ursprünglich vorübergehend beibehaltene API
+`validateDocument(docType, document): ValidationResult` wurde inzwischen entfernt.
+Neue Aufrufer verwenden `ParsedDocType.metadata` für Pflichtfelder, bereiten
+DocTypes und Regeln einmal vor und rufen synchron `lint` mit Originaltext und
+Quellenidentität auf. Eingabe, Ergebnis und Fehlerkategorien unterscheiden sich
+vom früheren `valid`/`missingFields`-Vertrag. Eine ausführbare
+[Migrationsanleitung](../../../examples/validator/README.md#migration-vom-temporären-validator)
+zeigt den aktuellen Ablauf.
 
 ## Quellen
 

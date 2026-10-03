@@ -1,10 +1,11 @@
 # Tasks: synchrone ESLint-Regelausführung
 
 Status: Aufgaben 01, 02, 04, 05, 06 und 07 abgeschlossen; Aufgabe 03 auf Wunsch übersprungen;
-Aufgabe 08 noch nicht begonnen.
+Aufgabe 08 abgeschlossen. Die [Beispielsammlung](../../../examples/validator/README.md)
+zeigt den synchronen Library- und Plugin-Ablauf mit acht DocTypes.
 
 Die [Runtime-Entscheidung](./01-runtime-entscheidung.md) dokumentiert die geprüfte
-Versionskombination, den synchronen Zielvertrag und die unveränderte Bestands-API.
+Versionskombination, den synchronen Zielvertrag und die Migration der temporären API.
 Der [Loader-Vertrag](./02-loader-vertrag.md) beschreibt Originaltext, Positionen,
 Parse-Diagnosen und die Entscheidung zum künftigen Konfigurationsformat.
 Der [Konfigurationsvertrag](./04-konfigurationsvertrag.md) beschreibt die

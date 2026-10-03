@@ -1,0 +1,24 @@
+name: api
+description: Gegenseitig ausschließende Authentifizierungsvarianten und Zahlenbereich.
+metadata:
+  type: object
+  required: [doctype, title, auth, timeoutSeconds]
+  properties:
+    doctype: { const: api }
+    title: { type: string }
+    timeoutSeconds: { type: integer, minimum: 1, maximum: 60 }
+    auth:
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [kind]
+          properties:
+            kind: { const: none }
+        - type: object
+          additionalProperties: false
+          required: [kind, tokenUrl]
+          properties:
+            kind: { const: oauth2 }
+            tokenUrl: { type: string, format: uri }
+structure:
+  requiredHeadings: [Anfrage, Antwort]

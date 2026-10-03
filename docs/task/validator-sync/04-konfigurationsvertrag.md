@@ -62,7 +62,8 @@ Die Beispiele setzen bereits geladene Daten und importierte Plugins voraus.
 `validateMetadata` liefert synchron `{ valid, errors }` mit unabhängigen
 Ajv-Fehlerkopien. Seit Aufgabe 06 verwendet auch die Metadaten-ESLint-Regel diese
 Prüfung. Die öffentliche [Lint-Fassade](./05-lint-vertrag.md) ist in Aufgabe 05 umgesetzt.
-`validateDocument` und sein bisheriges Ergebnis bleiben unverändert.
+Die temporäre `validateDocument`-API wurde inzwischen entfernt; neue Aufrufer
+verwenden die [Lint-Fassade](./05-lint-vertrag.md).
 
 DocTypes und Schema-Daten werden kopiert. Vorbereitete Definitionen sind
 unveränderlich; Flat-Config-Helfer liefern unabhängige Kopien der Config-Container

@@ -1,6 +1,6 @@
 # 08 — Synchrone Ausführung vollständig nachweisen und dokumentieren
 
-Status: vorgeschlagen, nicht begonnen.
+Status: abgeschlossen.
 
 Abhängigkeiten: 07.
 
@@ -29,6 +29,47 @@ Ein verifiziertes synchrones Lint-MVP samt Nutzungsbeispielen und dokumentierten
 ## Umfangsgrenze
 
 Keine Kontext-Runtime, keine neue CLI, kein Deployment; diese Liste endet beim synchronen Library- und Plugin-MVP.
+
+## Nachweise und Beispiele
+
+- [`examples/validator`](../../../examples/validator/README.md) enthält acht
+  DocTypes, acht gültige und 16 gezielt fehlerhafte oder warnende Dokumente.
+  Gezeigt werden Compact und JSON Schema, Pflichtfelder und Überschriften,
+  `pattern`, `enum`, Array- und Zahlenbedingungen, verschachtelte Objekte,
+  Formate, `additionalProperties`, `if`/`then`, `oneOf`, vorab geladene `$ref`
+  und ein eigenes Markdown-Plugin.
+- `examples/validator/src/setup.examples.test.ts` vergleicht für alle 24
+  Dokumente die Meldungen der Fassade mit Standard-ESLint über `createLintConfig`
+  und mit einer direkten Einbindung von `plugin.configs.recommended`. Rule-IDs,
+  Schwere, Meldungstext und vollständige Quellpositionen stimmen überein. Gültige
+  Dokumente bleiben meldungsfrei; Fehlerbeispiele treffen jeweils die erwartete
+  Regel. Die beiden Warnungsbeispiele bleiben im Status `passed`.
+- `packages/validator/src/lint/runtime/runtime.sources.test.ts` lädt
+  Dateisystem-Text und einen echten lokalen Git-Commit. Anschließend wird die
+  temporäre Quelle entfernt; beide synchronen Prüfwege funktionieren weiterhin.
+  Der Commit-Text bleibt trotz geänderter Arbeitskopie unverändert, und die
+  Diagnose erhält seine Revision. Eine virtuelle Quelle verweigert nach dem
+  Laden jeden weiteren Zugriff; wiederholte Aufrufe für verschiedene Dokumente
+  bleiben unabhängig. CRLF und Unicode-Positionen werden mitgeprüft.
+- Derselbe Test unterscheidet fehlende Quelldateien, den standardmäßigen
+  `DocumentParseError`, gesammelte Parse-Findings und einen
+  `LintConfigurationError` bei unbekannten Regeln. Vorhandene Fehler- und
+  Diagnosetests decken zusätzlich Regelabstürze, Suppressionen, BOM, Fixes,
+  ungültige Optionen, fehlende Ressourcen und Schema-Konflikte ab.
+- Die Beispielanleitung dokumentiert Vorbereitung, Root-APIs, Plugin-Verwendung,
+  erwartete Exit-Codes und den Wechsel von der entfernten `validateDocument`-API
+  auf Schemas und `lint`. Die bestehende Dokkurator-CLI erhält keinen neuen
+  Befehl. CLI-Anbindung und Knowledge-Beispiele sind getrennte Folgeaufgaben.
+- Das Beispielprojekt ist ein privater Workspace-Verbraucher der vorhandenen
+  Root-APIs. Manifeste und Lockfile wurden ohne Dependency-Upgrades ergänzt;
+  Bibliotheksimplementierungen und öffentliche Exports wurden nicht erweitert.
+
+Verifikation: Loader (85 Tests), Validator (146 Tests) und Beispielvergleich
+(ein Test über die gesamte Sammlung), betroffene Builds und Typechecks sowie
+Lint- und Formatprüfungen. Die dokumentierten Beispielbefehle wurden ausgeführt;
+ESLint meldet für die Fehlersammlung erwartungsgemäß 25 Fehler und zwei Warnungen.
+Boundary- und Referenzsuchen zeigen keine internen Cross-Package-Imports,
+Knowledge-Abhängigkeiten oder Runtime-I/O im Validator.
 
 ## Grundlage
 
