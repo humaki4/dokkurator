@@ -54,6 +54,24 @@ function document(body: string, eol = "\n") {
 }
 
 describe("metadata rule ESLint integration", () => {
+  test("metadata and association rules can be enabled independently", () => {
+    const text = document("details:\n  title: 42");
+    const withoutAssociation = prepareLintConfiguration({
+      docTypes: [docType],
+      rules: { "dokkurator/doctype": "off" },
+    });
+    expect(check(text, withoutAssociation).diagnostics).toEqual([
+      expect.objectContaining({
+        ruleId: "dokkurator/metadata-schema",
+        messageId: "invalid-metadata",
+      }),
+    ]);
+    const withoutSchema = prepareLintConfiguration({
+      docTypes: [docType],
+      rules: { "dokkurator/metadata-schema": "off" },
+    });
+    expect(check(text, withoutSchema).diagnostics).toEqual([]);
+  });
   test.each([
     document("details:\n  title: Guide"),
     document("details:\n  title: 42"),
@@ -90,7 +108,7 @@ describe("metadata rule ESLint integration", () => {
   test("schema diagnostics obey normal ESLint severity and off overrides", () => {
     const prepared = prepareLintConfiguration({
       docTypes: [docType],
-      rules: { "dokkurator/doctype": "warn" },
+      rules: { "dokkurator/metadata-schema": "warn" },
     });
     const text = document("details:\n  title: 42");
     expect(check(text, prepared)).toMatchObject({
@@ -99,7 +117,7 @@ describe("metadata rule ESLint integration", () => {
     });
     const disabled = prepareLintConfiguration({
       docTypes: [docType],
-      rules: { "dokkurator/doctype": "off" },
+      rules: { "dokkurator/metadata-schema": "off" },
     });
     expect(check(text, disabled).diagnostics).toEqual([]);
   });

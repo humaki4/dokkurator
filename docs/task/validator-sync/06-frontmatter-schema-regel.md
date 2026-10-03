@@ -10,12 +10,18 @@ Frontmatter wird mit Ajv gegen das DocType-Schema geprüft; Dokkurator implement
 
 ## Umsetzung und Vertrag
 
-Die bestehende ESLint-Regel `dokkurator/doctype` prüft zuerst YAML und DocType-Zuordnung,
-anschließend das vorbereitete Schema. So gibt es einen Parse-Durchlauf und keine
-doppelten Befunde aus Auswahl- und Schema-Regeln. Die Regel ist standardmäßig
-`error`; globale und projektspezifische `rules` können sie wie bisher auf `warn`
-oder `off` setzen. `off` deaktiviert sowohl Zuordnung als auch Metadatenprüfung.
-Es gibt keine weiteren Root-Exports oder Abhängigkeiten.
+Die Schema-Prüfung wurde zunächst in `dokkurator/doctype` integriert und ist
+inzwischen als `dokkurator/metadata-schema` getrennt. `doctype` prüft YAML und
+Zuordnung; `metadata-schema` prüft das vorbereitete Schema. Beide Regeln teilen
+dieselbe YAML-Auswertung und stehen im empfohlenen Profil auf `error`. Globale
+und projektspezifische `rules` können sie unabhängig auf `warn` oder `off` setzen.
+`doctype: off` deaktiviert die Metadatenprüfung nicht mehr. Es gibt keine weiteren
+Root-Exports oder Abhängigkeiten.
+
+Ajv-Vorbereitung, DocType-Auswahl und ESLint-Regeln liegen in separaten Bereichen
+`schemas/`, `doc-types/` und `rules/`. Die
+[Paket-Dokumentation](../../../packages/validator/README.md) erklärt beide Phasen
+und die Zuständigkeiten.
 
 Ajv übernimmt sämtliche Keywords, inklusive Bedingungen und vorab geladener
 `$ref`-Ressourcen. Schema-Befunde haben `messageId: invalid-metadata`, Phase `lint`
@@ -47,11 +53,10 @@ Regel. Metadaten werden weder ergänzt, konvertiert noch bereinigt.
 
 Geprüft mit ESLint 10.10.0, `@eslint/markdown` 8.0.3, Ajv 8.20.0 und yaml 2.9.1.
 Die relevanten Evaluationsfälle der übersprungenen Aufgabe 03 sind in
-den thematisch gruppierten Tests `doctype-rule.schema.test.ts`,
-`doctype-rule.positions.test.ts`, `doctype-rule.parsing.test.ts`,
-`doctype-rule.association.test.ts` und `doctype-rule.integration.test.ts` neben
-`packages/validator/src/lint/doctype-rule.ts` sowie den Vorbereitungstests neben
-`doc-types.ts` abgedeckt:
+den thematisch gruppierten Tests neben `rules/metadata-schema-rule/` und
+`rules/doctype-rule/` sowie den Vorbereitungstests neben `schemas/schemas.ts`
+und `doc-types/doc-types.ts` abgedeckt. Die neue Schema-Regel wird auch direkt
+mit ESLint RuleTester geprüft:
 
 | Fall                                                              | Ergebnis                                                 |
 | ----------------------------------------------------------------- | -------------------------------------------------------- |

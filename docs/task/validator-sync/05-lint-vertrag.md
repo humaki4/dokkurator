@@ -34,7 +34,8 @@ und `ReturnType<typeof lint>` ableitbar. Die bisherige Pflichtfeld-API
 
 Die gemeinsame Vorbereitung aktiviert alle Regeln aus
 `@eslint/markdown.configs.recommended` der installierten Version 8.0.3 sowie
-`dokkurator/doctype` sowie seit Aufgabe 07 `dokkurator/required-headings`.
+`dokkurator/doctype`, die inzwischen getrennte Regel `dokkurator/metadata-schema`
+sowie seit Aufgabe 07 `dokkurator/required-headings`.
 Das gilt auch für direktes ESLint über `createLintConfig`.
 Eigene `rules`-Einträge haben Vorrang, einschließlich `warn` und `off`.
 Die Config-Schicht führt vorher Projekt- und Repository-Overrides zusammen.
@@ -85,8 +86,8 @@ bereitstellen; beliebiger Plugin-Code wird nicht sandboxed.
 
 Loader-Parse-Diagnosen werden nicht zusätzlich angehängt: Der Originaltext ist
 maßgeblich und jeder YAML-Parsefehler erscheint einmal. Feldbezogene Schema-Diagnosen
-sind seit [Aufgabe 06](./06-frontmatter-schema-regel.md) ebenfalls Teil von
-`dokkurator/doctype`. CLI-Lint-Befehle,
+sind seit [Aufgabe 06](./06-frontmatter-schema-regel.md) ebenfalls Teil des
+Lint-Ablaufs und gehören inzwischen zur gesonderten Regel `dokkurator/metadata-schema`. CLI-Lint-Befehle,
 Kontextvalidierung, Caching und Persistenz bleiben außerhalb dieser Aufgabe.
 
 ## Nachweis

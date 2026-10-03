@@ -20,6 +20,7 @@ describe("public plugin and recommended profile", () => {
     expect(config[0]!.plugins!.dokkurator).toBe(plugin);
     expect(config[0]!.rules).toMatchObject({
       "dokkurator/doctype": "error",
+      "dokkurator/metadata-schema": "error",
       "dokkurator/required-headings": "error",
     });
   });

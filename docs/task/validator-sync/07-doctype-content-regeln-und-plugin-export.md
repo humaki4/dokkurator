@@ -10,8 +10,8 @@ Das bestehende Validator-Paket stellt ein normales ESLint-Plugin bereit, einschl
 
 ## Umsetzung
 
-Die Paket-Root exportiert zusätzlich nur `plugin`, mit den Regeln `doctype` und
-`required-headings` sowie `configs.recommended`. Das Profil registriert das Plugin
+Die Paket-Root exportiert zusätzlich nur `plugin`, mit den Regeln `doctype`,
+`metadata-schema` und `required-headings` sowie `configs.recommended`. Das Profil registriert das Plugin
 und legt seine Standardregeln fest. `createLintConfig` verwendet dieses Profil
 und das empfohlene Markdown-Profil, ohne einzelne Dokkurator-Rule-IDs zu kennen.
 Vorbereitete DocTypes werden
@@ -28,7 +28,7 @@ Frontmatter `missing-heading` mit DocType und Überschriftentext gemeldet.
 Die Regel hat keine zusätzlichen Optionen (`meta.schema: []`); Schweregrad und
 Aktivierung folgen ESLint-Konventionen. Sie überspringt Dokumente mit kaputtem
 YAML oder ungültiger DocType-Zuordnung, damit die Metadatenregel diese Fehler nur
-einmal meldet. Beide Regeln teilen eine YAML-Auswertung pro ESLint-Source-Objekt;
+einmal meldet. Alle drei Regeln teilen eine YAML-Auswertung pro ESLint-Source-Objekt;
 erfasste Überschriften bleiben lokal im jeweiligen Regellauf.
 
 Die Prüfung von `structure.requiredHeadings` gehört zur Überschriften-Regel und

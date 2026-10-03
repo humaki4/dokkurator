@@ -1,9 +1,6 @@
 import { type ParsedDocType } from "@dokkurator/loader";
 import { describe, expect, test } from "vitest";
-import {
-  LintConfigurationError,
-  prepareLintConfiguration,
-} from "../../index.js";
+import { LintConfigurationError, prepareLintConfiguration } from "../index.js";
 
 function docType(
   metadata: ParsedDocType["metadata"] = { type: "object" },

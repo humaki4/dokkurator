@@ -3,6 +3,33 @@
 Der Validator prüft Markdown synchron mit ESLint. DocTypes bleiben YAML;
 ESLint-Regeln und Plugins werden in JavaScript konfiguriert.
 
+## Ablauf und Zuständigkeiten
+
+Es gibt zwei getrennte Phasen:
+
+1. `prepareLintConfiguration` nimmt bereits geladene Daten entgegen. Die
+   DocType-Vorbereitung erstellt unveränderliche Definitionen und eine Suche nach
+   Namen. Die Schema-Vorbereitung kompiliert alle JSON Schemas mit Ajv. Danach
+   entsteht die geprüfte ESLint-Konfiguration mit den empfohlenen Profilen.
+2. `lint` prüft die Eingabe, führt ESLint aus und bereitet dessen Meldungen mit
+   Quellenidentität und Originalpositionen auf. ESLint ruft die aktivierten
+   Regeln auf; nur die Metadaten-Regel verwendet den vorbereiteten Ajv-Validator.
+
+| Bereich unter `src/` | Aufgabe                                                                    |
+| -------------------- | -------------------------------------------------------------------------- |
+| `schemas/`           | Schema-Identitäten, Registrierung und Ajv-Kompilierung; keine ESLint-Regel |
+| `doc-types/`         | Definitionen vorbereiten und DocType anhand von Metadaten auswählen        |
+| `markdown/`          | Frontmatter aus Originaltext lesen und YAML-Positionen erhalten            |
+| `rules/`             | Einzelne fachliche ESLint-Prüfungen                                        |
+| `plugin/`            | Regeln bündeln, empfohlenes Profil und Regel-Settings bereitstellen        |
+| `lint/`              | ESLint-Konfiguration, Ausführung und Ergebnisaufbereitung                  |
+| `legacy/`            | Bestehende Pflichtfeld-API, unabhängig vom neuen Ablauf                    |
+
+Die Einstiegspunkte beschreiben den Ablauf mit benannten Schritten. Die
+Ajv-Optionen, YAML-Knotenauflösung, ESLint-Konfigurationsprobe und
+Diagnoseumwandlung liegen in den jeweiligen Implementierungen. `index.ts`
+enthält ausschließlich Exports; es gibt keine neuen Paketgrenzen.
+
 ## In einer normalen ESLint-Konfiguration
 
 `eslint.config.js` in einem ESM-Projekt (alternativ `eslint.config.mjs`):
@@ -60,13 +87,24 @@ export default [
 ```
 
 Ohne vorbereitete `settings.dokkurator` melden aktivierte Dokkurator-Regeln einen
-Konfigurationsfehler. Beide Regeln haben keine zusätzlichen Regeloptionen.
+Konfigurationsfehler. Die Regeln haben keine zusätzlichen Regeloptionen.
 Die Paket-Root ist der einzige Exportpfad; zusätzliche Hilfstypen werden nicht exportiert.
 
 ## DocType-Regeln
 
-`dokkurator/doctype` prüft YAML, die eindeutige DocType-Zuordnung und Metadaten
-gegen das vorbereitete JSON Schema. `dokkurator/required-headings` prüft
+Das empfohlene Profil aktiviert drei voneinander getrennte Regeln:
+
+- `dokkurator/doctype` prüft YAML und die eindeutige DocType-Zuordnung.
+- `dokkurator/metadata-schema` prüft Metadaten gegen das vorbereitete JSON Schema.
+- `dokkurator/required-headings` prüft Pflichtüberschriften.
+
+Alle drei Regeln sind unabhängig mit `warn` und `off` konfigurierbar. Seit der
+Trennung deaktiviert `dokkurator/doctype: off` die Schema-Prüfung nicht mehr;
+dazu wird `dokkurator/metadata-schema: off` verwendet. Bei fehlerhaftem YAML oder
+ungültiger Zuordnung überspringt die Schema-Regel die Prüfung, damit nur die
+Zuordnungs-Regel den ursprünglichen Fehler meldet.
+
+Pflichtüberschriften stehen in
 `structure.requiredHeadings`, beispielsweise in
 `_dokkurator/.doctypes/decision/definition.yml`:
 
@@ -98,7 +136,7 @@ Für Pflichtüberschriften gilt:
   und Überschriftentext in der Meldung. Bei fehlerhaftem YAML oder ungültiger
   DocType-Zuordnung werden keine zusätzlichen Überschriftenfehler erzeugt.
   Bei gültiger Zuordnung läuft die Inhaltsprüfung auch bei Schema-Verletzungen.
-- Beide Regeln sind unabhängig abschaltbar. Ungültige Überschriftenanforderungen
+- Die Regeln sind unabhängig abschaltbar. Ungültige Überschriftenanforderungen
   prüft die aktivierte Überschriften-Regel in ihrem `create`-Schritt selbst und
   meldet sie als Konfigurationsfehler. Bei `off` erfolgt diese Prüfung nicht.
   Die allgemeine DocType-Vorbereitung kennt diese Regelkonfiguration nicht.
@@ -113,5 +151,7 @@ Die Diagnosephase kommt ebenfalls aus der jeweiligen Regel: Optional ordnet
 `lint`; fatale ESLint-Parserfehler sind stets `parse`. Dafür sind keine konkreten
 Rule-IDs in der Fassade hinterlegt.
 
-Die bestehende `validateDocument`-API bleibt verfügbar. Der synchrone Einstieg
+Die bestehende `validateDocument`-API bleibt als isolierte Kompatibilitätsfunktion
+in `legacy/validate-document.ts` verfügbar. Sie ist keine zusätzliche ESLint-Regel.
+Der synchrone Einstieg
 für vollständiges Markdown ist `lint({ originalText, source, configuration })`.

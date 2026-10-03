@@ -48,7 +48,7 @@ function document(body: string, eol = "\n") {
     .replace(/\n/g, eol);
 }
 
-describe("original YAML source positions", () => {
+describe("metadata schema source positions", () => {
   test.each(["\n", "\r\n", "\r"])(
     "retains source positions with %j line endings and a BOM",
     (eol) => {
@@ -60,13 +60,4 @@ describe("original YAML source positions", () => {
       });
     },
   );
-  test("localizes duplicate keys in the original YAML", () => {
-    expect(
-      check(document("details: {}\ndetails: {}", "\r\n")).diagnostics[0],
-    ).toMatchObject({
-      phase: "parse",
-      location: { line: 4, column: 1, endLine: 4, endColumn: 2 },
-      message: expect.stringContaining("unique"),
-    });
-  });
 });

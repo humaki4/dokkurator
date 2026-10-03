@@ -1,5 +1,5 @@
-import type { PreparedDocTypeRegistry } from "./doc-types/doc-types.js";
-import { LintConfigurationError } from "./errors.js";
+import type { PreparedDocTypeRegistry } from "../doc-types/doc-types.js";
+import { LintConfigurationError } from "../lint/errors.js";
 
 export function getDocTypeRegistry(
   settings: Readonly<Record<string, unknown>>,

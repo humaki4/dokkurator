@@ -2,31 +2,7 @@ import { type ParsedDocType } from "@dokkurator/loader";
 import { describe, expect, test } from "vitest";
 import { lint, prepareLintConfiguration } from "../../index.js";
 
-const schema = {
-  type: "object",
-  required: ["doctype", "details"],
-  properties: {
-    doctype: { const: "guide" },
-    details: {
-      type: "object",
-      required: ["title"],
-      properties: {
-        title: { type: "string", minLength: 3, pattern: "^[A-Z]" },
-        state: { enum: ["draft", "published"] },
-        count: { type: "integer", minimum: 1, maximum: 5 },
-        tags: { type: "array", items: { type: "string" } },
-        "a/b~c": { type: "string" },
-        "123": { type: "string" },
-      },
-      if: {
-        required: ["state"],
-        properties: { state: { const: "published" } },
-      },
-      then: { required: ["owner"] },
-      additionalProperties: false,
-    },
-  },
-};
+const schema = { type: "object" };
 
 const docType: ParsedDocType = { name: "guide", metadata: schema, rules: [] };
 
@@ -61,5 +37,14 @@ describe("invalid frontmatter", () => {
     expect(check(text).diagnostics).toEqual([
       expect.objectContaining({ messageId }),
     ]);
+  });
+  test("localizes duplicate keys in the original YAML", () => {
+    expect(
+      check(document("details: {}\ndetails: {}", "\r\n")).diagnostics[0],
+    ).toMatchObject({
+      phase: "parse",
+      location: { line: 4, column: 1, endLine: 4, endColumn: 2 },
+      message: expect.stringContaining("unique"),
+    });
   });
 });

@@ -1,11 +1,12 @@
-import { Linter } from "eslint";
-import markdown, { MarkdownLanguage } from "@eslint/markdown";
+import { validateLintConfiguration } from "./validate-configuration.js";
+import type { MetadataSchema } from "../../schemas/schemas.js";
+import type { Linter } from "eslint";
+import markdown from "@eslint/markdown";
 import type { ParsedDocType } from "@dokkurator/loader";
 import {
   prepareDocTypes,
-  type MetadataSchema,
   type PreparedDocTypeRegistry,
-} from "../doc-types/doc-types.js";
+} from "../../doc-types/doc-types.js";
 import { plugin } from "../../plugin/plugin.js";
 import { LintConfigurationError } from "../errors.js";
 
@@ -28,44 +29,9 @@ export function prepareLintConfiguration(
 ): PreparedLintConfiguration {
   const registry = prepareDocTypes(input.docTypes, input.schemas ?? {});
   try {
-    if (
-      Object.hasOwn(input.plugins ?? {}, "markdown") ||
-      Object.hasOwn(input.plugins ?? {}, "dokkurator")
-    ) {
-      throw new LintConfigurationError(
-        "Plugin namespaces markdown and dokkurator are reserved.",
-      );
-    }
-    const entry: Linter.Config = {
-      name: "dokkurator/prepared-markdown",
-      // Accept upper-case extensions supported by Loader as well.
-      files: ["**/*.[mM][dD]"],
-      language: "markdown/gfm",
-      languageOptions: { frontmatter: "yaml" },
-      plugins: {
-        ...input.plugins,
-        markdown,
-        dokkurator: plugin,
-      },
-      settings: { dokkurator: registry },
-      rules: {
-        ...Object.assign(
-          {},
-          ...[
-            ...markdown.configs.recommended,
-            ...plugin.configs.recommended,
-          ].map((config) => config.rules),
-        ),
-        ...structuredClone(input.rules ?? {}),
-      },
-    };
+    const entry = createMarkdownConfig(input, registry);
     validateLintConfiguration([entry], "__dokkurator_configuration__.md");
-    Object.freeze(entry.files);
-    Object.freeze(entry.languageOptions);
-    Object.freeze(entry.plugins);
-    Object.freeze(entry.settings);
-    freezeOptions(entry.rules);
-    Object.freeze(entry);
+    freezeConfig(entry);
     return Object.freeze({ ...registry, flatConfig: Object.freeze([entry]) });
   } catch (cause) {
     if (cause instanceof LintConfigurationError) throw cause;
@@ -93,64 +59,54 @@ export function createLintConfig(
   }));
 }
 
-export function validateLintConfiguration(
-  config: Linter.Config[],
-  filename: string,
-): void {
-  // ESLint validates rule IDs/options before parsing. An intentional failed parse
-  // ends this configuration-only probe before any plugin's create/visitor runs.
-  const language = new MarkdownLanguage({ mode: "gfm" });
-  language.parse = () => ({
-    ok: false,
-    errors: [{ message: "Configuration probe.", line: 1, column: 1 }],
-  });
-  try {
-    const messages = new Linter({ configType: "flat" }).verify(
-      "",
-      config.map((entry) => ({
-        ...entry,
-        // Disabled IDs/options are configuration too; validate without executing.
-        rules: Object.fromEntries(
-          Object.entries(entry.rules ?? {}).map(([id, rule]) => [
-            id,
-            Array.isArray(rule)
-              ? rule[0] === "off" || rule[0] === 0
-                ? ["error", ...rule.slice(1)]
-                : rule
-              : rule === "off" || rule === 0
-                ? "error"
-                : rule,
-          ]),
-        ),
-        plugins: {
-          ...entry.plugins,
-          markdown: { ...markdown, languages: { gfm: language } },
-        },
-      })),
-      { filename },
-    );
-    if (
-      !messages.some(
-        (message) =>
-          message.fatal &&
-          message.message === "Parsing error: Configuration probe.",
-      )
-    ) {
-      throw new Error(`No applicable Markdown configuration for ${filename}.`);
-    }
-  } catch (cause) {
-    throw new LintConfigurationError(
-      `Invalid ESLint rule configuration: ${cause instanceof Error ? cause.message : String(cause)}`,
-      {
-        cause,
-      },
-    );
-  }
-}
-
 function freezeOptions(value: unknown): void {
   if (value === null || typeof value !== "object" || Object.isFrozen(value))
     return;
   Object.freeze(value);
   for (const child of Object.values(value)) freezeOptions(child);
+}
+
+function freezeConfig(entry: Linter.Config): void {
+  Object.freeze(entry.files);
+  Object.freeze(entry.languageOptions);
+  Object.freeze(entry.plugins);
+  Object.freeze(entry.settings);
+  freezeOptions(entry.rules);
+  Object.freeze(entry);
+}
+
+function createMarkdownConfig(
+  input: LintConfigurationInput,
+  registry: PreparedDocTypeRegistry,
+): Linter.Config {
+  if (
+    Object.hasOwn(input.plugins ?? {}, "markdown") ||
+    Object.hasOwn(input.plugins ?? {}, "dokkurator")
+  ) {
+    throw new LintConfigurationError(
+      "Plugin namespaces markdown and dokkurator are reserved.",
+    );
+  }
+  return {
+    name: "dokkurator/prepared-markdown",
+    // Accept upper-case extensions supported by Loader as well.
+    files: ["**/*.[mM][dD]"],
+    language: "markdown/gfm",
+    languageOptions: { frontmatter: "yaml" },
+    plugins: {
+      ...input.plugins,
+      markdown,
+      dokkurator: plugin,
+    },
+    settings: { dokkurator: registry },
+    rules: {
+      ...Object.assign(
+        {},
+        ...[...markdown.configs.recommended, ...plugin.configs.recommended].map(
+          (config) => config.rules,
+        ),
+      ),
+      ...structuredClone(input.rules ?? {}),
+    },
+  };
 }

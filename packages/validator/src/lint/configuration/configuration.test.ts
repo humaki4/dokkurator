@@ -47,6 +47,8 @@ describe("ESLint configuration validation and isolation", () => {
     { "markdown/no-duplicate-headings": ["error", { unexpected: true }] },
     { "dokkurator/doctype": ["error", "unexpected"] },
     { "dokkurator/doctype": ["off", "unexpected"] },
+    { "dokkurator/metadata-schema": ["error", "unexpected"] },
+    { "dokkurator/metadata-schema": ["off", "unexpected"] },
   ] as Linter.RulesRecord[])(
     "rejects rule configuration %j during preparation",
     (rules) => {

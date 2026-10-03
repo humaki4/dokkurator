@@ -69,7 +69,7 @@ describe("DocType metadata schema validation", () => {
     expect(result.diagnostics).toEqual([
       expect.objectContaining({
         phase: "lint",
-        ruleId: "dokkurator/doctype",
+        ruleId: "dokkurator/metadata-schema",
         messageId: "invalid-metadata",
         message: expect.stringContaining(`(${keyword})`),
         location: expect.objectContaining({ line, column }),

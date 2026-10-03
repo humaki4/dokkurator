@@ -36,6 +36,7 @@ describe("heading rule invocation and diagnostics", () => {
     expect(
       result({
         "dokkurator/doctype": "off",
+        "dokkurator/metadata-schema": "off",
         "dokkurator/required-headings": "warn",
       }),
     ).toEqual([

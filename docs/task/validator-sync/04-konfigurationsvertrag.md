@@ -7,7 +7,8 @@ Status: Aufgabe 04 umgesetzt, 2026-10-03.
 Aufgabe 03 wird auf Wunsch übersprungen. Das externe Frontmatter-Schema-Plugin
 wird nicht übernommen. Eine eigene dünne Integration verwendet Ajv und `yaml`;
 die Metadatenprüfung ist mit [Aufgabe 06](./06-frontmatter-schema-regel.md) in
-`dokkurator/doctype` integriert. Das Plugin darf später
+die gesonderte Regel `dokkurator/metadata-schema` ausgelagert; sie war zunächst
+in `dokkurator/doctype` integriert. Das Plugin darf später
 als Funktionsumfang-Referenz dienen, ist aber keine Abhängigkeit.
 
 ESLint-Regeln werden als JavaScript-Objekt konfiguriert. DocType-Definitionen
@@ -31,8 +32,8 @@ vom Dateiformat, aus dem eine Anwendung ihre Einstellungen lädt.
   DocType-Registry samt kompilierten Schemas und geprüfter Flat Config.
 - `createLintConfig(inputOrPrepared)`: dieselbe Konfiguration als normales
   ESLint-Flat-Config-Array; wiederverwendbar für direktes und eingebettetes ESLint.
-- `plugin`: seit Aufgabe 07 das normale ESLint-Plugin mit `doctype` und
-  `required-headings`; Ressourcen kommen aus `settings.dokkurator`.
+- `plugin`: seit Aufgabe 07 das normale ESLint-Plugin, aktuell mit `doctype`,
+  `metadata-schema` und `required-headings`; Ressourcen kommen aus `settings.dokkurator`.
 - `LintConfigurationError` sowie die zentralen Typen `LintConfigurationInput`
   und `PreparedLintConfiguration`. Untertypen bleiben ohne eigene Root-Exports;
   ihre Struktur wird aus den öffentlichen Funktionen abgeleitet.
@@ -94,7 +95,8 @@ Dort bezeichnet `$schema` Draft 7, nicht die Dokumentzuordnung.
 
 Die Config nutzt `markdown/gfm`, YAML-Frontmatter und Markdown-Erweiterungen
 `.md`, `.MD`, `.Md`, `.mD`. Standardmäßig werden die Zuordnungsregel und seit
-Aufgabe 05 alle empfohlenen Markdown-Regeln aktiviert. Seit Aufgabe 07 ist auch
+Aufgabe 05 alle empfohlenen Markdown-Regeln aktiviert. Schema-Diagnosen liefert
+die unabhängig konfigurierbare Regel `dokkurator/metadata-schema`. Seit Aufgabe 07 ist auch
 `dokkurator/required-headings` standardmäßig aktiv. Weitere Regeln, Schweregrade,
 Optionen und Suppressionen verwenden die normale ESLint-Konfiguration.
 `markdown` und `dokkurator` sind reservierte Plugin-Namensräume.
