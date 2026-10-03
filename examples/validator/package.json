@@ -3,7 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "demo": "node src/run.mjs",
+    "start": "node src/minimal.mjs",
+    "demo": "node src/minimal.mjs",
+    "demo:all": "node src/run.mjs",
     "demo:valid": "node src/run.mjs valid",
     "demo:invalid": "node src/run.mjs invalid",
     "demo:virtual": "node src/virtual.mjs",

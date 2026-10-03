@@ -4,45 +4,95 @@ Das Beispiel lädt acht DocTypes und prüft Markdown mit der synchronen
 Dokkurator-Fassade oder direkt mit ESLint. Alle Daten bleiben lokal. Ein
 Knowledge-Index wird nicht benötigt.
 
-## Starten
+## Einfach starten
 
-Voraussetzungen: Node.js `>=22.13.0 <23` oder `>=24.0.0` und pnpm `>=10 <11`.
-Alle folgenden Befehle werden im **Repository-Stammverzeichnis** ausgeführt:
+Der Standardstart prüft **ein Dokument mit einem Compact-DocType**. Er benötigt
+keine eigene JavaScript-Konfiguration, keine zusätzlichen Plugins und keine
+externen Schema-Ressourcen. Die recommended-Regeln sind automatisch aktiv.
+
+Die Pakete sind derzeit lokale Workspace-Abhängigkeiten. Einmalig im
+Repository-Stammverzeichnis installieren und bauen (Node.js `>=22.13.0 <23`
+oder `>=24.0.0`, pnpm `>=10 <11`):
 
 ```sh
 pnpm install
 pnpm --filter @dokkurator/validator... build
-pnpm --filter @dokkurator/example-validator demo:valid
+cd examples/validator
+npm start
 ```
 
-Der letzte Befehl prüft die acht gültigen Dokumente. Erwartet werden acht
-`PASS`-Zeilen und `8 documents, 0 failed.`
+Danach kannst du das Beispiel in `examples/validator` auch mit `yarn start`
+oder `pnpm start` aufrufen. Diese Befehle starten denselben Node-Einstiegspunkt.
+Eine eigenständige Installation außerhalb des Repositorys ist noch nicht
+vorbereitet: `workspace:*` verweist auf die lokalen Dokkurator-Pakete. Dafür
+müssen später installierbare Paketversionen oder Artefakte bereitgestellt werden.
 
-Weitere Möglichkeiten:
+Erwartet wird ein Ergebnis mit `"status": "passed"` und einer leeren
+Diagnoseliste. Der Ablauf steht vollständig in [`src/minimal.mjs`](./src/minimal.mjs).
+Loader und Validator werden dort direkt verwendet; die geplante
+[Core-Integration](../../docs/task/core-validator-integration.md) soll diese
+Projekt-Orchestrierung künftig übernehmen, ohne einen Knowledge-Index zu öffnen.
+
+## Compact-Schreibweise ausprobieren
+
+Der minimale [DocType](./minimal/_dokkurator/.doctypes/guide/definition.yml)
+sieht so aus:
+
+```yaml
+name: guide
+metadata:
+  title:
+    type: string
+    required: true
+structure:
+  requiredHeadings: [Einstieg]
+```
+
+Das zugehörige [Dokument](./minimal/documents/guide.md) verwendet `doctype: guide`
+und enthält einen Titel sowie die Überschrift `Einstieg`. Entferne zum
+Ausprobieren den Titel oder die Überschrift und starte erneut `npm start`.
+Jetzt erhältst du einen Fehler mit seiner Position im Dokument und Exit-Code 1.
+
+Bei Compact stehen die Felder direkt unter `metadata`; Pflichtfelder verwenden
+`required: true`. Bei vollständigem JSON Schema stehen die Felder unter
+`metadata.properties`, und `metadata.required` enthält eine Liste ihrer Namen.
+Auch [guide](./_dokkurator/.doctypes/guide/definition.yml),
+[release](./_dokkurator/.doctypes/release/definition.yml) und
+[runbook](./_dokkurator/.doctypes/runbook/definition.yml) in der größeren Sammlung
+verwenden Compact.
+
+## Weitere Funktionen ausprobieren
+
+Die übrigen Beispiele sind optional. Sie zeigen zusätzliche Möglichkeiten und
+verwenden deshalb mehr Konfiguration. Alle folgenden Befehle werden direkt in
+**`examples/validator`** ausgeführt:
 
 ```sh
-# Alle 24 Dokumente über die synchrone Library prüfen
-pnpm --filter @dokkurator/example-validator demo
+# Acht gültige Dokumente prüfen
+npm run demo:valid
+
+# Alle 24 Dokumente der ausführlichen Sammlung prüfen
+npm run demo:all
 
 # Nur die 16 gezielten Fehler- und Warnungsbeispiele prüfen
-pnpm --filter @dokkurator/example-validator demo:invalid
+npm run demo:invalid
 
 # Identische Dokumente direkt mit ESLint prüfen
-pnpm --filter @dokkurator/example-validator demo:eslint
+npm run demo:eslint
 
 # Alternativ das Plugin mit seinem recommended-Profil direkt einbinden
-pnpm --filter @dokkurator/example-validator demo:plugin
+npm run demo:plugin
 
-# Einen virtuellen Editor-Text prüfen, ohne eine Dokumentdatei anzulegen
-pnpm --filter @dokkurator/example-validator demo:virtual
+# Einen virtuellen Editor-Text prüfen
+npm run demo:virtual
 
-# Alle Beispielmeldungen mit beiden ESLint-Konfigurationen vergleichen
-pnpm --filter @dokkurator/example-validator test
+# Beispielmeldungen mit beiden ESLint-Konfigurationen vergleichen
+npm test
 ```
 
-Die Läufe mit Fehlerbeispielen enden absichtlich mit **Exit-Code 1**. Der pnpm-Hinweis
-auf einen fehlgeschlagenen Befehl ist dabei erwartet. Warnungen allein führen zu
-`PASS` und Exit-Code 0: `custom-rule.md` und `duplicate-headings.md` demonstrieren
+Dieselben Skripte lassen sich mit `yarn run <name>` oder `pnpm run <name>` starten.
+Die Fehlersammlung endet absichtlich mit **Exit-Code 1**. Warnungen allein führen
+zu `PASS` und Exit-Code 0: `custom-rule.md` und `duplicate-headings.md` demonstrieren
 diesen Unterschied. Der virtuelle Text erzeugt ebenfalls nur eine Warnung.
 
 ## Dateien und DocTypes
@@ -63,7 +113,7 @@ Die zugehörigen Dokumente liegen in [`documents/valid`](./documents/valid/) und
 benennt die geprüfte Bedingung. Weitere Beispiele zeigen ungültiges YAML,
 fehlende oder unbekannte DocTypes, doppelte Überschriften und die eigene Regel.
 
-## So funktioniert die Library-Variante
+## So funktioniert die ausführliche Library-Variante
 
 [`src/setup.mjs`](./src/setup.mjs) lädt die DocTypes über `FileSystemSource`, liest
 das gemeinsame Schema und ruft `prepareLintConfiguration` auf. Hier werden auch

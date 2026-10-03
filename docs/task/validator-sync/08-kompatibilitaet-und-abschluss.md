@@ -38,6 +38,11 @@ Keine Kontext-Runtime, keine neue CLI, kein Deployment; diese Liste endet beim s
   `pattern`, `enum`, Array- und Zahlenbedingungen, verschachtelte Objekte,
   Formate, `additionalProperties`, `if`/`then`, `oneOf`, vorab geladene `$ref`
   und ein eigenes Markdown-Plugin.
+- Der Standardstart `npm start` zeigt zusätzlich einen minimalen Compact-DocType
+  und ein Dokument mit unveränderten Defaults, ohne Plugins oder externe Schemas.
+  Erweiterte Fälle werden separat gestartet. Die
+  [Core-Integration](../core-validator-integration.md) ist als Folgeaufgabe für
+  die Vereinfachung der Projekt-Orchestrierung festgehalten.
 - `examples/validator/src/setup.examples.test.ts` vergleicht für alle 24
   Dokumente die Meldungen der Fassade mit Standard-ESLint über `createLintConfig`
   und mit einer direkten Einbindung von `plugin.configs.recommended`. Rule-IDs,
@@ -65,7 +70,7 @@ Keine Kontext-Runtime, keine neue CLI, kein Deployment; diese Liste endet beim s
   Bibliotheksimplementierungen und öffentliche Exports wurden nicht erweitert.
 
 Verifikation: Loader (85 Tests), Validator (146 Tests) und Beispielvergleich
-(ein Test über die gesamte Sammlung), betroffene Builds und Typechecks sowie
+(zwei Tests für Minimalstart und die gesamte Sammlung), betroffene Builds und Typechecks sowie
 Lint- und Formatprüfungen. Die dokumentierten Beispielbefehle wurden ausgeführt;
 ESLint meldet für die Fehlersammlung erwartungsgemäß 25 Fehler und zwei Warnungen.
 Boundary- und Referenzsuchen zeigen keine internen Cross-Package-Imports,
