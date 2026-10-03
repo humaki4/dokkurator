@@ -1,0 +1,20 @@
+name: decision
+description: Records a proposed or accepted decision and its consequences.
+metadata:
+  type: object
+  required:
+    - title
+    - status
+  properties:
+    title:
+      type: string
+    status:
+      type: string
+    date:
+      type: string
+    component:
+      type: string
+    tags:
+      type: array
+      items:
+        type: string

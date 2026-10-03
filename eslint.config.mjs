@@ -4,7 +4,7 @@ import tseslint from "typescript-eslint";
 import markdown from "@eslint/markdown";
 import { fileURLToPath, URL } from "node:url";
 import { loadDocTypes } from "@dokkurator/loader";
-import { dokkuratorPlugin, prepareDocTypes } from "@dokkurator/validator";
+import { dokkuratorEslintPlugin, prepareDocTypes } from "@dokkurator/validator";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
 const docTypes = prepareDocTypes(await loadDocTypes(root));
@@ -21,7 +21,7 @@ export default defineConfig(
     files: ["docs/**/*.[mM][dD]"],
     extends: [
       markdown.configs.recommended,
-      dokkuratorPlugin.configs.recommended,
+      dokkuratorEslintPlugin.configs.recommended,
     ],
     language: "markdown/gfm",
     languageOptions: { frontmatter: "yaml" },

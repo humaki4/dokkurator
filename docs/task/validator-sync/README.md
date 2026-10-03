@@ -1,3 +1,9 @@
+---
+doctype: task
+title: "Tasks: synchrone ESLint-Regelausführung"
+status: accepted
+---
+
 # Tasks: synchrone ESLint-Regelausführung
 
 Status: Aufgaben 01, 02, 04, 05, 06 und 07 abgeschlossen; Aufgabe 03 auf Wunsch übersprungen;

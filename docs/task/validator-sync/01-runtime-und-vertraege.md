@@ -1,3 +1,9 @@
+---
+doctype: task
+title: "01 — Synchrone ESLint-Runtime und Verträge festlegen"
+status: accepted
+---
+
 # 01 — Synchrone ESLint-Runtime und Verträge festlegen
 
 Status: abgeschlossen. Entscheidung und geprüfte Verträge siehe

@@ -1,3 +1,9 @@
+---
+doctype: task
+title: "05 — Synchrone Lint-Fassade und Diagnosen implementieren"
+status: accepted
+---
+
 # 05 — Synchrone Lint-Fassade und Diagnosen implementieren
 
 Status: abgeschlossen. Öffentliche Fassade, empfohlenes Markdown-Profil und

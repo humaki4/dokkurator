@@ -1,3 +1,9 @@
+---
+doctype: task
+title: "08 — Synchrone Ausführung vollständig nachweisen und dokumentieren"
+status: accepted
+---
+
 # 08 — Synchrone Ausführung vollständig nachweisen und dokumentieren
 
 Status: abgeschlossen.

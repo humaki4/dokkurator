@@ -1,3 +1,9 @@
+---
+doctype: task
+title: Synchrone Lint-Fassade und empfohlenes Markdown-Profil
+status: accepted
+---
+
 # Synchrone Lint-Fassade und empfohlenes Markdown-Profil
 
 Status: Aufgabe 05 umgesetzt, 2026-10-03.

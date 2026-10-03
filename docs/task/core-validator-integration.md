@@ -1,3 +1,9 @@
+---
+doctype: task
+title: Projektvalidierung über Core vereinfachen
+status: open
+---
+
 # Projektvalidierung über Core vereinfachen
 
 Status: umgesetzt; geprüft über Core, Config, Beispiele und bestehende CLI-Use-Cases.

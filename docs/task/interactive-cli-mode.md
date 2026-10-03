@@ -1,3 +1,9 @@
+---
+doctype: task
+title: Interaktiver CLI-Modus
+status: open
+---
+
 # Interaktiver CLI-Modus
 
 Status: Nachgelagerter Produkt- und Architektur-Task  

@@ -1,3 +1,9 @@
+---
+doctype: task
+title: Loader-Vertrag für Originaltext und Parse-Diagnosen
+status: accepted
+---
+
 # Loader-Vertrag für Originaltext und Parse-Diagnosen
 
 Status: Aufgabe 02 umgesetzt, 2026-10-03.

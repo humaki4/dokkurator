@@ -1,4 +1,12 @@
-### Phase A — Rename `@dokkurator/doctype` -> `@dokkurator/loader`
+---
+doctype: task
+title: Rename @dokkurator/doctype to @dokkurator/loader
+status: accepted
+---
+
+# Rename @dokkurator/doctype to @dokkurator/loader
+
+## Phase A — Rename `@dokkurator/doctype` -> `@dokkurator/loader`
 
 1. `git mv packages/doctype packages/loader`.
 2. In `packages/loader/package.json`: rename `"name"` to `@dokkurator/loader`,

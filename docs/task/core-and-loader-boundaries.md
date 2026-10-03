@@ -1,3 +1,9 @@
+---
+doctype: task
+title: "Dokkurator Core und Loader: Abgrenzung auf Basis des aktuellen Projekts"
+status: accepted
+---
+
 # Dokkurator Core und Loader: Abgrenzung auf Basis des aktuellen Projekts
 
 Status: Erster Core-Zuschnitt umgesetzt

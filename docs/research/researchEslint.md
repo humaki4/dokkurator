@@ -1,3 +1,12 @@
+---
+doctype: research
+title: ESLint research notes
+status: in-progress
+topic: ESLint plugins
+---
+
+# ESLint research notes
+
 ## Plugins:
 
 ### für markdown

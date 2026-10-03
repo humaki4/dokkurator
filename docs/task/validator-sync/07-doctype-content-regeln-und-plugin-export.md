@@ -1,3 +1,9 @@
+---
+doctype: task
+title: "07 — DocType-Inhaltsregeln als ESLint-Plugin bereitstellen"
+status: accepted
+---
+
 # 07 — DocType-Inhaltsregeln als ESLint-Plugin bereitstellen
 
 Status: umgesetzt, 2026-10-03.

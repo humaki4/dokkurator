@@ -1,3 +1,9 @@
+---
+doctype: task
+title: Git-Checkout- und Update-Semantik
+status: open
+---
+
 # Git-Checkout- und Update-Semantik
 
 Status: Entwurf, noch nicht umgesetzt

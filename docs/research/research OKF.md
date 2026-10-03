@@ -55,7 +55,7 @@ Dagegen bleiben mehrere Ebenen offen, die OKF bewusst nicht löst und die weiter
 
 ---
 
-# 1. Was ist OKF?
+## 1. Was ist OKF?
 
 Google Cloud veröffentlichte OKF am **12. Juni 2026**.
 
@@ -154,7 +154,7 @@ Eine offene, Git-zentrierte Variante desselben Problems bleibt interessant.
 ---
 
 
-# 3. LangChain OpenWiki
+## 3. LangChain OpenWiki
 
 OpenWiki ist aktuell der wichtigste OKF-Adopter außerhalb von Google.
 Das GitHub-Repository weist derzeit ungefähr **16.000 Stars und mehr als 1.000 Forks** auf. Diese Zahlen gelten jedoch für OpenWiki als Ganzes und sind nicht mit „16.000 OKF-Nutzern“ gleichzusetzen.
@@ -253,7 +253,7 @@ Die Projekte überschneiden sich zunehmend, sind aber derzeit nicht identisch.
 
 ---
 
-# Was passiert aktuell in der Community?
+## Was passiert aktuell in der Community?
 
 Die Entwicklung lässt sich grob in fünf Themen clustern.
 ## Interoperabilität
@@ -363,7 +363,7 @@ Ein eindeutiger Gewinner ist noch nicht erkennbar.
 
 ---
 
-# Was könnte kurzfristig Commodity werden?
+## Was könnte kurzfristig Commodity werden?
 
 Bei folgenden Bereichen zeichnet sich bereits starke Überschneidung zwischen Implementierungen ab:
 
@@ -389,7 +389,7 @@ Diese Bereiche sollte Dokkurator möglichst nicht unnötig neu erfinden.
 
 ---
 
-# Was ist dagegen noch weitgehend offen?
+## Was ist dagegen noch weitgehend offen?
 
 ## Fachliche DocTypes
 
@@ -528,7 +528,7 @@ ist ebenfalls keine Kernaufgabe der Spezifikation.
 
 ---
 
-# Auswirkungen auf Dokkurator
+## Auswirkungen auf Dokkurator
 
 Die ursprüngliche Architektur sollte vor diesem Hintergrund teilweise neu bewertet werden.
 
@@ -629,7 +629,7 @@ authorization-aware query
 
 ---
 
-# 11. Verhältnis Dokkurator ↔ OpenWiki
+## 11. Verhältnis Dokkurator ↔ OpenWiki
 
 Die beiden Projekte sollten nicht vorschnell als direkte Konkurrenten betrachtet werden.
 ### OpenWiki
@@ -683,7 +683,7 @@ OpenWiki wäre dann ein **Producer** und Dokkurator ein organisationsweiter **Co
 
 ---
 
-# Beobachtungspunkte
+## Beobachtungspunkte
 
 Das OKF-Ökosystem bewegt sich aktuell so schnell, dass vor größeren Eigenimplementierungen regelmäßig geprüft werden sollte:
 1. Entwickelt sich eine der bestehenden Libraries zum De-facto-Standard?

@@ -1,3 +1,9 @@
+---
+doctype: task
+title: Vorbereitete DocTypes und gemeinsame ESLint-Konfiguration
+status: accepted
+---
+
 # Vorbereitete DocTypes und gemeinsame ESLint-Konfiguration
 
 Status: Aufgabe 04 umgesetzt, 2026-10-03.

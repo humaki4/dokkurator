@@ -1,4 +1,5 @@
 ---
+doctype: task
 title: Diff-basiertes Laden und Parsen von DocTypes und Dokumenten
 status: open
 component: doctype

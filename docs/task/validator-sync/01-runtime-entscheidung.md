@@ -1,3 +1,9 @@
+---
+doctype: task
+title: "Entscheidung: synchrone lokale Validator-Runtime"
+status: accepted
+---
+
 # Entscheidung: synchrone lokale Validator-Runtime
 
 Status: für Aufgabe 01 angenommen, 2026-10-03. Die nachstehenden Typen sind

@@ -1,3 +1,10 @@
+---
+doctype: guide
+title: Dokkurator configuration
+status: accepted
+tags: [configuration]
+---
+
 # Dokkurator configuration
 
 each repository can describe its own documents and DocTypes.

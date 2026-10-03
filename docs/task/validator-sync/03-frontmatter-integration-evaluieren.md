@@ -1,3 +1,9 @@
+---
+doctype: task
+title: "03 — Frontmatter-Schema-Integration auswählen"
+status: accepted
+---
+
 # 03 — Frontmatter-Schema-Integration auswählen
 
 Status: auf Wunsch übersprungen. Das externe Plugin wird nicht übernommen;

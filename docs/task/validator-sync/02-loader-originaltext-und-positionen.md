@@ -1,3 +1,9 @@
+---
+doctype: task
+title: "02 — Originaltext und Positionen im Loader sichern"
+status: accepted
+---
+
 # 02 — Originaltext und Positionen im Loader sichern
 
 Status: abgeschlossen. Implementierter Vertrag und Fehlerbehandlung siehe

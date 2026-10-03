@@ -79,9 +79,19 @@ Detailed architecture is documented separately:
 | Catalog Server  | [`catalog-server.md`](catalog-server.md)   | Provides centralized indexing, synchronization, authentication and query APIs for shared documentation sources.    |
 | Explorer UI     | [`explorer-ui.md`](explorer-ui.md)         | Provides the browser-based interface for searching, navigating and inspecting documentation and its relationships. |
 
----
+## Responsibilities
 
-# Source of truth
+- preserve repositories as the authoritative source of documentation;
+- parse and validate structured documents and build a derived searchable index;
+- support local and CI workflows as well as centralized access through the server and UI.
+
+## Boundaries
+
+- the CLI and server coordinate application workflows but do not own parsing or index storage;
+- source and index adapters remain within their owning packages;
+- the Explorer UI accesses repositories and indexed data through the Catalog Server API.
+
+## Source of truth
 
 Dokkurator distinguishes between authoritative and derived data.
 
@@ -114,7 +124,7 @@ These values can always be recreated from the repositories and configuration.
 
 ---
 
-# Architectural principles
+## Architectural principles
 
 - **Repositories remain authoritative** - Dokkurator does not become the primary storage location for documentation.
 - **Open formats first** - Documents remain readable and editable without Dokkurator.

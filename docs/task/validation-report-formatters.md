@@ -1,3 +1,9 @@
+---
+doctype: task
+title: Validierungsreports mit ESLint-Formattern
+status: open
+---
+
 # Validierungsreports mit ESLint-Formattern
 
 Status: geplant; noch nicht implementiert.

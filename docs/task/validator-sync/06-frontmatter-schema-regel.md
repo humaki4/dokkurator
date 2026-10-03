@@ -1,3 +1,9 @@
+---
+doctype: task
+title: "06 — Metadatenprüfung in die ESLint-Runtime integrieren"
+status: accepted
+---
+
 # 06 — Metadatenprüfung in die ESLint-Runtime integrieren
 
 Status: umgesetzt, 2026-10-03.

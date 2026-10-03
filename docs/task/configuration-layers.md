@@ -1,4 +1,5 @@
 ---
+doctype: task
 title: Konfigurationsebenen und Repository-Konfiguration
 status: research
 component: configuration

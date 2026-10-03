@@ -1,3 +1,9 @@
+---
+doctype: task
+title: "04 — DocType-Auswahl und ESLint-Konfiguration vorbereiten"
+status: accepted
+---
+
 # 04 — DocType-Auswahl und ESLint-Konfiguration vorbereiten
 
 Status: abgeschlossen. Öffentliche API, Schema- und Auswahlregeln siehe
