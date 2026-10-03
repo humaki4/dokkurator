@@ -70,3 +70,10 @@ Dokument. Eigene Regeln, Plugins und zusätzliche Schemas bleiben optional.
 Die Beispiele bleiben mit `workspace:*` im pnpm-Workspace; alle Dokkurator-Pakete
 bleiben privat. Eine Veröffentlichung oder eigenständige npm-/yarn-Installation
 ist auf Wunsch nicht Teil dieser Aufgabe.
+
+## Geplante Folgeaufgabe
+
+[Validierungsreports mit ESLint-Formattern](./validation-report-formatters.md)
+plant `app.loadFormatter` und `formatter.format(report)` nach ESLints
+Aufrufschema sowie die Wiederverwendung der ESLint-Formate `stylish`, `json` und `json-with-metadata`. `html` wird auf Aufwand
+geprüft und gegebenenfalls zunächst zurückgestellt.
