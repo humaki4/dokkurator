@@ -19,7 +19,8 @@ dokkurator --project ../documentation index
 ```
 
 Ohne `--project` sucht die CLI vom Arbeitsverzeichnis aufwärts nach
-`.dokkurator/config.yaml`. Wird keine Datei gefunden, gilt das aktuelle
+`dokkurator.config.mjs` oder `.dokkurator/config.yaml`. JavaScript hat innerhalb
+eines Roots Vorrang. Wird keine Datei gefunden, gilt das aktuelle
 Arbeitsverzeichnis als neuer Projekt-Root.
 
 ## Dateien und Verzeichnisse
@@ -31,9 +32,14 @@ Arbeitsverzeichnis als neuer Projekt-Root.
     └── index.db        # standardmäßiger Knowledge-Index
 ```
 
-Fehlt `config.yaml`, behandeln Verwaltungsbefehle das Projekt als leere
+Fehlen beide Konfigurationsdateien, behandeln Verwaltungsbefehle das Projekt als leere
 Konfiguration. `source add` legt Verzeichnis und Datei automatisch an.
 Verarbeitungsbefehle melden dagegen, dass keine Sources konfiguriert sind.
+
+Bei JavaScript-Projekten lesen und schreiben Source-Verwaltungsbefehle die
+effektive Source-Liste über `.dokkurator/sources.yaml`. Die JavaScript-Datei und
+ihre Plugin-Imports bleiben erhalten. Einzelheiten und Beispiele für Projekt-
+und Repository-Regeln stehen in der [Config-Dokumentation](../../../packages/config/README.md).
 
 Beispielkonfiguration:
 

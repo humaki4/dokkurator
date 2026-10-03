@@ -1,0 +1,19 @@
+name: service
+description: Striktes Objektschema mit verschachteltem Kontakt und URL.
+metadata:
+  type: object
+  additionalProperties: false
+  required: [doctype, title, owner, endpoint]
+  properties:
+    doctype: { const: service }
+    title: { type: string }
+    endpoint: { type: string, format: uri }
+    owner:
+      type: object
+      additionalProperties: false
+      required: [team, email]
+      properties:
+        team: { type: string, minLength: 1 }
+        email: { type: string, format: email }
+structure:
+  requiredHeadings: [Betrieb]

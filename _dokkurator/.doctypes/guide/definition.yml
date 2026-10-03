@@ -1,0 +1,17 @@
+name: guide
+description: Provides practical product or configuration documentation.
+metadata:
+  type: object
+  required:
+    - title
+  properties:
+    title:
+      type: string
+    status:
+      type: string
+    topic:
+      type: string
+    tags:
+      type: array
+      items:
+        type: string

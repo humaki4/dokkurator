@@ -1,0 +1,15 @@
+name: architecture
+description: Komponente mit Pflichtüberschriften; dependencies ist ein reguläres Feld.
+metadata:
+  type: object
+  required: [doctype, title, component]
+  properties:
+    doctype: { const: architecture }
+    title: { type: string }
+    component: { type: string, pattern: "^[a-z][a-z0-9-]*$" }
+    dependencies:
+      type: array
+      uniqueItems: true
+      items: { type: string, pattern: "^[a-z][a-z0-9-]*$" }
+structure:
+  requiredHeadings: [Verantwortung, Grenzen]

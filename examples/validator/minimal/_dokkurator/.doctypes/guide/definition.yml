@@ -1,0 +1,7 @@
+name: guide
+metadata:
+  title:
+    type: string
+    required: true
+structure:
+  requiredHeadings: [Einstieg]

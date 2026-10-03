@@ -1,5 +1,14 @@
 # Repository agent instructions
 
+## Test placement
+
+- Place test files in the source directory alongside the corresponding
+  implementation files (for example, `foo.test.ts` next to `foo.ts`).
+- Do not put these tests in separate `test/` or `tests/` directories.
+- Name test files after the corresponding source file: `sourceFileName.test.ts`.
+- Split large test suites into meaningful topic groups and name their files
+  `sourceFileName.grouping.test.ts` (for example, `runtime.errors.test.ts`).
+
 ## Absolute package boundaries
 
 - Package boundaries are absolute. A package may consume another workspace

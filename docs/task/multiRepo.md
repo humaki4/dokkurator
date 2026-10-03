@@ -1,3 +1,9 @@
+---
+doctype: task
+title: Multi-Repository-Support und zentrale CLI
+status: open
+---
+
 # Multi-Repository-Support und zentrale CLI
 
 ## Ziel

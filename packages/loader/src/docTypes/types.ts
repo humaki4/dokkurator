@@ -16,7 +16,7 @@ export interface LoadedDocType {
   readonly rules?: SourceDocument;
 }
 
-export type MetadataDefinition = Readonly<Record<string, unknown>>;
+export type MetadataDefinition = Readonly<Record<string, unknown>> | boolean;
 
 export interface StructureDefinition {
   readonly requiredHeadings?: readonly string[];
@@ -31,6 +31,7 @@ export interface RuleDefinition {
 export interface ParsedDocType {
   readonly name: string;
   readonly description?: string;
+  /** Normalized JSON Schema; compact YAML fields are expanded by Loader. */
   readonly metadata: MetadataDefinition;
   readonly structure?: StructureDefinition;
   readonly rules: readonly RuleDefinition[];

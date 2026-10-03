@@ -37,6 +37,12 @@ library only through a deliberate package-boundary decision.
 - support incremental updates
 - keep storage-specific logic inside the backend implementation boundary
 
+## Boundaries
+
+- the adapter contract and supported implementations are owned by `@dokkurator/knowledge`;
+- backend-specific code stays in Knowledge's separable internal adapter area;
+- adapters persist and query the Knowledge model, but do not parse source documents.
+
 ## Common interface
 
 ```ts

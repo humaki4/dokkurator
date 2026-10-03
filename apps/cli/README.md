@@ -27,11 +27,17 @@ dokkurator search "architecture decision"
 
 ## Projektkonfiguration
 
-Die CLI verwendet diese Datei:
+Die CLI unterstützt `dokkurator.config.mjs` im Projekt-Root für importierte
+Plugins und Validator-Regeln. Diese Datei hat Vorrang vor der bisherigen YAML-Datei:
 
 ```text
 <project-root>/.dokkurator/config.yaml
 ```
+
+Projekt- und Repository-Regeln sowie ihre Zusammenführung sind in der
+[Config-Dokumentation](../../packages/config/README.md) beschrieben. Bei
+JavaScript-Projekten speichern Source-Verwaltungsbefehle die effektive Source-Liste
+in `.dokkurator/sources.yaml`, ohne den JavaScript-Code zu überschreiben.
 
 Ohne explizite Angabe sucht die CLI vom Arbeitsverzeichnis nach oben nach der
 Config. Mit der globalen Option `--project <directory>` kann der Root

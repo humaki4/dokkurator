@@ -1,0 +1,22 @@
+name: runbook
+description: Betriebsanleitung mit booleschen und numerischen Metadaten.
+metadata:
+  doctype:
+    const: runbook
+    required: true
+  title:
+    type: string
+    required: true
+  severity:
+    type: string
+    enum: [low, medium, high]
+    required: true
+  automated:
+    type: boolean
+    required: true
+  estimatedMinutes:
+    type: integer
+    minimum: 1
+    required: true
+structure:
+  requiredHeadings: [Diagnose, Maßnahmen, Rücknahme]

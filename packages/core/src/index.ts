@@ -15,4 +15,5 @@ export type {
   SourceRecovery,
   SourceSelection,
   SyncSourceResult,
+  ValidationSourceResult,
 } from "./types.js";

@@ -1,0 +1,14 @@
+name: reference
+description: Referenzdokument mit vorab geladenen externen Schema-Ressourcen.
+metadata:
+  type: object
+  required: [doctype, title, component, owner]
+  properties:
+    doctype: { const: reference }
+    title: { type: string }
+    component:
+      $ref: https://examples.dokkurator.dev/common.schema.json#/definitions/component
+    owner:
+      $ref: https://examples.dokkurator.dev/common.schema.json#/definitions/owner
+structure:
+  requiredHeadings: [Referenz]

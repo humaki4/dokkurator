@@ -79,3 +79,15 @@ dokkurator search "authentication AND owner.team:platform"
 ```
 
 The local index is derived data and can be rebuilt from the repository.
+
+## Responsibilities
+
+- expose local and CI workflows for repository inspection and validation;
+- delegate parsing, validation, indexing, and search to Core;
+- translate command-line arguments and format returned results.
+
+## Boundaries
+
+- Core owns application workflows and coordinates public package APIs;
+- the CLI does not parse documents or translate storage queries;
+- source and index implementations remain owned by their respective packages.

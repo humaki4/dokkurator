@@ -11,7 +11,7 @@ const PROJECT_FIELDS = [
   "watch",
   "sources",
 ];
-const REPOSITORY_FIELDS = ["documents", "doctypes"];
+const REPOSITORY_FIELDS = ["documents", "doctypes", "validator"];
 const DOCUMENT_FIELDS = ["directory", "include", "exclude"];
 const DOCTYPE_FIELDS = ["directory"];
 
@@ -94,6 +94,36 @@ function repositoryFields(
   value: Record<string, unknown>,
   prefix: string,
 ): void {
+  optionalObject(value.validator, `${prefix}.validator`, (validator) => {
+    keys(validator, ["plugins", "rules", "schemas"], "validator");
+    optionalObject(validator.schemas, "validator.schemas", (schemas) => {
+      for (const [id, schema] of Object.entries(schemas)) {
+        if (typeof schema !== "boolean")
+          object(schema, `validator.schemas.${id}`);
+      }
+    });
+    optionalObject(validator.plugins, "validator.plugins", (plugins) => {
+      for (const [name, plugin] of Object.entries(plugins)) {
+        if (!name || name === "markdown" || name === "dokkurator")
+          throw new Error(
+            `Reserved or empty validator plugin namespace: ${name}`,
+          );
+        object(plugin, `validator.plugins.${name}`);
+      }
+    });
+    optionalObject(validator.rules, "validator.rules", (rules) => {
+      for (const [name, entry] of Object.entries(rules)) {
+        const severity = Array.isArray(entry) ? entry[0] : entry;
+        if (
+          !name ||
+          ![0, 1, 2, "off", "warn", "error"].includes(
+            severity as string | number,
+          )
+        )
+          throw new Error(`Invalid validator rule severity: ${name}`);
+      }
+    });
+  });
   optionalObject(value.documents, `${prefix}.documents`, (documents) => {
     keys(documents, DOCUMENT_FIELDS, `${prefix}.documents`);
     optionalString(documents.directory, "documents.directory");

@@ -10,6 +10,11 @@ The package provides two complete workflows:
 - `loadDocuments` discovers, reads, and parses Markdown documents and their
   YAML Frontmatter without validating document content.
 
+For local DocTypes, `loadDocTypes(projectRoot, config?)` accepts a project root
+path and creates the filesystem source internally. Use a `DocumentSource` when
+loading from a custom or already configured source. Both forms support a custom
+`doctypesDirectory`.
+
 Both workflows access files through DocType's public `DocumentSource`
 contract. `FileSystemSource` reads a local directory, while `GitSource` reads a
 local Git working tree and adds normalized Git metadata. These implementations
@@ -56,6 +61,65 @@ from document discovery.
 
 DocType definitions are validated while loading because they are a prerequisite
 for validating documents.
+
+### Metadata: compact fields or JSON Schema
+
+`definition.yml` accepts a compact field map for common metadata requirements:
+
+```yaml
+name: decision
+metadata:
+  doctype:
+    type: string
+    required: true
+  title:
+    type: string
+    required: true
+    pattern: "^[A-Z]"
+  status:
+    type: string
+    enum: [draft, accepted]
+  tags:
+    type: array
+    items:
+      type: string
+```
+
+The Loader expands the map into an object JSON Schema: field definitions become
+`properties`, and `required: true` becomes an entry in the object's `required`
+array. Fields are optional otherwise; additional fields remain allowed. Each
+field accepts JSON Schema keywords such as `pattern`, `enum`, `items`, or `$ref`.
+Nested object schemas use the standard `properties` and `required: [field]`
+syntax; compact expansion only applies to the top-level field map.
+
+For conditions across fields, `additionalProperties`, or other object-level
+constraints, use a complete JSON Schema Draft 7 instead:
+
+```yaml
+name: decision
+metadata:
+  type: object
+  required: [doctype, title]
+  properties:
+    doctype: { const: decision }
+    title: { type: string, pattern: "^[A-Z]" }
+    status: { type: string, enum: [draft, accepted] }
+    component: { type: string }
+  additionalProperties: false
+  if:
+    required: [status]
+    properties:
+      status: { const: accepted }
+  then:
+    required: [component]
+```
+
+Complete schemas are preserved. Both forms produce the same JSON Schema
+contract for consumers and are validated by the same Validator rule. Do not mix
+compact fields with object-level schema keywords. For field names that are also
+object-level keywords, such as `properties` or `required`, use the full schema's
+`properties` map. `type` can be a regular compact field when its value is a field
+schema, but the document's DocType selector remains `doctype`.
 
 ## Parsed documents
 

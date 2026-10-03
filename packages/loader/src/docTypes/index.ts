@@ -2,6 +2,7 @@ import type {
   DocumentSource,
   SourceId,
 } from "../source-adapter/source-adapter.js";
+import { FileSystemSource } from "../source-adapter/index.js";
 import { parseDocType, parseDocTypes } from "./parse.js";
 import { readDocType, readDocTypes } from "./read.js";
 import type { DocTypeConfig, ParsedDocType } from "./types.js";
@@ -14,10 +15,14 @@ export async function loadDocType(
 }
 
 export async function loadDocTypes(
-  source: DocumentSource,
+  source: DocumentSource | string,
   config: DocTypeConfig = {},
 ): Promise<ParsedDocType[]> {
-  return parseDocTypes(await readDocTypes(source, config));
+  const adapter =
+    typeof source === "string"
+      ? new FileSystemSource({ root: source })
+      : source;
+  return parseDocTypes(await readDocTypes(adapter, config));
 }
 
 export { DocTypeParseError } from "./parse.js";

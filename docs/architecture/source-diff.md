@@ -12,6 +12,18 @@ Dokkurator compares the current source with the state used by the last
 successful index run. Source-specific comparison belongs to DocType; checkpoint
 persistence and index updates belong to Knowledge.
 
+## Responsibilities
+
+- identify added, modified, and deleted documents between source states;
+- apply affected document changes to the Knowledge index;
+- persist the new checkpoint only after the index update succeeds.
+
+## Boundaries
+
+- DocType owns source-specific comparison and revision semantics;
+- Knowledge persists source state and applies changes without interpreting adapter-specific revisions;
+- Core and the CLI expose these workflows without owning diff or storage logic.
+
 ```text
 Knowledge loads the last SourceState
         ↓

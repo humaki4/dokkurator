@@ -1,4 +1,5 @@
 ---
+doctype: task
 title: Typisierte SQLite-Queries, Mapping und Index-Migrationen
 status: open
 component: index-adapters

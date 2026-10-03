@@ -1,4 +1,12 @@
-### Phase A — Rename `@dokkurator/doctype` -> `@dokkurator/loader`
+---
+doctype: task
+title: Rename @dokkurator/doctype to @dokkurator/loader
+status: accepted
+---
+
+# Rename @dokkurator/doctype to @dokkurator/loader
+
+## Phase A — Rename `@dokkurator/doctype` -> `@dokkurator/loader`
 
 1. `git mv packages/doctype packages/loader`.
 2. In `packages/loader/package.json`: rename `"name"` to `@dokkurator/loader`,
@@ -21,7 +29,7 @@
      `packages/knowledge/src/index/incremental-index.ts` (+ `.test.ts`),
      `packages/knowledge/src/index/index-documents.ts` (+ `.test.ts`)
    - `packages/validator/package.json`, `packages/validator/src/index.ts`,
-     `packages/validator/test/index.test.ts`
+     `packages/validator/src/legacy/validate-document.test.ts`
 5. Update prose references (no code behavior change):
    `AGENTS.md` (package-boundary section references `@dokkurator/doctype`
    twice), `README.md`, `docs/adr/0001-use-simple-git-for-local-git-access.md`,

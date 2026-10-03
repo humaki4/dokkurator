@@ -1,5 +1,0 @@
-rules:
-  - name: sources-are-recommended
-    field: sources
-    severity: warning
-

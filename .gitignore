@@ -6,3 +6,4 @@ coverage/
 local
 .dokkurator/
 generated/
+.vscode/

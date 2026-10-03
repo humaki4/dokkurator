@@ -1,15 +1,5 @@
-import { findProjectRoot, resolveProjectConfig } from "@dokkurator/config";
-import { SQLiteIndex } from "@dokkurator/knowledge";
-import { sourceStatus } from "./source-operations.js";
-import {
-  diffSources,
-  listProjectDocTypes,
-  listProjectDocuments,
-  prepareSources,
-  searchDocuments,
-  syncSources,
-  type ApplicationContext,
-} from "./use-cases.js";
+import type { SQLiteIndex } from "@dokkurator/knowledge";
+import type { ApplicationContext } from "./application-context.js";
 import type {
   DiffSourceResult,
   DocTypesSourceResult,
@@ -22,6 +12,7 @@ import type {
   SourceOperationResult,
   SourceSelection,
   SyncSourceResult,
+  ValidationSourceResult,
 } from "./types.js";
 
 /** Creates a closed application without filesystem or database access. */
@@ -39,6 +30,8 @@ class DefaultDokkuratorApp implements DokkuratorApp {
   #activeMutation?: Promise<unknown>;
   #context?: ApplicationContext;
   #index?: SQLiteIndex;
+  #indexOpening?: Promise<SQLiteIndex>;
+  readonly #operations = new Set<Promise<unknown>>();
   #openResult?: OpenResult;
 
   constructor({ root }: DokkuratorOptions) {
@@ -94,59 +87,117 @@ class DefaultDokkuratorApp implements DokkuratorApp {
   async prepare(
     options: SourceSelection = {},
   ): Promise<SourceOperationResult<PrepareSourceResult>> {
-    return this.#mutate(() => prepareSources(this.#opened(), options));
+    return this.#mutate(() =>
+      this.#run(async (context) => {
+        const { prepareSources } = await import("./index-use-cases.js");
+        return prepareSources(await this.#indexed(context), options);
+      }),
+    );
   }
 
   async sync(
     options: SourceSelection = {},
   ): Promise<SourceOperationResult<SyncSourceResult>> {
-    return this.#mutate(() => syncSources(this.#opened(), options));
+    return this.#mutate(() =>
+      this.#run(async (context) => {
+        const { syncSources } = await import("./index-use-cases.js");
+        return syncSources(await this.#indexed(context), options);
+      }),
+    );
   }
 
   async diff(
     options: SourceSelection = {},
   ): Promise<SourceOperationResult<DiffSourceResult>> {
-    return diffSources(this.#opened(), options);
+    return this.#run(async (context) => {
+      const { diffSources } = await import("./index-use-cases.js");
+      return diffSources(await this.#indexed(context), options);
+    });
   }
 
   async search(query: string, options: SearchOptions = {}) {
-    return searchDocuments(this.#opened(), query, options);
+    return this.#run(async (context) => {
+      const { searchDocuments } = await import("./index-use-cases.js");
+      return searchDocuments(await this.#indexed(context), query, options);
+    });
   }
 
   async listDocTypes(
     options: SourceSelection = {},
   ): Promise<SourceOperationResult<DocTypesSourceResult>> {
-    return listProjectDocTypes(this.#opened(), options);
+    return this.#run(async (context) => {
+      const { listProjectDocTypes } = await import("./document-use-cases.js");
+      return listProjectDocTypes(context, options);
+    });
   }
 
   async listDocuments(
     options: SourceSelection = {},
   ): Promise<SourceOperationResult<DocumentsSourceResult>> {
-    return listProjectDocuments(this.#opened(), options);
+    return this.#run(async (context) => {
+      const { listProjectDocuments } = await import("./document-use-cases.js");
+      return listProjectDocuments(context, options);
+    });
+  }
+
+  async validate(
+    options: SourceSelection = {},
+  ): Promise<SourceOperationResult<ValidationSourceResult>> {
+    return this.#run(async (context) => {
+      const { validateProjectDocuments } =
+        await import("./validation-use-cases.js");
+      return validateProjectDocuments(context, options);
+    });
   }
 
   async #open(): Promise<OpenResult> {
+    const { findProjectRoot, resolveProjectConfig } =
+      await import("@dokkurator/config");
+    const { sourceStatus } = await import("./source-operations.js");
     const root = findProjectRoot(this.#root);
-    const project = await resolveProjectConfig({ root });
-    const index = new SQLiteIndex({ filename: project.knowledge.index });
+    const project = await resolveProjectConfig({ root, defaultSource: true });
+    const sources = await Promise.all(project.sources.map(sourceStatus));
+    this.#context = { project };
+    return { root: project.root, sources };
+  }
+
+  async #close(): Promise<void> {
+    // Let all started operations finish before releasing their resources.
+    await Promise.allSettled([
+      ...this.#operations,
+      ...(this.#activeMutation === undefined ? [] : [this.#activeMutation]),
+    ]);
+    this.#index?.close();
+  }
+
+  async #indexed(context: ApplicationContext) {
+    this.#indexOpening ??= import("@dokkurator/knowledge").then(
+      ({ SQLiteIndex }) => {
+        const index = new SQLiteIndex({
+          filename: context.project.knowledge.index,
+        });
+        this.#index = index;
+        return index;
+      },
+    );
     try {
-      const sources = await Promise.all(project.sources.map(sourceStatus));
-      this.#index = index;
-      this.#context = { project, index };
-      return { root: project.root, sources };
+      return { ...context, index: await this.#indexOpening };
     } catch (error) {
-      index.close();
+      this.#indexOpening = undefined;
       throw error;
     }
   }
 
-  async #close(): Promise<void> {
+  async #run<T>(
+    operation: (context: ApplicationContext) => Promise<T>,
+  ): Promise<T> {
+    const pending = operation(this.#opened());
+    this.#operations.add(pending);
     try {
-      await this.#activeMutation;
-    } catch {
-      // The operation reports its own failures; cleanup must still continue.
+      return await pending;
+    } finally {
+      this.#operations.delete(pending);
     }
-    this.#index?.close();
   }
 
   #opened(): ApplicationContext {
@@ -174,6 +225,7 @@ class DefaultDokkuratorApp implements DokkuratorApp {
     this.#state = "closed";
     this.#context = undefined;
     this.#index = undefined;
+    this.#indexOpening = undefined;
     this.#openResult = undefined;
     this.#closing = undefined;
   }

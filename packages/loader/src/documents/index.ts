@@ -5,21 +5,29 @@ import type {
 } from "../source-adapter/source-adapter.js";
 import { parseDocument, parseDocuments } from "./parse.js";
 import { readDocument, readDocuments } from "./read.js";
-import type { DocumentConfig, ParsedDocument } from "./types.js";
+import type {
+  DocumentConfig,
+  DocumentParseOptions,
+  ParsedDocument,
+} from "./types.js";
 
 export async function loadDocument(
   source: DocumentSource,
   id: SourceId,
-  options?: ReadOptions,
+  options?: ReadOptions & DocumentParseOptions,
 ): Promise<ParsedDocument> {
-  return parseDocument(await readDocument(source, id, options));
+  const readOptions =
+    options?.revision === undefined
+      ? undefined
+      : { revision: options.revision };
+  return parseDocument(await readDocument(source, id, readOptions), options);
 }
 
 export async function loadDocuments(
   source: DocumentSource,
   config: DocumentConfig = {},
 ): Promise<ParsedDocument[]> {
-  return parseDocuments(await readDocuments(source, config));
+  return parseDocuments(await readDocuments(source, config), config);
 }
 
 export { DocumentParseError } from "./parse.js";
@@ -30,6 +38,8 @@ export {
 } from "./types.js";
 export type {
   DocumentConfig,
+  DocumentParseDiagnostic,
+  DocumentParseOptions,
   Heading,
   Link,
   MarkdownDocument,

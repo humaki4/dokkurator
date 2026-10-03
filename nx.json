@@ -17,7 +17,8 @@
       "{workspaceRoot}/pnpm-workspace.yaml",
       {
         "runtime": "node --version"
-      }
+      },
+      "{workspaceRoot}/_dokkurator/.doctypes/**/*"
     ]
   },
   "targetDefaults": {
@@ -42,7 +43,13 @@
     "lint": {
       "cache": true,
       "inputs": ["default"],
-      "outputs": []
+      "outputs": [],
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": ["@dokkurator/validator"]
+        }
+      ]
     }
   },
   "analytics": false

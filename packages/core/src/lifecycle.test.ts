@@ -23,7 +23,7 @@ test("creates an application without filesystem access", async () => {
   await expect(access(root)).rejects.toMatchObject({ code: "ENOENT" });
 });
 
-test("opens the project, initializes the index and reports source readiness", async () => {
+test("opens the project without an index and reports source readiness", async () => {
   const root = await createTemporaryDirectory();
   await writeProjectConfig(
     root,
@@ -47,7 +47,54 @@ test("opens the project, initializes the index and reports source readiness", as
   });
   await expect(
     access(join(root, ".dokkurator/index.db")),
+  ).rejects.toMatchObject({ code: "ENOENT" });
+  await app.close();
+});
+
+test("creates the index only for an index operation and releases it on close", async () => {
+  const root = await createTemporaryDirectory();
+  const app = createDokkurator({ root });
+  await app.open();
+  expect(await app.search("nothing")).toEqual([]);
+  await expect(
+    access(join(root, ".dokkurator/index.db")),
   ).resolves.toBeUndefined();
+  await app.close();
+  await app.open();
+  expect(await app.search("nothing")).toEqual([]);
+  await app.close();
+});
+
+test("waits for started read operations before closing their lazy index", async () => {
+  const root = await createTemporaryDirectory();
+  const app = createDokkurator({ root });
+  await app.open();
+  const first = app.search("nothing");
+  const second = app.search("nothing");
+  const closing = app.close();
+  await expect(app.search("late")).rejects.toThrow("not open");
+  expect(await first).toEqual([]);
+  expect(await second).toEqual([]);
+  await closing;
+  await app.open();
+  expect(await app.search("nothing")).toEqual([]);
+  await app.close();
+});
+
+test("lets validation and inspection work with an unusable index path", async () => {
+  const root = await createTemporaryDirectory();
+  await writeProjectConfig(root, "knowledge:\n  index: blocked/index.db\n");
+  await writeFile(join(root, "blocked"), "a file, not a directory");
+  const app = createDokkurator({ root });
+  await app.open();
+  expect(await app.validate()).toEqual({
+    results: [],
+    errors: [expect.objectContaining({ phase: "load" })],
+  });
+  await expect(app.listDocuments()).resolves.toMatchObject({ errors: [] });
+  await expect(app.search("nothing")).rejects.toThrow();
+  await rm(join(root, "blocked"));
+  expect(await app.search("nothing")).toEqual([]);
   await app.close();
 });
 

@@ -8,6 +8,8 @@ import type {
   ResolvedProjectConfig,
   ResolvedProjectSource,
   ResolvedSource,
+  ValidatorConfig,
+  ResolvedValidatorConfig,
 } from "./model.js";
 import { resolveIndexPath, resolveSourcePath } from "./paths.js";
 import { selectSources } from "./sources.js";
@@ -34,6 +36,7 @@ function resolveRepositoryValues(
         ? {}
         : { directory: options.doctypesDirectory }),
     },
+    validator: mergeValidatorConfig(repository.validator),
   };
   validateRepositoryConfig(resolved);
   return resolved;
@@ -78,7 +81,18 @@ export async function resolveProjectConfig(
   const selected =
     options.includeSources === false
       ? []
-      : selectSources(project, options.sourceId);
+      : selectSources(
+          options.defaultSource && project.config.sources.length === 0
+            ? {
+                ...project,
+                config: {
+                  ...project.config,
+                  sources: [{ id: "root", path: "." }],
+                },
+              }
+            : project,
+          options.sourceId,
+        );
   const sources = selected.map((source) => ({
     id: source.id,
     root: resolveSourcePath(project, source),
@@ -105,11 +119,34 @@ export async function resolveSourceConfig(
     source.root === project.root
       ? project.repository
       : await loadRepositoryConfig(source.root);
+  const resolved = resolveRepositoryValues(repositoryConfig, {
+    root: project.root,
+    ...options,
+  });
   return {
     ...source,
-    ...resolveRepositoryValues(repositoryConfig, {
-      root: project.root,
-      ...options,
-    }),
+    ...resolved,
+    validator: mergeValidatorConfig(
+      project.repository.validator,
+      resolved.validator,
+    ),
+  };
+}
+
+function mergeValidatorConfig(
+  base: ValidatorConfig = {},
+  local: ValidatorConfig = {},
+): ResolvedValidatorConfig {
+  const plugins = { ...base.plugins };
+  for (const [namespace, plugin] of Object.entries(local.plugins ?? {})) {
+    if (Object.hasOwn(plugins, namespace) && plugins[namespace] !== plugin)
+      throw new Error(
+        `Conflicting validator plugins in namespace: ${namespace}`,
+      );
+  }
+  return {
+    schemas: structuredClone({ ...base.schemas, ...local.schemas }),
+    plugins: { ...plugins, ...local.plugins },
+    rules: structuredClone({ ...base.rules, ...local.rules }),
   };
 }

@@ -7,14 +7,18 @@
     "test": "nx run-many -t test",
     "coverage": "vitest run --coverage",
     "typecheck": "nx run-many -t typecheck",
-    "lint": "nx run-many -t lint",
-    "check": "nx run-many -t typecheck,lint,test",
+    "lint": "pnpm lint:docs && nx run-many -t lint",
+    "check": "pnpm lint:docs && nx run-many -t typecheck,lint,test",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "smoke": "nx run @dokkurator/cli:build && pnpm --filter @dokkurator/cli start"
+    "smoke": "nx run @dokkurator/cli:build && pnpm --filter @dokkurator/cli start",
+    "lint:docs": "nx run @dokkurator/validator:build && eslint docs"
   },
   "devDependencies": {
+    "@dokkurator/loader": "workspace:*",
+    "@dokkurator/validator": "workspace:*",
     "@eslint/js": "^10.0.1",
+    "@eslint/markdown": "^8.0.3",
     "@types/node": "^22.20.3",
     "@vitest/coverage-v8": "5.0.1",
     "eslint": "^10.10.0",

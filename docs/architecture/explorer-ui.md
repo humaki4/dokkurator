@@ -44,6 +44,12 @@ src/
 └── styles/
 ```
 
+## Responsibilities
+
+- provide browser-based search, navigation, and document inspection;
+- consume the Catalog Server API and render its document and relationship data;
+- keep view state and user interaction in the browser application.
+
 ## Boundaries
 
 - Repository configuration is file-based and managed outside the Explorer UI.

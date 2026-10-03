@@ -84,6 +84,8 @@ function document(
   return {
     type: options.type,
     metadata: options.metadata,
+    originalText: "# Choose an index\n",
+    parseDiagnostics: [],
     content: "# Choose an index\n",
     ast: { type: "root", children: [] },
     headings: [{ depth: 1, text: "Choose an index" }],

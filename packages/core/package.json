@@ -23,7 +23,8 @@
   "dependencies": {
     "@dokkurator/config": "workspace:*",
     "@dokkurator/knowledge": "workspace:*",
-    "@dokkurator/loader": "workspace:*"
+    "@dokkurator/loader": "workspace:*",
+    "@dokkurator/validator": "workspace:*"
   },
   "devDependencies": {
     "simple-git": "^3.36.0"
