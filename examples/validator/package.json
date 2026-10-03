@@ -13,10 +13,10 @@
     "demo:plugin": "eslint --config eslint-plugin.config.mjs documents",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.check.json",
-    "lint": "eslint --config ../../eslint.config.mjs src eslint.config.mjs eslint-plugin.config.mjs"
+    "lint": "eslint --config ../../eslint.config.mjs src minimal/dokkurator.config.mjs dokkurator.config.mjs eslint.config.mjs eslint-plugin.config.mjs"
   },
   "dependencies": {
-    "@dokkurator/loader": "workspace:*",
+    "@dokkurator/core": "workspace:*",
     "@dokkurator/validator": "workspace:*",
     "@eslint/markdown": "8.0.3",
     "eslint": "10.10.0"

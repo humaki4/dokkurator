@@ -16,8 +16,19 @@ test("starts the Compact example with defaults from another working directory", 
   expect(stderr).toBe("");
   expect(stdout, entry).not.toBe("");
   expect(JSON.parse(stdout)).toEqual({
-    status: "passed",
-    diagnostics: [],
-    suppressedDiagnostics: [],
+    results: [
+      {
+        sourceId: "root",
+        documents: [
+          {
+            path: "documents/guide.md",
+            status: "passed",
+            diagnostics: [],
+            suppressedDiagnostics: [],
+          },
+        ],
+      },
+    ],
+    errors: [],
   });
 });

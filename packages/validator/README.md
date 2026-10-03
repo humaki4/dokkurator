@@ -7,6 +7,8 @@ Ein ausführbares [Beispielprojekt](../../examples/validator/README.md) enthält
 acht DocTypes, gültige und fehlerhafte Dokumente sowie Library-, ESLint- und
 Plugin-Aufrufe. Es dokumentiert auch die Migration von der entfernten temporären
 `validateDocument`-API auf `prepareLintConfiguration` und `lint`.
+Für die einfache Projektvalidierung übernimmt
+[Core](../core/README.md) das Laden und die Vorbereitung über `app.validate()`.
 
 ## Ablauf und Zuständigkeiten
 

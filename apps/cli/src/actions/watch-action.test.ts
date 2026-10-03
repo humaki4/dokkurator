@@ -33,7 +33,7 @@ test("initially syncs and watches project sources through Core", async () => {
     repository: {
       documents: { directory: "docs", include: ["**/*.md"], exclude: [] },
       doctypes: { directory: "types" },
-      validator: { plugins: {}, rules: {} },
+      validator: { plugins: {}, rules: {}, schemas: {} },
     },
     sources: [{ id: "docs", root }],
     knowledge: { index: "/project/index.db" },

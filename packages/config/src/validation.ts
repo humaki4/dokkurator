@@ -95,7 +95,13 @@ function repositoryFields(
   prefix: string,
 ): void {
   optionalObject(value.validator, `${prefix}.validator`, (validator) => {
-    keys(validator, ["plugins", "rules"], "validator");
+    keys(validator, ["plugins", "rules", "schemas"], "validator");
+    optionalObject(validator.schemas, "validator.schemas", (schemas) => {
+      for (const [id, schema] of Object.entries(schemas)) {
+        if (typeof schema !== "boolean")
+          object(schema, `validator.schemas.${id}`);
+      }
+    });
     optionalObject(validator.plugins, "validator.plugins", (plugins) => {
       for (const [name, plugin] of Object.entries(plugins)) {
         if (!name || name === "markdown" || name === "dokkurator")

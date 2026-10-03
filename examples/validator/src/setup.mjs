@@ -1,43 +1,27 @@
-import { readFile } from "node:fs/promises";
 import { fileURLToPath, URL } from "node:url";
-import {
-  FileSystemSource,
-  loadDocTypes,
-  loadDocuments,
-} from "@dokkurator/loader";
+import { createDokkurator } from "@dokkurator/core";
 import { prepareLintConfiguration } from "@dokkurator/validator";
-import customPlugin from "./custom-plugin.mjs";
+import projectConfig from "../dokkurator.config.mjs";
 
 export const root = fileURLToPath(new URL("../", import.meta.url));
 
-// Load everything before entering the synchronous rule runtime.
+// Integration preparation for direct ESLint only; this is not a Dokkurator config.
+// Core validation prepares these resources internally during app.validate().
 export async function prepareExample() {
-  const source = new FileSystemSource({ root, sourceId: "validator-examples" });
-  const commonSchema = JSON.parse(
-    await readFile(
-      new URL("../schemas/common.schema.json", import.meta.url),
-      "utf8",
-    ),
-  );
-  const configuration = prepareLintConfiguration({
-    docTypes: await loadDocTypes(source),
-    schemas: { [commonSchema.$id]: commonSchema },
-    plugins: { example: customPlugin },
-    rules: {
-      "example/no-todo": "warn",
-      "markdown/no-duplicate-headings": "warn",
-    },
-  });
-  return { source, configuration };
-}
-
-/** @param {import('@dokkurator/loader').DocumentSource} source */
-export async function loadExamples(source, group = "all") {
-  if (!["all", "valid", "invalid"].includes(group)) {
-    throw new Error("Use all, valid, or invalid as the example group.");
+  const app = createDokkurator({ root });
+  await app.open();
+  try {
+    const { results, errors } = await app.listDocTypes();
+    if (errors.length) {
+      throw new Error(errors.map(({ message }) => message).join("\n"));
+    }
+    return {
+      configuration: prepareLintConfiguration({
+        docTypes: results.flatMap(({ doctypes }) => doctypes),
+        ...projectConfig.validator,
+      }),
+    };
+  } finally {
+    await app.close();
   }
-  return loadDocuments(source, {
-    documentsDirectory: group === "all" ? "documents" : `documents/${group}`,
-    parseErrors: "collect",
-  });
 }

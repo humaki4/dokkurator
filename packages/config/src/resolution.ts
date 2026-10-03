@@ -81,7 +81,18 @@ export async function resolveProjectConfig(
   const selected =
     options.includeSources === false
       ? []
-      : selectSources(project, options.sourceId);
+      : selectSources(
+          options.defaultSource && project.config.sources.length === 0
+            ? {
+                ...project,
+                config: {
+                  ...project.config,
+                  sources: [{ id: "root", path: "." }],
+                },
+              }
+            : project,
+          options.sourceId,
+        );
   const sources = selected.map((source) => ({
     id: source.id,
     root: resolveSourcePath(project, source),
@@ -134,6 +145,7 @@ function mergeValidatorConfig(
       );
   }
   return {
+    schemas: structuredClone({ ...base.schemas, ...local.schemas }),
     plugins: { ...plugins, ...local.plugins },
     rules: structuredClone({ ...base.rules, ...local.rules }),
   };

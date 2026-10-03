@@ -137,9 +137,9 @@ importers:
 
   examples/validator:
     dependencies:
-      '@dokkurator/loader':
+      '@dokkurator/core':
         specifier: workspace:*
-        version: link:../../packages/loader
+        version: link:../../packages/core
       '@dokkurator/validator':
         specifier: workspace:*
         version: link:../../packages/validator
@@ -170,6 +170,9 @@ importers:
       '@dokkurator/loader':
         specifier: workspace:*
         version: link:../loader
+      '@dokkurator/validator':
+        specifier: workspace:*
+        version: link:../validator
     devDependencies:
       simple-git:
         specifier: ^3.36.0

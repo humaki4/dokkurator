@@ -4,6 +4,7 @@ import type {
   SourceDiff,
 } from "@dokkurator/loader";
 import type { SearchHit } from "@dokkurator/knowledge";
+import type { lint } from "@dokkurator/validator";
 
 /** Location from which the nearest Dokkurator project is discovered. */
 export interface DokkuratorOptions {
@@ -31,7 +32,13 @@ export interface SourceSelection {
 }
 
 export type SourceOperationPhase =
-  "preparation" | "configuration" | "index" | "sync" | "diff" | "load";
+  | "preparation"
+  | "configuration"
+  | "index"
+  | "sync"
+  | "diff"
+  | "load"
+  | "validation";
 
 export type SourceRecovery =
   | "run-prepare"
@@ -84,6 +91,13 @@ export interface DocumentsSourceResult {
   readonly documents: readonly ParsedDocument[];
 }
 
+export interface ValidationSourceResult {
+  readonly sourceId: string;
+  readonly documents: readonly ({ readonly path: string } & ReturnType<
+    typeof lint
+  >)[];
+}
+
 export interface SearchOptions extends SourceSelection {
   readonly limit?: number;
 }
@@ -91,6 +105,9 @@ export interface SearchOptions extends SourceSelection {
 /** Reusable application lifecycle and supported application use-cases. */
 export interface DokkuratorApp {
   open(): Promise<OpenResult>;
+  validate(
+    options?: SourceSelection,
+  ): Promise<SourceOperationResult<ValidationSourceResult>>;
   prepare(
     options?: SourceSelection,
   ): Promise<SourceOperationResult<PrepareSourceResult>>;

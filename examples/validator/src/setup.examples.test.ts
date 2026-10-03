@@ -1,7 +1,10 @@
 import { ESLint } from "eslint";
-import { createLintConfig, lint } from "@dokkurator/validator";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { createDokkurator } from "@dokkurator/core";
+import { createLintConfig } from "@dokkurator/validator";
 import { describe, expect, test } from "vitest";
-import { loadExamples, prepareExample, root } from "./setup.mjs";
+import { prepareExample, root } from "./setup.mjs";
 import pluginConfig from "../eslint-plugin.config.mjs";
 
 const expectedRule = {
@@ -25,8 +28,17 @@ const expectedRule = {
 
 describe("runnable Validator examples", () => {
   test("compares all example findings with standard ESLint and the direct plugin profile", async () => {
-    const { source, configuration } = await prepareExample();
-    const documents = await loadExamples(source);
+    const { configuration } = await prepareExample();
+    const app = createDokkurator({ root });
+    await app.open();
+    let validation;
+    try {
+      validation = await app.validate();
+    } finally {
+      await app.close();
+    }
+    expect(validation.errors).toEqual([]);
+    const documents = validation.results.flatMap(({ documents }) => documents);
     const engines = [createLintConfig(configuration), pluginConfig].map(
       (overrideConfig) =>
         new ESLint({ cwd: root, overrideConfigFile: true, overrideConfig }),
@@ -34,23 +46,16 @@ describe("runnable Validator examples", () => {
     expect(documents).toHaveLength(24);
     expect(configuration.docTypes).toHaveLength(8);
     for (const document of documents) {
-      const input = {
-        originalText: document.originalText,
-        source: document.source,
-        configuration,
-      };
-      const result = lint(input);
-      if (document.source.path.startsWith("documents/valid/")) {
-        expect(result.diagnostics, document.source.path).toEqual([]);
+      const result = document;
+      const originalText = await readFile(join(root, document.path), "utf8");
+      if (document.path.startsWith("documents/valid/")) {
+        expect(result.diagnostics, document.path).toEqual([]);
       } else {
-        const name = document.source.path
-          .split("/")
-          .at(-1)!
-          .replace(/\.md$/, "");
+        const name = document.path.split("/").at(-1)!.replace(/\.md$/, "");
         const ruleId = expectedRule[name as keyof typeof expectedRule];
         expect(
           [...new Set(result.diagnostics.map((item) => item.ruleId))],
-          document.source.path,
+          document.path,
         ).toEqual([ruleId]);
         expect(result.status).toBe(
           ["custom-rule", "duplicate-headings"].includes(name)
@@ -61,8 +66,8 @@ describe("runnable Validator examples", () => {
           expect(result.diagnostics[0].phase).toBe("parse");
       }
       for (const engine of engines) {
-        const [direct] = await engine.lintText(input.originalText, {
-          filePath: input.source.path,
+        const [direct] = await engine.lintText(originalText, {
+          filePath: document.path,
         });
         expect(
           result.diagnostics.map(({ ruleId, severity, message, location }) => ({
@@ -71,7 +76,7 @@ describe("runnable Validator examples", () => {
             message,
             location,
           })),
-          document.source.path,
+          document.path,
         ).toEqual(
           direct.messages.map(
             ({

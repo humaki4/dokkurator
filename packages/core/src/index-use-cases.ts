@@ -1,8 +1,4 @@
-import type {
-  ResolvedProjectConfig,
-  ResolvedProjectSource,
-  ResolvedSource,
-} from "@dokkurator/config";
+import type { ResolvedProjectSource, ResolvedSource } from "@dokkurator/config";
 import {
   calculateDocumentDiff,
   indexDocumentChanges,
@@ -11,8 +7,6 @@ import {
   type IncrementalKnowledgeIndex,
 } from "@dokkurator/knowledge";
 import {
-  loadDocTypes,
-  loadDocuments,
   openConfiguredSource,
   prepareConfiguredSource,
   SourcePreparationRequiredError,
@@ -27,10 +21,9 @@ import {
   resolveProjectSource,
   selectProjectSources,
 } from "./source-operations.js";
+import type { ApplicationContext } from "./application-context.js";
 import type {
   DiffSourceResult,
-  DocTypesSourceResult,
-  DocumentsSourceResult,
   PrepareSourceResult,
   SearchOptions,
   SourceOperationResult,
@@ -38,14 +31,12 @@ import type {
   SyncSourceResult,
 } from "./types.js";
 
-/** Resources available while a Dokkurator application is open. */
-export interface ApplicationContext {
-  readonly project: ResolvedProjectConfig;
+export interface IndexedApplicationContext extends ApplicationContext {
   readonly index: IncrementalKnowledgeIndex;
 }
 
 export async function prepareSources(
-  context: ApplicationContext,
+  context: IndexedApplicationContext,
   options: SourceSelection = {},
 ): Promise<SourceOperationResult<PrepareSourceResult>> {
   return processProjectSources(context.project, options, (source) =>
@@ -54,7 +45,7 @@ export async function prepareSources(
 }
 
 export async function syncSources(
-  context: ApplicationContext,
+  context: IndexedApplicationContext,
   options: SourceSelection = {},
 ): Promise<SourceOperationResult<SyncSourceResult>> {
   return processProjectSources(context.project, options, (source) =>
@@ -63,7 +54,7 @@ export async function syncSources(
 }
 
 export async function diffSources(
-  context: ApplicationContext,
+  context: IndexedApplicationContext,
   options: SourceSelection = {},
 ): Promise<SourceOperationResult<DiffSourceResult>> {
   return processProjectSources(context.project, options, async (source) => {
@@ -83,7 +74,7 @@ export async function diffSources(
 }
 
 export async function searchDocuments(
-  context: ApplicationContext,
+  context: IndexedApplicationContext,
   query: string,
   options: SearchOptions = {},
 ) {
@@ -91,42 +82,8 @@ export async function searchDocuments(
   return searchKnowledge(context.index, query, options);
 }
 
-export async function listProjectDocTypes(
-  context: ApplicationContext,
-  options: SourceSelection = {},
-): Promise<SourceOperationResult<DocTypesSourceResult>> {
-  return processProjectSources(context.project, options, async (source) => {
-    const { adapter, config } = await openProjectSource(
-      context.project,
-      source,
-    );
-    const doctypes = await sourceStage("load", "retry-operation", () =>
-      loadDocTypes(adapter, {
-        doctypesDirectory: config.doctypes.directory,
-      }),
-    );
-    return { sourceId: source.id, doctypes };
-  });
-}
-
-export async function listProjectDocuments(
-  context: ApplicationContext,
-  options: SourceSelection = {},
-): Promise<SourceOperationResult<DocumentsSourceResult>> {
-  return processProjectSources(context.project, options, async (source) => {
-    const { adapter, config } = await openProjectSource(
-      context.project,
-      source,
-    );
-    const documents = await sourceStage("load", "retry-operation", () =>
-      loadDocuments(adapter, documentConfig(config)),
-    );
-    return { sourceId: source.id, documents };
-  });
-}
-
 async function prepareSource(
-  context: ApplicationContext,
+  context: IndexedApplicationContext,
   source: ResolvedProjectSource,
 ): Promise<PrepareSourceResult> {
   let checkout: PrepareSourceResult["checkout"] =
@@ -163,7 +120,7 @@ async function prepareSource(
 }
 
 async function syncSource(
-  context: ApplicationContext,
+  context: IndexedApplicationContext,
   source: ResolvedProjectSource,
 ): Promise<SyncSourceResult> {
   const adapter = await sourceStage("sync", "run-prepare", () =>
@@ -175,7 +132,7 @@ async function syncSource(
 }
 
 async function indexSourceChanges(
-  context: ApplicationContext,
+  context: IndexedApplicationContext,
   source: SourceAdapter,
   config: ResolvedSource,
 ): Promise<IndexDocumentChangesResult> {

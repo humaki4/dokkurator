@@ -87,3 +87,16 @@ overrides for these settings.
 Secrets never belong in this file. Remote Git sources use the local Git
 credential helper, SSH agent, and SSH configuration. CI must configure Git
 credentials before invoking Dokkurator.
+
+## Core validation
+
+`createDokkurator({ root })` resolves configuration through this package. Core
+uses the project directory as source `root` when no sources are configured; the
+low-level resolver enables this explicitly with `defaultSource: true`.
+`open()` and `validate()` do not open a Knowledge index.
+
+In `dokkurator.config.mjs`, `validator` accepts imported `plugins`, JavaScript
+`rules` and preloaded `schemas` keyed by absolute URI. Project values are merged
+with repository values; repository rule and schema entries override matching
+project entries. Different plugin instances under one namespace are rejected.
+See the [Core README](../packages/core/README.md) for a complete example.

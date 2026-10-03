@@ -6,5 +6,11 @@
     "checkJs": true,
     "types": ["node"]
   },
-  "include": ["src/**/*.mjs", "src/**/*.ts", "eslint*.mjs"]
+  "include": [
+    "src/**/*.mjs",
+    "src/**/*.ts",
+    "eslint*.mjs",
+    "dokkurator.config.mjs",
+    "minimal/dokkurator.config.mjs"
+  ]
 }

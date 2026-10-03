@@ -2,11 +2,17 @@ import type { Linter } from "eslint";
 
 /** Imported ESLint plugins and explicit rule activation, resolved per source. */
 export interface ValidatorConfig {
+  readonly schemas?: Readonly<
+    Record<string, boolean | Readonly<Record<string, unknown>>>
+  >;
   readonly plugins?: NonNullable<Linter.Config["plugins"]>;
   readonly rules?: Linter.RulesRecord;
 }
 
 export interface ResolvedValidatorConfig {
+  readonly schemas: Readonly<
+    Record<string, boolean | Readonly<Record<string, unknown>>>
+  >;
   readonly plugins: NonNullable<Linter.Config["plugins"]>;
   readonly rules: Linter.RulesRecord;
 }
@@ -47,6 +53,8 @@ export interface ConfigOptions {
   readonly root: string;
   readonly sourceId?: string;
   readonly includeSources?: boolean;
+  /** Use the project root as source "root" when no sources are declared. */
+  readonly defaultSource?: boolean;
   readonly index?: string;
   readonly documentsDirectory?: string;
   readonly include?: readonly string[];
