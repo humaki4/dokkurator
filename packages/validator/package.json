@@ -21,6 +21,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@dokkurator/loader": "workspace:*"
+    "@dokkurator/loader": "workspace:*",
+    "@eslint/markdown": "^8.0.3",
+    "eslint": "10.10.0"
   }
 }

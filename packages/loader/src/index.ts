@@ -6,12 +6,15 @@ export type { ParsedDocType } from "./docTypes/index.js";
 export {
   DEFAULT_DOCUMENTS_DIRECTORY,
   DEFAULT_EXCLUDED_DOCUMENT_DIRECTORIES,
+  DocumentParseError,
   loadDocument,
   loadDocuments,
   isDocumentationFile,
 } from "./documents/index.js";
 export type {
   DocumentConfig,
+  DocumentParseDiagnostic,
+  DocumentParseOptions,
   Heading,
   Link,
   ParsedDocument,
@@ -33,6 +36,8 @@ export type {
   SourceChange,
   SourceDiff,
   SourceId,
+  SourceDocument,
+  SourceMetadata,
   SourcePreparationReason,
   SourceState,
 } from "./source-adapter/index.js";

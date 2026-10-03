@@ -17,7 +17,12 @@ export const DEFAULT_EXCLUDED_DOCUMENT_DIRECTORIES = [
   "dist",
 ] as const;
 
-export interface DocumentConfig {
+export interface DocumentParseOptions {
+  /** Keep invalid frontmatter as diagnostics instead of throwing. Defaults to throw. */
+  readonly parseErrors?: "throw" | "collect";
+}
+
+export interface DocumentConfig extends DocumentParseOptions {
   readonly documentsDirectory?: SourceId;
   readonly excludeDirectories?: readonly SourceId[];
   readonly include?: readonly string[];
@@ -26,6 +31,15 @@ export interface DocumentConfig {
 
 export type MarkdownDocument = Root;
 export type SourcePosition = NonNullable<Root["position"]>;
+
+export interface DocumentParseDiagnostic {
+  readonly phase: "parse";
+  readonly code: string;
+  readonly severity: "error";
+  readonly message: string;
+  readonly source: SourceMetadata;
+  readonly position: SourcePosition;
+}
 
 export interface Heading {
   readonly depth: MarkdownHeading["depth"];
@@ -51,7 +65,12 @@ export interface Reference {
 export interface ParsedDocument {
   readonly type: string | undefined;
   readonly metadata: unknown;
+  /** Complete source text, including frontmatter, BOM and original line endings. */
+  readonly originalText: string;
+  /** Markdown body; AST positions refer to originalText, not this substring. */
   readonly content: string;
+  /** Invalid frontmatter never supplies partial metadata. */
+  readonly parseDiagnostics: readonly DocumentParseDiagnostic[];
   readonly ast: MarkdownDocument;
   readonly headings: readonly Heading[];
   readonly links: readonly Link[];

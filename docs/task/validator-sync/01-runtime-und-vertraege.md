@@ -1,6 +1,7 @@
 # 01 — Synchrone ESLint-Runtime und Verträge festlegen
 
-Status: vorgeschlagen, nicht begonnen.
+Status: abgeschlossen. Entscheidung und geprüfte Verträge siehe
+[Runtime-Entscheidung](./01-runtime-entscheidung.md).
 
 Abhängigkeiten: Keine.
 

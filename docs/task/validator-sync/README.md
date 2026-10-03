@@ -1,6 +1,11 @@
 # Tasks: synchrone ESLint-Regelausführung
 
-Status: vorgeschlagene Implementierungsreihenfolge; keine Tasks ausgeführt.
+Status: Aufgaben 01–02 abgeschlossen; Aufgaben 03–08 noch nicht begonnen.
+
+Die [Runtime-Entscheidung](./01-runtime-entscheidung.md) dokumentiert die geprüfte
+Versionskombination, den synchronen Zielvertrag und die unveränderte Bestands-API.
+Der [Loader-Vertrag](./02-loader-vertrag.md) beschreibt Originaltext, Positionen,
+Parse-Diagnosen und die Entscheidung zum künftigen Konfigurationsformat.
 
 Grundlage: [Validator-Spezifikation 2](../../../packages/validator/spec/Validator%20Specification%202%20-%20ESLint%20and%20Context%20Validation.md).
 

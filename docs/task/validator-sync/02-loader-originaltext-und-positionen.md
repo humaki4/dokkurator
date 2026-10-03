@@ -1,6 +1,7 @@
 # 02 — Originaltext und Positionen im Loader sichern
 
-Status: vorgeschlagen, nicht begonnen.
+Status: abgeschlossen. Implementierter Vertrag und Fehlerbehandlung siehe
+[Loader-Vertrag](./02-loader-vertrag.md).
 
 Abhängigkeiten: 01.
 
