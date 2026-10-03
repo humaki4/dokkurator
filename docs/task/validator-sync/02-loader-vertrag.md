@@ -81,7 +81,7 @@ Loader-Diagnosen übernommen. Diese Auswahl wird in Aufgaben 05/06 konkret
 implementiert; das Sammeln hier verhindert zunächst den Batch-Abbruch.
 
 Eine Feldpositions-API oder persistierter YAML-CST wird noch nicht eingeführt.
-Aufgabe 03 bewertet den Bedarf der Schema-Integration; der Originaltext bleibt
+Aufgabe 06 konkretisiert den Bedarf der eigenen Schema-Integration; der Originaltext bleibt
 für deren Positionsbestimmung verfügbar.
 
 ## Nachweis

@@ -1,11 +1,15 @@
 # Tasks: synchrone ESLint-Regelausführung
 
-Status: Aufgaben 01–02 abgeschlossen; Aufgaben 03–08 noch nicht begonnen.
+Status: Aufgaben 01, 02 und 04 abgeschlossen; Aufgabe 03 auf Wunsch übersprungen;
+Aufgaben 05–08 noch nicht begonnen.
 
 Die [Runtime-Entscheidung](./01-runtime-entscheidung.md) dokumentiert die geprüfte
 Versionskombination, den synchronen Zielvertrag und die unveränderte Bestands-API.
 Der [Loader-Vertrag](./02-loader-vertrag.md) beschreibt Originaltext, Positionen,
 Parse-Diagnosen und die Entscheidung zum künftigen Konfigurationsformat.
+Der [Konfigurationsvertrag](./04-konfigurationsvertrag.md) beschreibt die
+gemeinsame Vorbereitung für direktes und eingebettetes ESLint: Regeln als
+JavaScript-Objekt, DocTypes vorerst YAML, eigene dünne Schema-Integration.
 
 Grundlage: [Validator-Spezifikation 2](../../../packages/validator/spec/Validator%20Specification%202%20-%20ESLint%20and%20Context%20Validation.md).
 
@@ -26,4 +30,7 @@ Laden von Dokumenten, DocTypes und Schema-Abhängigkeiten darf vorab asynchron e
 | 7       | [DocType-Inhaltsregeln als ESLint-Plugin bereitstellen](./07-doctype-content-regeln-und-plugin-export.md)     | Das bestehende Validator-Paket stellt ein normales ESLint-Plugin bereit, einschließlich einer DocType-Regel für erforderliche Überschriften.                                   |
 | 8       | [Synchrone Ausführung vollständig nachweisen und dokumentieren](./08-kompatibilitaet-und-abschluss.md)        | Ein verifiziertes synchrones Lint-MVP samt Nutzungsbeispielen und dokumentierten Grenzen ist abgeschlossen.                                                                    |
 
-Jeder Task beschreibt Arbeit, Outcome und Abnahmekriterien. Die Frontmatter-Integration wird erst nach ihrer Evaluation gewählt. Alle Implementierungen bleiben in den vorhandenen besitzenden Paketen und werden über deren Root-APIs konsumiert.
+Jeder Task beschreibt Arbeit, Outcome und Abnahmekriterien. Auf Wunsch entfällt
+die Plugin-Evaluation aus Aufgabe 03; eine eigene dünne Ajv-/yaml-Integration
+ist festgelegt. Alle Implementierungen bleiben in den vorhandenen besitzenden
+Paketen und werden über deren Root-APIs konsumiert.

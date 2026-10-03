@@ -87,7 +87,7 @@ export function parseDocument(
   };
 }
 
-function extractMarkdownContent(source: string, frontmatter: YAML | undefined) {
+function extractMarkdownContent(source: string, frontmatter: Yaml | undefined) {
   const endOffset = frontmatter?.position?.end.offset;
   if (endOffset === undefined) return source;
 
@@ -101,7 +101,7 @@ export function parseDocuments(
   return sources.map((source) => parseDocument(source, options));
 }
 
-function isYamlFrontmatter(node: Root["children"][number]): node is YAML {
+function isYamlFrontmatter(node: Root["children"][number]): node is Yaml {
   return node.type === "yaml";
 }
 

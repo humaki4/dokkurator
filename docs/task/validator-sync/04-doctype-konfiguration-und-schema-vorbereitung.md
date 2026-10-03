@@ -1,8 +1,10 @@
 # 04 — DocType-Auswahl und ESLint-Konfiguration vorbereiten
 
-Status: vorgeschlagen, nicht begonnen.
+Status: abgeschlossen. Öffentliche API, Schema- und Auswahlregeln siehe
+[Konfigurationsvertrag](./04-konfigurationsvertrag.md).
 
-Abhängigkeiten: 03.
+Abhängigkeiten: 01, 02. Aufgabe 03 wurde auf Wunsch übersprungen; das externe
+Frontmatter-Plugin wird nicht verwendet.
 
 ## Outcome
 

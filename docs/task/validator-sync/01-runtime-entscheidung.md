@@ -22,9 +22,10 @@ wurden hier nicht getestet.
 
 `eslint` und `@eslint/markdown` sind direkte Runtime-Abhängigkeiten von Validator,
 auch wenn ESLint bereits als Entwicklungswerkzeug im Root vorhanden ist.
-Eine Schema-Integration wird erst in Aufgabe 03 ausgewählt. Falls eine eigene
-Integration Ajv oder YAML direkt verwendet, werden diese dort ebenfalls direkte
-Runtime-Abhängigkeiten; Loader-Abhängigkeiten werden nicht intern konsumiert.
+Nach der Umsetzung von Aufgabe 04 ist eine eigene dünne Ajv-/yaml-Integration
+festgelegt; Aufgabe 03 wurde auf Wunsch übersprungen. Ajv, ajv-formats und yaml
+sind direkte Validator-Runtime-Abhängigkeiten; Loader-Abhängigkeiten werden nicht
+intern konsumiert.
 
 Der reproduzierbare Versuch liegt in
 [eslint-runtime.test.ts](../../../packages/validator/test/eslint-runtime.test.ts).

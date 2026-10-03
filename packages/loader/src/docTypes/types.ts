@@ -16,7 +16,7 @@ export interface LoadedDocType {
   readonly rules?: SourceDocument;
 }
 
-export type MetadataDefinition = Readonly<Record<string, unknown>>;
+export type MetadataDefinition = Readonly<Record<string, unknown>> | boolean;
 
 export interface StructureDefinition {
   readonly requiredHeadings?: readonly string[];

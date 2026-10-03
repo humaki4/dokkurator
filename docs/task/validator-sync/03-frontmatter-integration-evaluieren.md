@@ -1,6 +1,8 @@
 # 03 — Frontmatter-Schema-Integration auswählen
 
-Status: vorgeschlagen, nicht begonnen.
+Status: auf Wunsch übersprungen. Das externe Plugin wird nicht übernommen;
+eigene dünne Integration mit Ajv und yaml. Die Auswahl und Vorbereitung sind im
+[Konfigurationsvertrag](./04-konfigurationsvertrag.md) dokumentiert.
 
 Abhängigkeiten: 01, 02.
 
