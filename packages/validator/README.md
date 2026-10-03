@@ -23,7 +23,6 @@ Es gibt zwei getrennte Phasen:
 | `rules/`             | Einzelne fachliche ESLint-Prüfungen                                        |
 | `plugin/`            | Regeln bündeln, empfohlenes Profil und Regel-Settings bereitstellen        |
 | `lint/`              | ESLint-Konfiguration, Ausführung und Ergebnisaufbereitung                  |
-| `legacy/`            | Bestehende Pflichtfeld-API, unabhängig vom neuen Ablauf                    |
 
 Die Einstiegspunkte beschreiben den Ablauf mit benannten Schritten. Die
 Ajv-Optionen, YAML-Knotenauflösung, ESLint-Konfigurationsprobe und
@@ -104,6 +103,16 @@ dazu wird `dokkurator/metadata-schema: off` verwendet. Bei fehlerhaftem YAML ode
 ungültiger Zuordnung überspringt die Schema-Regel die Prüfung, damit nur die
 Zuordnungs-Regel den ursprünglichen Fehler meldet.
 
+DocType-Metadaten können als vollständiges JSON Schema Draft 7 oder als kompakte
+Feldbeschreibung in YAML definiert werden. Der Loader erweitert die kompakte
+Schreibweise zu JSON Schema; der Validator verwendet für beide Formen dieselbe
+Schema-Regel. `required: true` markiert dabei ein Pflichtfeld, und beispielsweise
+`pattern`, `enum` oder `items` bleiben reguläre Schema-Keywords. Für Bedingungen
+zwischen Feldern (`if`/`then`) und Objektoptionen wie `additionalProperties`
+steht das vollständige Schema zur Verfügung. Beispiele und die Grenzen der
+Kurzform stehen in der [Loader-Dokumentation](../loader/README.md#metadata-compact-fields-or-json-schema).
+Die DocType-Kennung im Frontmatter bleibt `doctype`.
+
 Pflichtüberschriften stehen in
 `structure.requiredHeadings`, beispielsweise in
 `_dokkurator/.doctypes/decision/definition.yml`:
@@ -151,7 +160,5 @@ Die Diagnosephase kommt ebenfalls aus der jeweiligen Regel: Optional ordnet
 `lint`; fatale ESLint-Parserfehler sind stets `parse`. Dafür sind keine konkreten
 Rule-IDs in der Fassade hinterlegt.
 
-Die bestehende `validateDocument`-API bleibt als isolierte Kompatibilitätsfunktion
-in `legacy/validate-document.ts` verfügbar. Sie ist keine zusätzliche ESLint-Regel.
 Der synchrone Einstieg
 für vollständiges Markdown ist `lint({ originalText, source, configuration })`.

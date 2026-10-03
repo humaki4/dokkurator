@@ -103,6 +103,13 @@ Optionen und Suppressionen verwenden die normale ESLint-Konfiguration.
 
 ## Schemas und Vorbereitung
 
+- Der Loader akzeptiert vollständiges JSON Schema oder eine kompakte
+  Metadaten-Feldbeschreibung. Die Kurzform wird zu einem Objektschema mit
+  `properties` und einer aus `required: true` gebildeten Pflichtfeldliste
+  normalisiert. Feld-Keywords bleiben erhalten; Objektbedingungen und Optionen
+  wie `if`/`then` oder `additionalProperties` stehen im vollständigen Schema.
+  Der Validator erhält ausschließlich das normalisierte JSON Schema. Die
+  DocType-Kennung bleibt `doctype`, ohne Alias über `type`.
 - Maßgeblich ist das tatsächliche `ParsedDocType.metadata`, einschließlich der
   in Draft 7 erlaubten booleschen Schemas. Der Loader-Typ wurde an sein bereits
   vorhandenes Draft-7-Schema angeglichen.
