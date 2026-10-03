@@ -6,8 +6,8 @@ Status: Aufgabe 02 umgesetzt, 2026-10-03.
 
 Dokkurator soll künftig über eine JavaScript-Konfiguration (`dokkurator.config.mjs`)
 konfiguriert werden. DocType-Definitionen bleiben zunächst deklarative YAML-Dateien
-mit JSON Schema. Die Umsetzung der JavaScript-Konfiguration ist eine separate
-Änderung; Aufgabe 02 verändert weder Config-Discovery noch das DocType-Dateiformat.
+mit JSON Schema. Die JavaScript-Konfiguration wurde anschließend in
+[Config](../../../packages/config/README.md) ergänzt; Aufgabe 02 verändert weder Config-Discovery noch das DocType-Dateiformat.
 Plugin-Imports und Schema-Vorbereitung gehören vor die synchrone Lint-Runtime.
 YAML-Frontmatter in Markdown-Dokumenten bleibt davon unabhängig.
 

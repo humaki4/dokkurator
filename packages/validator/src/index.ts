@@ -9,13 +9,6 @@ export type {
   PreparedLintConfiguration,
 } from "./lint/configuration.js";
 export { LintConfigurationError } from "./lint/errors.js";
-export type {
-  DocTypeSelection,
-  DocTypeSelectionCode,
-  MetadataSchema,
-  MetadataValidationResult,
-  PreparedDocType,
-} from "./lint/doc-types.js";
 
 export interface ValidationResult {
   valid: boolean;

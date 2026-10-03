@@ -137,6 +137,9 @@ importers:
 
   packages/config:
     dependencies:
+      eslint:
+        specifier: 10.10.0
+        version: 10.10.0
       yaml:
         specifier: ^2.9.1
         version: 2.9.1

@@ -1,5 +1,7 @@
 export const CONFIG_DIRECTORY = ".dokkurator";
 export const CONFIG_FILENAME = "config.yaml";
+export const JS_CONFIG_FILENAME = "dokkurator.config.mjs";
+export const SOURCES_FILENAME = "sources.yaml";
 export const DEFAULT_CONFIG = {
   documents: {
     directory: ".",

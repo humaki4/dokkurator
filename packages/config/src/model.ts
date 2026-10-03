@@ -1,3 +1,16 @@
+import type { Linter } from "eslint";
+
+/** Imported ESLint plugins and explicit rule activation, resolved per source. */
+export interface ValidatorConfig {
+  readonly plugins?: NonNullable<Linter.Config["plugins"]>;
+  readonly rules?: Linter.RulesRecord;
+}
+
+export interface ResolvedValidatorConfig {
+  readonly plugins: NonNullable<Linter.Config["plugins"]>;
+  readonly rules: Linter.RulesRecord;
+}
+
 /** Document discovery settings shared by project and source repositories. */
 type DocumentsConfig = {
   readonly directory?: string;
@@ -22,6 +35,7 @@ export type DokkuratorConfig = {
   readonly version?: 1;
   readonly documents?: DocumentsConfig;
   readonly doctypes?: DocTypeConfig;
+  readonly validator?: ValidatorConfig;
   readonly knowledge?: { readonly index?: string };
   readonly checkouts?: { readonly directory?: string };
   readonly watch?: { readonly debounce?: number };
@@ -48,6 +62,7 @@ export type ResolvedSource = {
   readonly remote?: { readonly url: string; readonly branch?: string };
   readonly documents: Required<DocumentsConfig>;
   readonly doctypes: Required<DocTypeConfig>;
+  readonly validator: ResolvedValidatorConfig;
 };
 
 /** Source declaration with its resolved checkout path, before repo config. */
@@ -72,6 +87,7 @@ export interface ResolvedConfig {
   readonly repository: {
     readonly documents: Required<DocumentsConfig>;
     readonly doctypes: Required<DocTypeConfig>;
+    readonly validator: ResolvedValidatorConfig;
   };
   readonly sources: readonly ResolvedSource[];
   readonly knowledge: { readonly index: string };
@@ -88,4 +104,7 @@ export type LoadedConfig = {
 };
 
 /** Repository-local subset of the Dokkurator configuration. */
-export type RepositoryConfig = Pick<DokkuratorConfig, "documents" | "doctypes">;
+export type RepositoryConfig = Pick<
+  DokkuratorConfig,
+  "documents" | "doctypes" | "validator"
+>;

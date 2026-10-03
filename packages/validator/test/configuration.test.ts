@@ -9,11 +9,10 @@ import {
   createLintConfig,
   LintConfigurationError,
   prepareLintConfiguration,
-  type MetadataSchema,
 } from "../src/index.js";
 
 function docType(
-  metadata: MetadataSchema = { type: "object" },
+  metadata: ParsedDocType["metadata"] = { type: "object" },
   name = "decision",
 ): ParsedDocType {
   return { name, metadata, rules: [] };

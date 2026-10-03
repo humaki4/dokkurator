@@ -17,9 +17,10 @@ Legacy-Regeln ausdrücklich ab. Sie werden weder ignoriert noch automatisch in
 eine neue Regel-DSL übersetzt. Metadatenbedingungen stehen im JSON Schema;
 zusätzliche lokale Regeln stehen im ESLint-`rules`-Objekt.
 
-Die globale `dokkurator.config.mjs`-Discovery wird hier noch nicht eingeführt.
-Die neue Validator-API ist unabhängig vom Dateiformat, aus dem eine Anwendung
-ihre Einstellungen lädt.
+Die anschließende [Config-Erweiterung](../../../packages/config/README.md) lädt
+`dokkurator.config.mjs` auf Projekt- und Repository-Ebene und führt deren
+Validator-Einstellungen pro Quelle zusammen. Die Validator-API bleibt unabhängig
+vom Dateiformat, aus dem eine Anwendung ihre Einstellungen lädt.
 
 ## Öffentliche API
 
@@ -29,7 +30,9 @@ ihre Einstellungen lädt.
   DocType-Registry samt kompilierten Schemas und geprüfter Flat Config.
 - `createLintConfig(inputOrPrepared)`: dieselbe Konfiguration als normales
   ESLint-Flat-Config-Array; wiederverwendbar für direktes und eingebettetes ESLint.
-- `LintConfigurationError` und die zugehörigen Eingabe-, Auswahl- und Ergebnistypen.
+- `LintConfigurationError` sowie die zentralen Typen `LintConfigurationInput`
+  und `PreparedLintConfiguration`. Untertypen bleiben ohne eigene Root-Exports;
+  ihre Struktur wird aus den öffentlichen Funktionen abgeleitet.
 
 ```ts
 const prepared = prepareLintConfiguration({
