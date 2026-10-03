@@ -11,7 +11,7 @@ export function getDocTypeRegistry(
     typeof registry.selectDocType !== "function"
   ) {
     throw new LintConfigurationError(
-      "Dokkurator rules require prepared DocTypes in settings.dokkurator; use prepareLintConfiguration or createLintConfig.",
+      "Dokkurator rules require prepared DocTypes in settings.dokkurator; use prepareDocTypes.",
     );
   }
   return registry;

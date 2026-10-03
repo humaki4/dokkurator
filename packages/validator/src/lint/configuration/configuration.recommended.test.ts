@@ -27,7 +27,12 @@ describe("recommended Markdown profile", () => {
       {},
       ...markdown.configs.recommended.map((config) => config.rules),
     );
-    expect(createLintConfig(prepared)[0]!.rules).toMatchObject(recommended);
+    expect(
+      Object.assign(
+        {},
+        ...createLintConfig(prepared).map((entry) => entry.rules),
+      ),
+    ).toMatchObject(recommended);
     const originalText = `${header}![ ](image.png)\n`;
     const result = lint({ originalText, source, configuration: prepared });
     expect(result).not.toBeInstanceOf(Promise);

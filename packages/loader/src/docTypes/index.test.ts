@@ -1,3 +1,6 @@
+import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { expect, test, vi } from "vitest";
 import type { SourceAdapter, SourceDocument } from "../source-adapter/index.js";
 import { SourceNotFoundError } from "../source-adapter/index.js";
@@ -66,3 +69,21 @@ function document(path: string, content: string): SourceDocument {
     source: { sourceId: "test", kind: "filesystem", path },
   };
 }
+
+test("loadDocTypes accepts a project root and custom DocType directory", async () => {
+  const root = await mkdtemp(join(tmpdir(), "dokkurator-doctypes-"));
+  try {
+    await mkdir(join(root, "types", "guide"), { recursive: true });
+    await writeFile(
+      join(root, "types", "guide", "definition.yml"),
+      "name: guide\nmetadata:\n  type: object\n",
+    );
+    await expect(
+      loadDocTypes(root, { doctypesDirectory: "types" }),
+    ).resolves.toEqual([
+      { name: "guide", metadata: { type: "object" }, rules: [] },
+    ]);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

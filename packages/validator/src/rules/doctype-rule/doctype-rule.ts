@@ -1,6 +1,6 @@
 import type { DiagnosticRule } from "../../lint/diagnostics/diagnostics.js";
 import { getFrontmatter } from "../../markdown/frontmatter.js";
-import { getDocTypeRegistry } from "../../plugin/settings.js";
+import { getDocTypeRegistry } from "../../eslintPlugin/settings.js";
 
 /** Require valid YAML and an unambiguous prepared DocType association. */
 export const docTypeRule: DiagnosticRule = {

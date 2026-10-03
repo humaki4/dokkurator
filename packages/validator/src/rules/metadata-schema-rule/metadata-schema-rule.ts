@@ -1,6 +1,6 @@
 import type { MarkdownRuleDefinition } from "@eslint/markdown";
 import { getFrontmatter } from "../../markdown/frontmatter.js";
-import { getDocTypeRegistry } from "../../plugin/settings.js";
+import { getDocTypeRegistry } from "../../eslintPlugin/settings.js";
 import { getSchemaErrorLocation } from "./schema-error-location.js";
 
 /** Check metadata using the selected DocType's precompiled JSON Schema. */

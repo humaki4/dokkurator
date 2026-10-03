@@ -13,6 +13,7 @@ export function validateLintConfiguration(
     ok: false,
     errors: [{ message: "Configuration probe.", line: 1, column: 1 }],
   });
+  const probePlugin = { ...markdown, languages: { gfm: language } };
   try {
     const messages = new Linter({ configType: "flat" }).verify(
       "",
@@ -33,7 +34,7 @@ export function validateLintConfiguration(
         ),
         plugins: {
           ...entry.plugins,
-          markdown: { ...markdown, languages: { gfm: language } },
+          markdown: probePlugin,
         },
       })),
       { filename },

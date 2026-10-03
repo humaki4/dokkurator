@@ -63,10 +63,20 @@ pnpm install
 pnpm build       # build all workspace projects
 pnpm test        # run tests
 pnpm typecheck   # run TypeScript checks
-pnpm lint        # run ESLint
+pnpm lint        # validate project docs and run workspace ESLint
+pnpm lint:docs   # validate only the project documentation
 pnpm check       # typecheck, lint, and test
 pnpm format:check
 ```
+
+The root ESLint configuration uses the Validator's recommended plugin profile
+for `docs/**/*.md`, with DocTypes loaded from `_dokkurator/.doctypes`. It checks
+DocType association, metadata schemas, required headings, and recommended
+Markdown rules. `lint:docs` builds the Validator and its dependencies first;
+`lint` and `check` include this documentation validation. Existing documentation
+findings fail these commands and can be corrected in the documents or DocType
+definitions. Package READMEs, templates, and example fixtures are outside this
+project documentation scope.
 
 Nx derives the project graph from workspace package relationships. To inspect it:
 

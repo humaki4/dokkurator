@@ -4,7 +4,7 @@ import { metadataSchemaRule } from "../rules/metadata-schema-rule/metadata-schem
 import type { Linter } from "eslint";
 
 /** Ordinary ESLint plugin; prepared resources are supplied through settings. */
-export const plugin = {
+export const dokkuratorEslintPlugin = {
   meta: { name: "@dokkurator/validator", version: "0.0.0" },
   rules: Object.freeze({
     doctype: docTypeRule,
@@ -14,16 +14,16 @@ export const plugin = {
   configs: { recommended: [] as Linter.Config[] },
 };
 
-plugin.configs.recommended.push({
+dokkuratorEslintPlugin.configs.recommended.push({
   name: "dokkurator/recommended",
   files: ["**/*.[mM][dD]"],
-  plugins: { dokkurator: plugin },
+  plugins: { dokkurator: dokkuratorEslintPlugin },
   rules: {
     "dokkurator/doctype": "error",
     "dokkurator/metadata-schema": "error",
     "dokkurator/required-headings": "error",
   },
 });
-Object.freeze(plugin.configs.recommended);
-Object.freeze(plugin.configs);
-Object.freeze(plugin);
+Object.freeze(dokkuratorEslintPlugin.configs.recommended);
+Object.freeze(dokkuratorEslintPlugin.configs);
+Object.freeze(dokkuratorEslintPlugin);

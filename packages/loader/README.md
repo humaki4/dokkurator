@@ -10,6 +10,11 @@ The package provides two complete workflows:
 - `loadDocuments` discovers, reads, and parses Markdown documents and their
   YAML Frontmatter without validating document content.
 
+For local DocTypes, `loadDocTypes(projectRoot, config?)` accepts a project root
+path and creates the filesystem source internally. Use a `DocumentSource` when
+loading from a custom or already configured source. Both forms support a custom
+`doctypesDirectory`.
+
 Both workflows access files through DocType's public `DocumentSource`
 contract. `FileSystemSource` reads a local directory, while `GitSource` reads a
 local Git working tree and adds normalized Git metadata. These implementations
@@ -70,7 +75,7 @@ metadata:
   title:
     type: string
     required: true
-    pattern: '^[A-Z]'
+    pattern: "^[A-Z]"
   status:
     type: string
     enum: [draft, accepted]
@@ -97,7 +102,7 @@ metadata:
   required: [doctype, title]
   properties:
     doctype: { const: decision }
-    title: { type: string, pattern: '^[A-Z]' }
+    title: { type: string, pattern: "^[A-Z]" }
     status: { type: string, enum: [draft, accepted] }
     component: { type: string }
   additionalProperties: false

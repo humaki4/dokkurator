@@ -36,16 +36,15 @@ Ajv-Optionen, YAML-Knotenauflösung, ESLint-Konfigurationsprobe und
 Diagnoseumwandlung liegen in den jeweiligen Implementierungen. `index.ts`
 enthält ausschließlich Exports; es gibt keine neuen Paketgrenzen.
 
-## In einer normalen ESLint-Konfiguration
+## Vollständige Konfiguration für die eingebettete Runtime
 
 `eslint.config.js` in einem ESM-Projekt (alternativ `eslint.config.mjs`):
 
 ```js
-import { FileSystemSource, loadDocTypes } from "@dokkurator/loader";
+import { loadDocTypes } from "@dokkurator/loader";
 import { createLintConfig } from "@dokkurator/validator";
 
-const source = new FileSystemSource({ root: process.cwd() });
-const docTypes = await loadDocTypes(source);
+const docTypes = await loadDocTypes(process.cwd());
 
 export default createLintConfig({
   docTypes,
@@ -71,13 +70,10 @@ vorbereitete Daten aus `settings.dokkurator`:
 
 ```js
 import markdown from "@eslint/markdown";
-import { FileSystemSource, loadDocTypes } from "@dokkurator/loader";
-import { plugin, prepareLintConfiguration } from "@dokkurator/validator";
+import { loadDocTypes } from "@dokkurator/loader";
+import { plugin, prepareDocTypes } from "@dokkurator/validator";
 
-const source = new FileSystemSource({ root: process.cwd() });
-const prepared = prepareLintConfiguration({
-  docTypes: await loadDocTypes(source),
-});
+const prepared = prepareDocTypes(await loadDocTypes(process.cwd()));
 
 export default [
   ...markdown.configs.recommended,
@@ -91,6 +87,22 @@ export default [
   },
 ];
 ```
+
+`prepareDocTypes` bereitet ausschließlich DocType-Daten vor: Es erstellt eine
+unveränderliche Momentaufnahme, kompiliert Metadaten-Schemas und baut die
+DocType-Suche. Es erzeugt keine ESLint-Konfiguration und aktiviert keine Regeln.
+Optional nimmt es als zweites Argument zusätzliche Schema-Ressourcen entgegen.
+
+`settings.dokkurator` übergibt diese Registry an die Regeln. Das recommended-Profil
+aktiviert Regeln, kennt aber keine Projekt-DocTypes. Die Vorbereitung erfolgt
+einmal vor der Ausführung; die Regeln selbst laden keine Dateien.
+
+`prepareLintConfiguration` kombiniert diese Datenvorbereitung mit einer geprüften,
+unveränderlichen vollständigen Flat-Konfiguration für `lint()` und Core.
+`createLintConfig` liefert davon eine veränderbare Kopie für ESLint. Diese beiden
+Helfer sind für die direkte Plugin-Einbindung nicht erforderlich. Intern werden
+die empfohlenen Profile mit ESLints `defineConfig` eingebunden; ihre Regeln
+werden nicht separat zusammengemischt.
 
 Ohne vorbereitete `settings.dokkurator` melden aktivierte Dokkurator-Regeln einen
 Konfigurationsfehler. Die Regeln haben keine zusätzlichen Regeloptionen.

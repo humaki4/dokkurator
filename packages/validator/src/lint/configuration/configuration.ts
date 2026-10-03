@@ -1,13 +1,14 @@
 import { validateLintConfiguration } from "./validate-configuration.js";
 import type { MetadataSchema } from "../../schemas/schemas.js";
 import type { Linter } from "eslint";
+import { defineConfig } from "eslint/config";
 import markdown from "@eslint/markdown";
 import type { ParsedDocType } from "@dokkurator/loader";
 import {
   prepareDocTypes,
   type PreparedDocTypeRegistry,
 } from "../../doc-types/doc-types.js";
-import { plugin } from "../../plugin/plugin.js";
+import { dokkuratorEslintPlugin } from "../../eslintPlugin/eslintPlugin.js";
 import { LintConfigurationError } from "../errors.js";
 
 export interface LintConfigurationInput {
@@ -23,16 +24,16 @@ export interface PreparedLintConfiguration extends PreparedDocTypeRegistry {
   readonly flatConfig: readonly Linter.Config[];
 }
 
-/** Compile schemas and validate ESLint configuration without running rule visitors. */
+/** Prepare a complete configuration for lint()/Core; direct plugins use prepareDocTypes. */
 export function prepareLintConfiguration(
   input: LintConfigurationInput,
 ): PreparedLintConfiguration {
   const registry = prepareDocTypes(input.docTypes, input.schemas ?? {});
   try {
-    const entry = createMarkdownConfig(input, registry);
-    validateLintConfiguration([entry], "__dokkurator_configuration__.md");
-    freezeConfig(entry);
-    return Object.freeze({ ...registry, flatConfig: Object.freeze([entry]) });
+    const config = createRuntimeConfig(input, registry);
+    validateLintConfiguration(config, "__dokkurator_configuration__.md");
+    for (const entry of config) freezeConfig(entry);
+    return Object.freeze({ ...registry, flatConfig: Object.freeze(config) });
   } catch (cause) {
     if (cause instanceof LintConfigurationError) throw cause;
     throw new LintConfigurationError("Invalid ESLint configuration.", {
@@ -75,10 +76,10 @@ function freezeConfig(entry: Linter.Config): void {
   Object.freeze(entry);
 }
 
-function createMarkdownConfig(
+function createRuntimeConfig(
   input: LintConfigurationInput,
   registry: PreparedDocTypeRegistry,
-): Linter.Config {
+): Linter.Config[] {
   if (
     Object.hasOwn(input.plugins ?? {}, "markdown") ||
     Object.hasOwn(input.plugins ?? {}, "dokkurator")
@@ -87,26 +88,22 @@ function createMarkdownConfig(
       "Plugin namespaces markdown and dokkurator are reserved.",
     );
   }
-  return {
+  return defineConfig({
     name: "dokkurator/prepared-markdown",
+    extends: [
+      // The enclosing pattern also supports Loader's upper-case extensions.
+      markdown.configs.recommended.map((config) => ({
+        ...config,
+        files: ["**/*.[mM][dD]"],
+      })),
+      dokkuratorEslintPlugin.configs.recommended,
+    ],
     // Accept upper-case extensions supported by Loader as well.
     files: ["**/*.[mM][dD]"],
     language: "markdown/gfm",
     languageOptions: { frontmatter: "yaml" },
-    plugins: {
-      ...input.plugins,
-      markdown,
-      dokkurator: plugin,
-    },
+    plugins: { ...input.plugins },
     settings: { dokkurator: registry },
-    rules: {
-      ...Object.assign(
-        {},
-        ...[...markdown.configs.recommended, ...plugin.configs.recommended].map(
-          (config) => config.rules,
-        ),
-      ),
-      ...structuredClone(input.rules ?? {}),
-    },
-  };
+    rules: structuredClone(input.rules ?? {}),
+  });
 }

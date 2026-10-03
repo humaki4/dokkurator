@@ -60,10 +60,10 @@ describe("ESLint configuration validation and isolation", () => {
   test("returned flat configs do not mutate the prepared configuration", () => {
     const prepared = prepareLintConfiguration({ docTypes: [docType()] });
     const config = createLintConfig(prepared);
-    config[0]!.rules!["dokkurator/doctype"] = "off";
-    config[0]!.languageOptions!.frontmatter = false;
-    config[0]!.plugins!.dokkurator = {};
-    config[0]!.files![0] = "**/*.txt";
+    config.at(-1)!.rules!["dokkurator/doctype"] = "off";
+    config.at(-1)!.languageOptions!.frontmatter = false;
+    config.at(-1)!.plugins!.dokkurator = {};
+    config.at(-1)!.files![0] = "**/*.txt";
     expect(
       new Linter().verify("# No association", createLintConfig(prepared), {
         filename: "virtual/example.md",

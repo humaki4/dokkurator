@@ -21,7 +21,7 @@ export interface PreparedDocTypeRegistry {
 /** Snapshot DocTypes, prepare their schemas, then build a reusable lookup. */
 export function prepareDocTypes(
   definitions: readonly ParsedDocType[],
-  schemas: Readonly<Record<string, MetadataSchema>>,
+  schemas: Readonly<Record<string, MetadataSchema>> = {},
 ): PreparedDocTypeRegistry {
   try {
     const copies = snapshotDefinitions(definitions);

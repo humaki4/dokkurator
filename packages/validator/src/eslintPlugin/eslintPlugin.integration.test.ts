@@ -5,6 +5,7 @@ import {
   createLintConfig,
   lint,
   plugin,
+  prepareDocTypes,
   prepareLintConfiguration,
 } from "@dokkurator/validator";
 
@@ -15,7 +16,7 @@ const docType = {
   rules: [],
 };
 
-const prepared = prepareLintConfiguration({ docTypes: [docType] });
+const prepared = prepareDocTypes([docType]);
 
 const frontmatter = "---\ndoctype: decision\n---\n";
 
@@ -39,14 +40,18 @@ describe("public plugin ESLint integration", () => {
     const [direct] = await eslint.lintText(text, {
       filePath: "virtual/decision.md",
     });
-    const messages = new Linter().verify(text, createLintConfig(prepared), {
-      filename: "virtual/decision.md",
-    });
+    const messages = new Linter().verify(
+      text,
+      createLintConfig({ docTypes: [docType] }),
+      {
+        filename: "virtual/decision.md",
+      },
+    );
     expect(direct!.messages).toEqual(messages);
     const result = lint({
       originalText: text,
       source: { sourceId: "virtual", path: "virtual/decision.md" },
-      configuration: prepared,
+      configuration: prepareLintConfiguration({ docTypes: [docType] }),
     });
     expect(result.diagnostics).toEqual([
       expect.objectContaining({

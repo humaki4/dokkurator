@@ -17,8 +17,12 @@ const prepared = prepareLintConfiguration({ docTypes: [docType] });
 describe("public plugin and recommended profile", () => {
   test("the helper registers the public plugin and both default rules", () => {
     const config = createLintConfig(prepared);
-    expect(config[0]!.plugins!.dokkurator).toBe(plugin);
-    expect(config[0]!.rules).toMatchObject({
+    expect(
+      config.find((entry) => entry.plugins?.dokkurator)!.plugins!.dokkurator,
+    ).toBe(plugin);
+    expect(
+      Object.assign({}, ...config.map((entry) => entry.rules)),
+    ).toMatchObject({
       "dokkurator/doctype": "error",
       "dokkurator/metadata-schema": "error",
       "dokkurator/required-headings": "error",
@@ -28,12 +32,17 @@ describe("public plugin and recommended profile", () => {
     const recommended = plugin.configs.recommended;
     expect(recommended[0]!.plugins!.dokkurator).toBe(plugin);
     const rules = Object.assign({}, ...recommended.map((entry) => entry.rules));
-    expect(createLintConfig(prepared)[0]!.rules).toMatchObject(rules);
+    expect(
+      Object.assign(
+        {},
+        ...createLintConfig(prepared).map((entry) => entry.rules),
+      ),
+    ).toMatchObject(rules);
     expect(
       createLintConfig({
         docTypes: [docType],
         rules: { "dokkurator/required-headings": "off" },
-      })[0]!.rules!["dokkurator/required-headings"],
+      }).at(-1)!.rules!["dokkurator/required-headings"],
     ).toBe("off");
   });
 });
