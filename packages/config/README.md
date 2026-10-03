@@ -87,8 +87,10 @@ for (const source of config.sources) {
 
 Config validates the structure and severity values. Validator preparation owns
 rule-ID/option validation and schema compilation. Resolving config does not
-activate lint in CLI commands; the lint facade and its application wiring remain
-subsequent work. DocType definitions remain YAML; nonempty legacy DocType rules
+activate lint in CLI commands; application wiring remains subsequent work.
+Validator's synchronous lint facade uses the complete recommended Markdown
+profile by default, with resolved rule entries taking precedence.
+DocType definitions remain YAML; nonempty legacy DocType rules
 are still rejected by Validator preparation.
 
 ## Source administration

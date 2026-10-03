@@ -57,7 +57,7 @@ const flatConfig = createLintConfig(prepared);
 Die Beispiele setzen bereits geladene Daten und importierte Plugins voraus.
 `validateMetadata` liefert synchron `{ valid, errors }` mit unabhängigen
 Ajv-Fehlerkopien. Es wird noch nicht automatisch als Metadaten-ESLint-Regel
-aufgerufen. Die neue öffentliche `lint`-Fassade folgt in Aufgabe 05.
+aufgerufen. Die öffentliche [Lint-Fassade](./05-lint-vertrag.md) ist in Aufgabe 05 umgesetzt.
 `validateDocument` und sein bisheriges Ergebnis bleiben unverändert.
 
 DocTypes und Schema-Daten werden kopiert. Vorbereitete Definitionen sind
@@ -90,8 +90,8 @@ Der JSON-Schema-Dialekt in `ParsedDocType.metadata.$schema` ist davon getrennt:
 Dort bezeichnet `$schema` Draft 7, nicht die Dokumentzuordnung.
 
 Die Config nutzt `markdown/gfm`, YAML-Frontmatter und Markdown-Erweiterungen
-`.md`, `.MD`, `.Md`, `.mD`. Standardmäßig wird nur die Zuordnungsregel aktiviert;
-das Markdown-Regelprofil folgt in Aufgabe 05. Weitere Regeln, Schweregrade,
+`.md`, `.MD`, `.Md`, `.mD`. Standardmäßig werden die Zuordnungsregel und seit
+Aufgabe 05 alle empfohlenen Markdown-Regeln aktiviert. Weitere Regeln, Schweregrade,
 Optionen und Suppressionen verwenden die normale ESLint-Konfiguration.
 `markdown` und `dokkurator` sind reservierte Plugin-Namensräume.
 

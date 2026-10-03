@@ -1,7 +1,7 @@
 # Tasks: synchrone ESLint-Regelausführung
 
-Status: Aufgaben 01, 02 und 04 abgeschlossen; Aufgabe 03 auf Wunsch übersprungen;
-Aufgaben 05–08 noch nicht begonnen.
+Status: Aufgaben 01, 02, 04 und 05 abgeschlossen; Aufgabe 03 auf Wunsch übersprungen;
+Aufgaben 06–08 noch nicht begonnen.
 
 Die [Runtime-Entscheidung](./01-runtime-entscheidung.md) dokumentiert die geprüfte
 Versionskombination, den synchronen Zielvertrag und die unveränderte Bestands-API.
@@ -10,6 +10,8 @@ Parse-Diagnosen und die Entscheidung zum künftigen Konfigurationsformat.
 Der [Konfigurationsvertrag](./04-konfigurationsvertrag.md) beschreibt die
 gemeinsame Vorbereitung für direktes und eingebettetes ESLint: Regeln als
 JavaScript-Objekt, DocTypes vorerst YAML, eigene dünne Schema-Integration.
+Der [Lint-Vertrag](./05-lint-vertrag.md) beschreibt die synchrone Fassade,
+normalisierte Diagnosen und das standardmäßig aktivierte empfohlene Markdown-Profil.
 
 Grundlage: [Validator-Spezifikation 2](../../../packages/validator/spec/Validator%20Specification%202%20-%20ESLint%20and%20Context%20Validation.md).
 

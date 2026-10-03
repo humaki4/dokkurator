@@ -8,7 +8,8 @@ export type {
   LintConfigurationInput,
   PreparedLintConfiguration,
 } from "./lint/configuration.js";
-export { LintConfigurationError } from "./lint/errors.js";
+export { LintConfigurationError, LintRuntimeError } from "./lint/errors.js";
+export { lint } from "./lint/runtime.js";
 
 export interface ValidationResult {
   valid: boolean;

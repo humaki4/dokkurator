@@ -48,11 +48,15 @@ export function prepareLintConfiguration(
         dokkurator: { rules: { doctype: createDocTypeRule(registry) } },
       },
       rules: {
+        ...Object.assign(
+          {},
+          ...markdown.configs.recommended.map((config) => config.rules),
+        ),
         "dokkurator/doctype": "error",
         ...structuredClone(input.rules ?? {}),
       },
     };
-    validateRules(entry);
+    validateLintConfiguration([entry], "__dokkurator_configuration__.md");
     Object.freeze(entry.files);
     Object.freeze(entry.languageOptions);
     Object.freeze(entry.plugins);
@@ -84,7 +88,10 @@ export function createLintConfig(
   }));
 }
 
-function validateRules(entry: Linter.Config): void {
+export function validateLintConfiguration(
+  config: Linter.Config[],
+  filename: string,
+): void {
   // ESLint validates rule IDs/options before parsing. An intentional failed parse
   // ends this configuration-only probe before any plugin's create/visitor runs.
   const language = new MarkdownLanguage({ mode: "gfm" });
@@ -93,32 +100,39 @@ function validateRules(entry: Linter.Config): void {
     errors: [{ message: "Configuration probe.", line: 1, column: 1 }],
   });
   try {
-    new Linter({ configType: "flat" }).verify(
+    const messages = new Linter({ configType: "flat" }).verify(
       "",
-      [
-        {
-          ...entry,
-          // Disabled IDs/options are configuration too; validate without executing.
-          rules: Object.fromEntries(
-            Object.entries(entry.rules ?? {}).map(([id, rule]) => [
-              id,
-              Array.isArray(rule)
-                ? rule[0] === "off" || rule[0] === 0
-                  ? ["error", ...rule.slice(1)]
-                  : rule
-                : rule === "off" || rule === 0
-                  ? "error"
-                  : rule,
-            ]),
-          ),
-          plugins: {
-            ...entry.plugins,
-            markdown: { ...markdown, languages: { gfm: language } },
-          },
+      config.map((entry) => ({
+        ...entry,
+        // Disabled IDs/options are configuration too; validate without executing.
+        rules: Object.fromEntries(
+          Object.entries(entry.rules ?? {}).map(([id, rule]) => [
+            id,
+            Array.isArray(rule)
+              ? rule[0] === "off" || rule[0] === 0
+                ? ["error", ...rule.slice(1)]
+                : rule
+              : rule === "off" || rule === 0
+                ? "error"
+                : rule,
+          ]),
+        ),
+        plugins: {
+          ...entry.plugins,
+          markdown: { ...markdown, languages: { gfm: language } },
         },
-      ],
-      { filename: "__dokkurator_configuration__.md" },
+      })),
+      { filename },
     );
+    if (
+      !messages.some(
+        (message) =>
+          message.fatal &&
+          message.message === "Parsing error: Configuration probe.",
+      )
+    ) {
+      throw new Error(`No applicable Markdown configuration for ${filename}.`);
+    }
   } catch (cause) {
     throw new LintConfigurationError(
       `Invalid ESLint rule configuration: ${cause instanceof Error ? cause.message : String(cause)}`,

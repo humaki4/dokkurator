@@ -1,6 +1,7 @@
 # 05 — Synchrone Lint-Fassade und Diagnosen implementieren
 
-Status: vorgeschlagen, nicht begonnen.
+Status: abgeschlossen. Öffentliche Fassade, empfohlenes Markdown-Profil und
+Fehlerbehandlung siehe [Lint-Vertrag](./05-lint-vertrag.md).
 
 Abhängigkeiten: 04.
 
