@@ -5,9 +5,9 @@ import {
   prepareDocTypes,
   type MetadataSchema,
   type PreparedDocTypeRegistry,
-} from "./doc-types.js";
-import { plugin } from "./plugin.js";
-import { LintConfigurationError } from "./errors.js";
+} from "../doc-types/doc-types.js";
+import { plugin } from "../../plugin/plugin.js";
+import { LintConfigurationError } from "../errors.js";
 
 export interface LintConfigurationInput {
   readonly docTypes: readonly ParsedDocType[];

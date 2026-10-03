@@ -1,5 +1,5 @@
-import { docTypeRule } from "./doctype-rule.js";
-import { requiredHeadingsRule } from "./required-headings-rule.js";
+import { docTypeRule } from "../rules/doctype-rule/doctype-rule.js";
+import { requiredHeadingsRule } from "../rules/required-headings-rule/required-headings-rule.js";
 import type { Linter } from "eslint";
 
 /** Ordinary ESLint plugin; prepared resources are supplied through settings. */

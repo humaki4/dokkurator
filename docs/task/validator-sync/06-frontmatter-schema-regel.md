@@ -47,8 +47,11 @@ Regel. Metadaten werden weder ergänzt, konvertiert noch bereinigt.
 
 Geprüft mit ESLint 10.10.0, `@eslint/markdown` 8.0.3, Ajv 8.20.0 und yaml 2.9.1.
 Die relevanten Evaluationsfälle der übersprungenen Aufgabe 03 sind in
-`packages/validator/test/frontmatter-schema.test.ts` sowie den vorhandenen
-Konfigurationstests abgedeckt:
+den thematisch gruppierten Tests `doctype-rule.schema.test.ts`,
+`doctype-rule.positions.test.ts`, `doctype-rule.parsing.test.ts`,
+`doctype-rule.association.test.ts` und `doctype-rule.integration.test.ts` neben
+`packages/validator/src/lint/doctype-rule.ts` sowie den Vorbereitungstests neben
+`doc-types.ts` abgedeckt:
 
 | Fall                                                              | Ergebnis                                                 |
 | ----------------------------------------------------------------- | -------------------------------------------------------- |

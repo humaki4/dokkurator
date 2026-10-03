@@ -1,4 +1,4 @@
-import type { PreparedDocTypeRegistry } from "./doc-types.js";
+import type { PreparedDocTypeRegistry } from "./doc-types/doc-types.js";
 import { LintConfigurationError } from "./errors.js";
 
 export function getDocTypeRegistry(

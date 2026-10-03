@@ -4,9 +4,9 @@ import {
   createLintConfig,
   validateLintConfiguration,
   type PreparedLintConfiguration,
-} from "./configuration.js";
-import { LintConfigurationError, LintRuntimeError } from "./errors.js";
-import { getDiagnosticPhase } from "./diagnostics.js";
+} from "../configuration/configuration.js";
+import { LintConfigurationError, LintRuntimeError } from "../errors.js";
+import { getDiagnosticPhase } from "../diagnostics/diagnostics.js";
 
 export interface LintInput {
   readonly originalText: string;

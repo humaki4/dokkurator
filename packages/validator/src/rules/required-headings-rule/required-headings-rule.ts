@@ -1,8 +1,8 @@
 import type { MarkdownRuleDefinition } from "@eslint/markdown";
 import { toString } from "mdast-util-to-string";
-import { getFrontmatter } from "./frontmatter.js";
-import { getDocTypeRegistry } from "./settings.js";
-import { LintConfigurationError } from "./errors.js";
+import { getFrontmatter } from "../../lint/frontmatter.js";
+import { getDocTypeRegistry } from "../../lint/settings.js";
+import { LintConfigurationError } from "../../lint/errors.js";
 
 export const requiredHeadingsRule: MarkdownRuleDefinition = {
   meta: {

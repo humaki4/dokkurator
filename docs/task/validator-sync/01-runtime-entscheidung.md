@@ -28,7 +28,7 @@ sind direkte Validator-Runtime-Abhängigkeiten; Loader-Abhängigkeiten werden ni
 intern konsumiert.
 
 Der reproduzierbare Versuch liegt in
-[eslint-runtime.test.ts](../../../packages/validator/test/eslint-runtime.test.ts).
+[runtime.compatibility.test.ts](../../../packages/validator/src/lint/runtime.compatibility.test.ts).
 `# Title\n\n# Title\n` liefert unmittelbar ein Array mit
 `markdown/no-duplicate-headings`, `duplicateHeading`, Schwere 2 und Position
 3:1–3:8. Weitere Fälle belegen Warning/Off, Markdown-Suppressionen, getrennte

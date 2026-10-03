@@ -1,7 +1,7 @@
-import type { DiagnosticRule } from "./diagnostics.js";
+import type { DiagnosticRule } from "../../lint/diagnostics/diagnostics.js";
 import { isMap, isNode, isScalar, isSeq } from "yaml";
-import { getFrontmatter } from "./frontmatter.js";
-import { getDocTypeRegistry } from "./settings.js";
+import { getFrontmatter } from "../../lint/frontmatter.js";
+import { getDocTypeRegistry } from "../../lint/settings.js";
 
 /** Select a prepared DocType and delegate its metadata constraints to Ajv. */
 export const docTypeRule: DiagnosticRule = {

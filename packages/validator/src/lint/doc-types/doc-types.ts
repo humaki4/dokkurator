@@ -1,7 +1,7 @@
 import { Ajv, type ErrorObject } from "ajv";
 import addFormats from "ajv-formats";
 import type { ParsedDocType } from "@dokkurator/loader";
-import { LintConfigurationError } from "./errors.js";
+import { LintConfigurationError } from "../errors.js";
 
 export type MetadataSchema = Readonly<Record<string, unknown>> | boolean;
 
