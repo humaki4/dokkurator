@@ -5,7 +5,7 @@ import {
   createLintConfig,
   lint,
   LintConfigurationError,
-  plugin,
+  dokkuratorEslintPlugin,
   prepareLintConfiguration,
 } from "@dokkurator/validator";
 
@@ -60,7 +60,7 @@ describe("heading rule configuration", () => {
     expect(() =>
       new Linter().verify(frontmatter, [
         {
-          plugins: { markdown, dokkurator: plugin },
+          plugins: { markdown, dokkurator: dokkuratorEslintPlugin },
           language: "markdown/gfm",
           languageOptions: { frontmatter: "yaml" },
           rules: { "dokkurator/required-headings": "error" },

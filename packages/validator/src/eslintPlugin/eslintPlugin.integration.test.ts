@@ -4,7 +4,7 @@ import { describe, expect, test } from "vitest";
 import {
   createLintConfig,
   lint,
-  plugin,
+  dokkuratorEslintPlugin,
   prepareDocTypes,
   prepareLintConfiguration,
 } from "@dokkurator/validator";
@@ -25,7 +25,7 @@ describe("public plugin ESLint integration", () => {
     const text = frontmatter + "## Context\n";
     const manual = [
       ...markdown.configs.recommended,
-      ...plugin.configs.recommended,
+      ...dokkuratorEslintPlugin.configs.recommended,
       {
         files: ["**/*.md"],
         language: "markdown/gfm",

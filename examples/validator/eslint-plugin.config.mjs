@@ -1,5 +1,5 @@
 import markdown from "@eslint/markdown";
-import { plugin } from "@dokkurator/validator";
+import { dokkuratorEslintPlugin } from "@dokkurator/validator";
 import { prepareExample } from "./src/setup.mjs";
 import projectConfig from "./dokkurator.config.mjs";
 
@@ -9,7 +9,7 @@ const { configuration } = await prepareExample();
 /** @type {import('eslint').Linter.Config[]} */
 const config = [
   ...markdown.configs.recommended,
-  ...plugin.configs.recommended,
+  ...dokkuratorEslintPlugin.configs.recommended,
   {
     files: ["**/*.md"],
     language: "markdown/gfm",

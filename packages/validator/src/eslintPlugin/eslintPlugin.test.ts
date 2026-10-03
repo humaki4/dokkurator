@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
   createLintConfig,
-  plugin,
+  dokkuratorEslintPlugin,
   prepareLintConfiguration,
 } from "@dokkurator/validator";
 
@@ -19,7 +19,7 @@ describe("public plugin and recommended profile", () => {
     const config = createLintConfig(prepared);
     expect(
       config.find((entry) => entry.plugins?.dokkurator)!.plugins!.dokkurator,
-    ).toBe(plugin);
+    ).toBe(dokkuratorEslintPlugin);
     expect(
       Object.assign({}, ...config.map((entry) => entry.rules)),
     ).toMatchObject({
@@ -29,8 +29,8 @@ describe("public plugin and recommended profile", () => {
     });
   });
   test("the helper consumes the plugin's recommended profile", () => {
-    const recommended = plugin.configs.recommended;
-    expect(recommended[0]!.plugins!.dokkurator).toBe(plugin);
+    const recommended = dokkuratorEslintPlugin.configs.recommended;
+    expect(recommended[0]!.plugins!.dokkurator).toBe(dokkuratorEslintPlugin);
     const rules = Object.assign({}, ...recommended.map((entry) => entry.rules));
     expect(
       Object.assign(
