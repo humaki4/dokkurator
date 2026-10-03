@@ -262,7 +262,10 @@ describe("prepared DocType registry", () => {
 
 describe("shared ESLint flat configuration", () => {
   test.each([
-    ["---\ndoctype: decision\n---\n# Example\n", undefined],
+    [
+      "---\ndoctype: decision\ntitle: Example\nstatus: draft\n---\nExample content.\n",
+      undefined,
+    ],
     ["# No frontmatter\n", "Document requires YAML frontmatter."],
     ["---\ntitle: Example\n---\n", "Frontmatter requires a doctype."],
     ["---\ndoctype: unknown\n---\n", "Unknown DocType: unknown."],

@@ -83,8 +83,9 @@ Importierte Plugins müssen ebenfalls lokale synchrone Regeln ohne I/O
 bereitstellen; beliebiger Plugin-Code wird nicht sandboxed.
 
 Loader-Parse-Diagnosen werden nicht zusätzlich angehängt: Der Originaltext ist
-maßgeblich und YAML-Syntaxfehler erscheinen einmal. Feldbezogene Schema-Diagnosen
-und die Metadaten-ESLint-Regel folgen in Aufgabe 06. CLI-Lint-Befehle,
+maßgeblich und jeder YAML-Parsefehler erscheint einmal. Feldbezogene Schema-Diagnosen
+sind seit [Aufgabe 06](./06-frontmatter-schema-regel.md) ebenfalls Teil von
+`dokkurator/doctype`. CLI-Lint-Befehle,
 Kontextvalidierung, Caching und Persistenz bleiben außerhalb dieser Aufgabe.
 
 ## Nachweis

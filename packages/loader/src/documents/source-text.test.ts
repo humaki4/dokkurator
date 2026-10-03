@@ -144,6 +144,28 @@ describe("original source text", () => {
 });
 
 describe("recoverable frontmatter errors", () => {
+  test("treats unresolved aliases as document errors in both parse policies", async () => {
+    const text = "---\ndoctype: guide\ndetails: *missing\n---\n# Body\n";
+    await expect(
+      loadDocument(source(text), "docs/example.md"),
+    ).rejects.toBeInstanceOf(DocumentParseError);
+    const parsed = await loadDocument(source(text), "docs/example.md", {
+      parseErrors: "collect",
+    });
+    expect(parsed.metadata).toBeUndefined();
+    expect(parsed.parseDiagnostics).toEqual([
+      expect.objectContaining({
+        phase: "parse",
+        code: "YAML_CONVERSION_ERROR",
+        message: expect.stringContaining("Unresolved alias"),
+        position: {
+          start: { line: 2, column: 1, offset: 4 },
+          end: { line: 4, column: 1, offset: 37 },
+        },
+      }),
+    ]);
+    expect(parsed.headings[0]!.text).toBe("Body");
+  });
   test("still throws by default", async () => {
     await expect(
       loadDocument(source("---\ntitle: [\n---\n"), "docs/example.md"),

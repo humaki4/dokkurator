@@ -1,7 +1,7 @@
 # Tasks: synchrone ESLint-Regelausführung
 
-Status: Aufgaben 01, 02, 04 und 05 abgeschlossen; Aufgabe 03 auf Wunsch übersprungen;
-Aufgaben 06–08 noch nicht begonnen.
+Status: Aufgaben 01, 02, 04, 05 und 06 abgeschlossen; Aufgabe 03 auf Wunsch übersprungen;
+Aufgaben 07–08 noch nicht begonnen.
 
 Die [Runtime-Entscheidung](./01-runtime-entscheidung.md) dokumentiert die geprüfte
 Versionskombination, den synchronen Zielvertrag und die unveränderte Bestands-API.

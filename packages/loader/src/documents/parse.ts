@@ -142,7 +142,34 @@ function parseFrontmatter(
       })),
     };
   }
-  return { metadata: yaml.toJS(), diagnostics: [] };
+  try {
+    return { metadata: yaml.toJS(), diagnostics: [] };
+  } catch (cause) {
+    // Unresolved aliases and alias expansion limits are conversion errors,
+    // even when YAML parsing itself succeeded.
+    if (options.parseErrors !== "collect") {
+      throw new DocumentParseError("Invalid YAML frontmatter", source.path, {
+        cause,
+      });
+    }
+    const range = yaml.contents?.range ?? [0, 0];
+    return {
+      metadata: undefined,
+      diagnostics: [
+        {
+          phase: "parse",
+          code: "YAML_CONVERSION_ERROR",
+          severity: "error",
+          message: cause instanceof Error ? cause.message : String(cause),
+          source: source.source,
+          position: {
+            start: sourcePoint(source.content, start + range[0]),
+            end: sourcePoint(source.content, start + range[1]),
+          },
+        },
+      ],
+    };
+  }
 }
 
 function sourcePoint(text: string, offset: number): SourcePosition["start"] {

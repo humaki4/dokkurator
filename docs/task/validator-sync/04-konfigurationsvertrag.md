@@ -6,7 +6,8 @@ Status: Aufgabe 04 umgesetzt, 2026-10-03.
 
 Aufgabe 03 wird auf Wunsch übersprungen. Das externe Frontmatter-Schema-Plugin
 wird nicht übernommen. Eine eigene dünne Integration verwendet Ajv und `yaml`;
-die eigentliche Metadaten-ESLint-Regel folgt in Aufgabe 06. Das Plugin darf später
+die Metadatenprüfung ist mit [Aufgabe 06](./06-frontmatter-schema-regel.md) in
+`dokkurator/doctype` integriert. Das Plugin darf später
 als Funktionsumfang-Referenz dienen, ist aber keine Abhängigkeit.
 
 ESLint-Regeln werden als JavaScript-Objekt konfiguriert. DocType-Definitionen
