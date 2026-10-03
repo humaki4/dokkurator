@@ -52,11 +52,11 @@ wer seinen Zustand kontrolliert:
 > Ohne `remote` gehört der lokale Zustand dem Nutzer. Mit `remote` gehört der
 > Checkout Dokkurator.
 
-| Source-Typ | Typischer Nutzerfall | Eigentümer des lokalen Zustands | Verhalten von Dokkurator |
-| --- | --- | --- | --- |
-| Lokales Dateisystem ohne Git | Manuell gepflegte Dokumente, Export oder generierter Ordner | Nutzer | Dateien lesen und indexieren |
-| Lokales Git-Repository | Aktives Entwicklungsverzeichnis | Entwickler | Working Tree lesen und Git-Metadaten verwenden, aber Git-Zustand nie verändern |
-| Verwaltetes Remote-Git | Externe Dokumentation automatisch beziehen | Dokkurator | Checkout anlegen, prüfen und synchronisieren |
+| Source-Typ                   | Typischer Nutzerfall                                        | Eigentümer des lokalen Zustands | Verhalten von Dokkurator                                                       |
+| ---------------------------- | ----------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------ |
+| Lokales Dateisystem ohne Git | Manuell gepflegte Dokumente, Export oder generierter Ordner | Nutzer                          | Dateien lesen und indexieren                                                   |
+| Lokales Git-Repository       | Aktives Entwicklungsverzeichnis                             | Entwickler                      | Working Tree lesen und Git-Metadaten verwenden, aber Git-Zustand nie verändern |
+| Verwaltetes Remote-Git       | Externe Dokumentation automatisch beziehen                  | Dokkurator                      | Checkout anlegen, prüfen und synchronisieren                                   |
 
 Lokales Dateisystem und lokales Git sind keine unterschiedlichen
 Konfigurationsarten. Beide werden mit einem lokalen `path` und ohne `remote`
@@ -134,15 +134,15 @@ Fehlerursache muss erhalten bleiben.
 
 `prepare` unterscheidet anhand des Pfadzustands:
 
-| Zustand am Zielpfad | Verhalten |
-| --- | --- |
-| Pfad fehlt | Remote in den Zielpfad klonen |
-| Leeres Verzeichnis | Wie fehlender Pfad behandeln; Clone darf dieses Verzeichnis verwenden |
-| Nicht leeres Nicht-Git-Verzeichnis | Abbrechen; Inhalte weder löschen noch überschreiben |
-| Datei oder anderer Nicht-Verzeichnis-Eintrag | Abbrechen |
-| Gültiger, passender Checkout | Unverändert öffnen |
-| Git-Repository mit falschem/fehlendem `origin` | Abbrechen; Remote nicht automatisch umschreiben |
-| Passender Checkout auf falschem oder detached Branch | Abbrechen; Branch nicht in `prepare` wechseln |
+| Zustand am Zielpfad                                  | Verhalten                                                             |
+| ---------------------------------------------------- | --------------------------------------------------------------------- |
+| Pfad fehlt                                           | Remote in den Zielpfad klonen                                         |
+| Leeres Verzeichnis                                   | Wie fehlender Pfad behandeln; Clone darf dieses Verzeichnis verwenden |
+| Nicht leeres Nicht-Git-Verzeichnis                   | Abbrechen; Inhalte weder löschen noch überschreiben                   |
+| Datei oder anderer Nicht-Verzeichnis-Eintrag         | Abbrechen                                                             |
+| Gültiger, passender Checkout                         | Unverändert öffnen                                                    |
+| Git-Repository mit falschem/fehlendem `origin`       | Abbrechen; Remote nicht automatisch umschreiben                       |
+| Passender Checkout auf falschem oder detached Branch | Abbrechen; Branch nicht in `prepare` wechseln                         |
 
 Beim Clone mit konfiguriertem Branch wird genau dieser Branch ausgecheckt. Ist
 der Branch am Remote nicht vorhanden, schlägt `prepare` als Konfigurations- oder
@@ -179,13 +179,13 @@ Danach gilt folgende Reihenfolge:
 
 Das Ergebnis hängt von der Revisionsbeziehung ab:
 
-| Revisionsbeziehung | Ergebnis |
-| --- | --- |
-| Lokal und Remote identisch | Erfolg ohne Änderung |
-| Lokal ist Vorfahr des Remotes | Fast-forward auf den Remote-Stand |
+| Revisionsbeziehung                      | Ergebnis                           |
+| --------------------------------------- | ---------------------------------- |
+| Lokal und Remote identisch              | Erfolg ohne Änderung               |
+| Lokal ist Vorfahr des Remotes           | Fast-forward auf den Remote-Stand  |
 | Remote ist Vorfahr des lokalen Branches | Abbruch: lokaler Branch ist voraus |
-| Beide Seiten enthalten eigene Commits | Abbruch: Branches sind divergiert |
-| Beziehung nicht bestimmbar | Abbruch mit Git-Ursache |
+| Beide Seiten enthalten eigene Commits   | Abbruch: Branches sind divergiert  |
+| Beziehung nicht bestimmbar              | Abbruch mit Git-Ursache            |
 
 Damit ist ein allgemeines `git pull` nicht Teil der Zielsemantik. Insbesondere
 dürfen nutzer- oder repositoriespezifische Pull-Konfigurationen keinen Merge
@@ -310,24 +310,24 @@ Git-Lifecycle-Fehler sollen als öffentliche, maschinenlesbare Loader-Fehler mit
 `sourceId`, sicher darstellbarer Ursache und einem stabilen Reason-Code
 auftreten. Vorgesehene Gründe sind:
 
-| Reason | Bedeutung | Empfohlene Handlung |
-| --- | --- | --- |
-| `missing-checkout` | Verwalteter Checkout fehlt | `prepare` für die Source ausführen |
-| `missing-local-source` | Lokale Source fehlt | Pfad oder Konfiguration korrigieren |
-| `checkout-path-conflict` | Ziel ist Datei oder nicht leeres Nicht-Git-Verzeichnis | Pfad manuell klären |
-| `invalid-checkout` | Pfad ist kein geeignetes Git-Working-Tree-Root | Checkout/Pfad manuell klären |
-| `missing-origin` | `origin` fehlt | Remote manuell ergänzen oder neu vorbereiten |
-| `origin-mismatch` | `origin` gehört nicht zur konfigurierten URL | Konfiguration oder Checkout korrigieren |
-| `branch-mismatch` | Anderer Branch ist ausgecheckt | Branch manuell wechseln oder Config korrigieren |
-| `detached-head` | Verwalteter Checkout hat detached HEAD | Branch manuell auschecken |
-| `dirty-worktree` | Lokale Änderungen verhindern Update | Änderungen committen, stashen oder verwerfen |
-| `missing-remote-branch` | Vorgesehener Branch existiert nicht am Remote | Branch/Remote-Konfiguration korrigieren |
-| `local-commits` | Lokaler Branch ist dem Remote voraus | Commits manuell veröffentlichen oder Checkout reparieren |
-| `diverged` | Lokal und Remote sind auseinander gelaufen | Merge/Rebase/Reset bewusst manuell durchführen |
+| Reason                     | Bedeutung                                                              | Empfohlene Handlung                                         |
+| -------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `missing-checkout`         | Verwalteter Checkout fehlt                                             | `prepare` für die Source ausführen                          |
+| `missing-local-source`     | Lokale Source fehlt                                                    | Pfad oder Konfiguration korrigieren                         |
+| `checkout-path-conflict`   | Ziel ist Datei oder nicht leeres Nicht-Git-Verzeichnis                 | Pfad manuell klären                                         |
+| `invalid-checkout`         | Pfad ist kein geeignetes Git-Working-Tree-Root                         | Checkout/Pfad manuell klären                                |
+| `missing-origin`           | `origin` fehlt                                                         | Remote manuell ergänzen oder neu vorbereiten                |
+| `origin-mismatch`          | `origin` gehört nicht zur konfigurierten URL                           | Konfiguration oder Checkout korrigieren                     |
+| `branch-mismatch`          | Anderer Branch ist ausgecheckt                                         | Branch manuell wechseln oder Config korrigieren             |
+| `detached-head`            | Verwalteter Checkout hat detached HEAD                                 | Branch manuell auschecken                                   |
+| `dirty-worktree`           | Lokale Änderungen verhindern Update                                    | Änderungen committen, stashen oder verwerfen                |
+| `missing-remote-branch`    | Vorgesehener Branch existiert nicht am Remote                          | Branch/Remote-Konfiguration korrigieren                     |
+| `local-commits`            | Lokaler Branch ist dem Remote voraus                                   | Commits manuell veröffentlichen oder Checkout reparieren    |
+| `diverged`                 | Lokal und Remote sind auseinander gelaufen                             | Merge/Rebase/Reset bewusst manuell durchführen              |
 | `remote-history-rewritten` | Veröffentlichte Remote-Historie wurde zurückgesetzt oder umgeschrieben | Expliziten Reparaturmodus verwenden oder Remote korrigieren |
-| `authentication-failed` | Remote-Zugriff wurde abgewiesen | Credential Helper, SSH-Agent oder CI-Credentials prüfen |
-| `remote-unavailable` | Remote konnte nicht erreicht werden | Netzwerk/Remote prüfen und erneut synchronisieren |
-| `git-command-failed` | Sonstiger Git-Fehler | Sichere Originalursache anzeigen und Git-Zustand prüfen |
+| `authentication-failed`    | Remote-Zugriff wurde abgewiesen                                        | Credential Helper, SSH-Agent oder CI-Credentials prüfen     |
+| `remote-unavailable`       | Remote konnte nicht erreicht werden                                    | Netzwerk/Remote prüfen und erneut synchronisieren           |
+| `git-command-failed`       | Sonstiger Git-Fehler                                                   | Sichere Originalursache anzeigen und Git-Zustand prüfen     |
 
 Core reicht diese Klassifikation pro Source in seinen strukturierten
 `prepare`-/`sync`-Ergebnissen weiter. Es leitet daraus keine Git-Aktionen ab.
@@ -596,25 +596,25 @@ sein und bleibt vollständig unter Nutzerkontrolle. Der zweite Eintrag wird in
 
 ## Akzeptanzkriterien
 
-| ID | Kriterium |
-| --- | --- |
-| AK-01 | Eine Source ohne `remote` wird als nutzerverwaltete lokale Source behandelt; Git-Erkennung verändert weder Repository noch Working Tree. |
-| AK-02 | `sync` indexiert bei lokalen Filesystem- und Git-Sources den sichtbaren Dateistand, ohne Fetch, Pull, Checkout oder andere Git-Mutationen auszuführen. |
-| AK-03 | Eine Source mit `remote` liegt ausschließlich unter dem aufgelösten `checkouts.directory/<source-id>` und wird als Dokkurator-verwalteter Cache behandelt. |
-| AK-04 | `open` führt weder Netzwerkzugriffe noch Clone- oder Update-Aktionen aus und meldet Identitätsfehler differenziert. |
-| AK-05 | `prepare` klont nur einen fehlenden verwalteten Checkout; ein bestehender passender Checkout wird nicht gefetcht oder verändert. |
-| AK-06 | Ein Clone ohne konfigurierten Branch verwendet den damaligen Remote-Default-Branch und hält diese Auswahl für spätere Syncs fest. |
-| AK-07 | `sync` verwendet Fetch plus expliziten Fast-forward und wird nicht durch Git-Pull-, Merge- oder Rebase-Konfiguration beeinflusst. |
-| AK-08 | Dirty-Zustand, lokaler Vorsprung, Divergenz und nachweislich umgeschriebene Remote-Historie liefern unterschiedliche stabile Reason-Codes. |
+| ID    | Kriterium                                                                                                                                                                               |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AK-01 | Eine Source ohne `remote` wird als nutzerverwaltete lokale Source behandelt; Git-Erkennung verändert weder Repository noch Working Tree.                                                |
+| AK-02 | `sync` indexiert bei lokalen Filesystem- und Git-Sources den sichtbaren Dateistand, ohne Fetch, Pull, Checkout oder andere Git-Mutationen auszuführen.                                  |
+| AK-03 | Eine Source mit `remote` liegt ausschließlich unter dem aufgelösten `checkouts.directory/<source-id>` und wird als Dokkurator-verwalteter Cache behandelt.                              |
+| AK-04 | `open` führt weder Netzwerkzugriffe noch Clone- oder Update-Aktionen aus und meldet Identitätsfehler differenziert.                                                                     |
+| AK-05 | `prepare` klont nur einen fehlenden verwalteten Checkout; ein bestehender passender Checkout wird nicht gefetcht oder verändert.                                                        |
+| AK-06 | Ein Clone ohne konfigurierten Branch verwendet den damaligen Remote-Default-Branch und hält diese Auswahl für spätere Syncs fest.                                                       |
+| AK-07 | `sync` verwendet Fetch plus expliziten Fast-forward und wird nicht durch Git-Pull-, Merge- oder Rebase-Konfiguration beeinflusst.                                                       |
+| AK-08 | Dirty-Zustand, lokaler Vorsprung, Divergenz und nachweislich umgeschriebene Remote-Historie liefern unterschiedliche stabile Reason-Codes.                                              |
 | AK-09 | Ein Force-Push wird durch Vergleich des bekannten alten Remote-/Sync-Stands mit dem Stand nach Fetch erkannt; nicht eindeutige Fälle werden nicht fälschlich als Force-Push bezeichnet. |
-| AK-10 | Normales `prepare` und `sync` löschen, resetten, stashen oder überschreiben keinen vorhandenen Checkout. |
-| AK-11 | Reparatur ist nur nach explizitem Opt-in und nur für den exakt zugeordneten verwalteten Checkout möglich; lokale Sources sind ausgeschlossen. |
-| AK-12 | Eine fehlgeschlagene Reparatur erhält den bisherigen Checkout; eine erfolgreiche Reparatur liefert `recreated` und einen vollständig validierten neuen Checkout. |
-| AK-13 | Andere Prozesse dürfen verwaltete Checkouts lesen; parallele Dokkurator-Schreiboperationen werden mindestens innerhalb einer Instanz verhindert. |
-| AK-14 | Git-spezifische Entscheidungen und Implementierungen verbleiben in `@dokkurator/loader`; Core und CLI importieren ausschließlich dessen öffentliche Root-API. |
-| AK-15 | Fehlerausgaben enthalten keine Credentials oder Tokens und bieten pro Reason eine verständliche Handlungsempfehlung. |
-| AK-16 | Die fokussierten Loader-/Core-Tests, Typechecks und Builds bestehen, und es existieren keine veralteten internen Imports nach dem Refactoring. |
-| AK-17 | Konfigurations-, Loader- und CLI-Dokumentation erklären die drei Nutzerfälle, das Besitzmodell, den Cache-Charakter sowie die destruktive Wirkung einer Reparatur konsistent. |
+| AK-10 | Normales `prepare` und `sync` löschen, resetten, stashen oder überschreiben keinen vorhandenen Checkout.                                                                                |
+| AK-11 | Reparatur ist nur nach explizitem Opt-in und nur für den exakt zugeordneten verwalteten Checkout möglich; lokale Sources sind ausgeschlossen.                                           |
+| AK-12 | Eine fehlgeschlagene Reparatur erhält den bisherigen Checkout; eine erfolgreiche Reparatur liefert `recreated` und einen vollständig validierten neuen Checkout.                        |
+| AK-13 | Andere Prozesse dürfen verwaltete Checkouts lesen; parallele Dokkurator-Schreiboperationen werden mindestens innerhalb einer Instanz verhindert.                                        |
+| AK-14 | Git-spezifische Entscheidungen und Implementierungen verbleiben in `@dokkurator/loader`; Core und CLI importieren ausschließlich dessen öffentliche Root-API.                           |
+| AK-15 | Fehlerausgaben enthalten keine Credentials oder Tokens und bieten pro Reason eine verständliche Handlungsempfehlung.                                                                    |
+| AK-16 | Die fokussierten Loader-/Core-Tests, Typechecks und Builds bestehen, und es existieren keine veralteten internen Imports nach dem Refactoring.                                          |
+| AK-17 | Konfigurations-, Loader- und CLI-Dokumentation erklären die drei Nutzerfälle, das Besitzmodell, den Cache-Charakter sowie die destruktive Wirkung einer Reparatur konsistent.           |
 
 ## Erwartetes Ergebnis der späteren Umsetzung
 

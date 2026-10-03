@@ -17,6 +17,7 @@ sources:
 Das von Google Cloud im Juni 2026 veröffentlichte **Open Knowledge Format (OKF)** entwickelt sich auffällig schnell.
 
 OKF selbst ist bewusst sehr klein gehalten:
+
 - Markdown als Inhalt
 - YAML Frontmatter als strukturierte Metadaten
 - Dateien und Verzeichnisse als Bundle
@@ -26,6 +27,7 @@ OKF selbst ist bewusst sehr klein gehalten:
 Google positioniert OKF ausdrücklich als **offenes Austauschformat**, nicht als fertiges Knowledge-Management-System oder Framework.
 
 Innerhalb von nur rund drei Monaten sind jedoch bereits mehrere unabhängige Implementierungen entstanden:
+
 - Parser und Validatoren
 - CLI-Tools
 - Graph-Implementierungen
@@ -86,24 +88,23 @@ und normalem Markdown darunter.
 Das Ziel ist keine neue Dokumentationsanwendung, sondern ein interoperables Format, das Menschen, Tools und Agents gleichermaßen lesen können.
 
 Google nennt beispielsweise als mögliche Producer:
+
 - Menschen
 - eigene Scripts
 - Google ADK Agents
 - LangChain Agents
 - Exporte aus Datenkatalogen
-und als mögliche Quellen unter anderem Dataplex, Unity Catalog oder Collibra. Das bedeutet allerdings **nicht**, dass diese Produkte bereits offiziell OKF unterstützen. Google beschreibt hier mögliche Integrationspfade.
+  und als mögliche Quellen unter anderem Dataplex, Unity Catalog oder Collibra. Das bedeutet allerdings **nicht**, dass diese Produkte bereits offiziell OKF unterstützen. Google beschreibt hier mögliche Integrationspfade.
 
 ---
 
 ## Erste unabhängige Implementierungen
 
 Es entstehen parallel Implementierungen in mehreren Programmiersprachen.
-**Go** `skosovsky/okf` 
-**Rust** `W4G1/okf` 
-**Dart** `conceptadev/okf` 
-**Ruby** `serradura/okf` 
-
-
+**Go** `skosovsky/okf`
+**Rust** `W4G1/okf`
+**Dart** `conceptadev/okf`
+**Ruby** `serradura/okf`
 
 ---
 
@@ -130,6 +131,7 @@ Wenn ein Coding Agent direkten Filesystemzugriff und einen OKF-Agent-Skill besit
 ## 26. August 2026 – Google adressiert organisationsweite Nutzung
 
 Google veröffentlicht einen weiteren Artikel mit dem expliziten Problem:
+
 > Wie lassen sich OKF Bundles organisationsweit teilen, durchsuchen und mit Berechtigungen versehen?
 
 Google stellt fest, dass ein Git-Repository pro Bundle zwar portabel ist, aber alleine keine organisationsweite Suche, Governance oder gemeinsame Zugriffskontrolle bietet.
@@ -153,11 +155,11 @@ Eine offene, Git-zentrierte Variante desselben Problems bleibt interessant.
 
 ---
 
-
 ## 3. LangChain OpenWiki
 
 OpenWiki ist aktuell der wichtigste OKF-Adopter außerhalb von Google.
 Das GitHub-Repository weist derzeit ungefähr **16.000 Stars und mehr als 1.000 Forks** auf. Diese Zahlen gelten jedoch für OpenWiki als Ganzes und sind nicht mit „16.000 OKF-Nutzern“ gleichzusetzen.
+
 ## Grundidee
 
 OpenWiki erstellt automatisch Dokumentation aus vorhandenen Informationsquellen.
@@ -207,11 +209,12 @@ commit abc123
 
 Wenn sich diese Quelle verändert, kann OpenWiki erkennen, dass eine Aussage erneut geprüft werden muss.
 Das überschneidet sich teilweise mit den für Dokkurator angedachten Bereichen:
+
 - Evidence
 - Code-Doc-Linking
 - Drift
 - Knowledge Health
-OpenWiki sollte daher nicht nur als OKF-Consumer, sondern als relevantes verwandtes Projekt beobachtet werden.
+  OpenWiki sollte daher nicht nur als OKF-Consumer, sondern als relevantes verwandtes Projekt beobachtet werden.
 
 ## Unterschiede zu Dokkurator
 
@@ -256,7 +259,9 @@ Die Projekte überschneiden sich zunehmend, sind aber derzeit nicht identisch.
 ## Was passiert aktuell in der Community?
 
 Die Entwicklung lässt sich grob in fünf Themen clustern.
+
 ## Interoperabilität
+
 Das Hauptmotiv bleibt:
 
 ```text
@@ -269,9 +274,11 @@ Search
     ↓
 same files
 ```
+
 Wissen soll nicht mehr ausschließlich in einem einzelnen Agent Memory oder SaaS-System liegen.
 
 ---
+
 ## Trust und Provenance
 
 Mit zunehmender AI-generierter Dokumentation wird die Frage wichtiger:
@@ -279,6 +286,7 @@ Mit zunehmender AI-generierter Dokumentation wird die Frage wichtiger:
 > Warum sollte diese Information stimmen?
 
 Daher entstehen Konzepte für:
+
 - generated-by
 - verified-by
 - sources
@@ -325,6 +333,7 @@ Git
 als persistentes Knowledge-System.
 
 Damit bleiben:
+
 - History
 - Diff
 - Blame
@@ -332,7 +341,7 @@ Damit bleiben:
 - Pull Requests
 - Offline-Nutzung
 - Tool-Unabhängigkeit
-erhalten.
+  erhalten.
 
 Commonplace beschreibt genau diese Eigenschaften als einen wesentlichen Vorteil seiner OKF-Unterstützung.
 
@@ -341,13 +350,14 @@ Commonplace beschreibt genau diese Eigenschaften als einen wesentlichen Vorteil 
 ## Query, Graph und MCP entstehen außerhalb der Spec
 
 OKF definiert bewusst nicht:
+
 - wie gesucht wird
 - welche Datenbank verwendet wird
 - wie ein Graph gespeichert wird
 - welche Query Language verwendet wird
 - wie Agents zugreife
 - wie organisationsweite Berechtigungen funktionieren
-Daher experimentiert die Community gleichzeitig mit:
+  Daher experimentiert die Community gleichzeitig mit:
 
 ```text
 filesystem search
@@ -632,6 +642,7 @@ authorization-aware query
 ## 11. Verhältnis Dokkurator ↔ OpenWiki
 
 Die beiden Projekte sollten nicht vorschnell als direkte Konkurrenten betrachtet werden.
+
 ### OpenWiki
 
 Schwerpunkt:
@@ -686,6 +697,7 @@ OpenWiki wäre dann ein **Producer** und Dokkurator ein organisationsweiter **Co
 ## Beobachtungspunkte
 
 Das OKF-Ökosystem bewegt sich aktuell so schnell, dass vor größeren Eigenimplementierungen regelmäßig geprüft werden sollte:
+
 1. Entwickelt sich eine der bestehenden Libraries zum De-facto-Standard?
 2. Entsteht eine offizielle TypeScript-Implementierung?
 3. Baut LangChain OpenWiki Query/Search weiter aus?
@@ -696,9 +708,10 @@ Das OKF-Ökosystem bewegt sich aktuell so schnell, dass vor größeren Eigenimpl
 8. Entsteht ein organisationsweiter Open-Source-Hub?
 9. Adoptieren weitere große Frameworks OKF?
 10. Unterstützen GitHub, GitLab, Backstage, Obsidian oder ähnliche Systeme OKF direkt?
-Besonders relevant für Dokkurator wären die Punkte 2, 4, 6 und 8.
+    Besonders relevant für Dokkurator wären die Punkte 2, 4, 6 und 8.
 
 ---
+
 ### Und ja: Das Ganze ist extrem frisch
 
 OKF v0.1 wurde erst am **12. Juni 2026** veröffentlicht. Das separate GitHub-Repository wurde sogar erst im **August 2026** angelegt; v0.2 folgte ebenfalls bereits im August. Wir reden also über ein Ökosystem, das gerade einmal ungefähr **drei Monate** alt ist.
