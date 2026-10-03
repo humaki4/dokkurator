@@ -31,6 +31,8 @@ vom Dateiformat, aus dem eine Anwendung ihre Einstellungen lädt.
   DocType-Registry samt kompilierten Schemas und geprüfter Flat Config.
 - `createLintConfig(inputOrPrepared)`: dieselbe Konfiguration als normales
   ESLint-Flat-Config-Array; wiederverwendbar für direktes und eingebettetes ESLint.
+- `plugin`: seit Aufgabe 07 das normale ESLint-Plugin mit `doctype` und
+  `required-headings`; Ressourcen kommen aus `settings.dokkurator`.
 - `LintConfigurationError` sowie die zentralen Typen `LintConfigurationInput`
   und `PreparedLintConfiguration`. Untertypen bleiben ohne eigene Root-Exports;
   ihre Struktur wird aus den öffentlichen Funktionen abgeleitet.
@@ -57,8 +59,8 @@ const flatConfig = createLintConfig(prepared);
 
 Die Beispiele setzen bereits geladene Daten und importierte Plugins voraus.
 `validateMetadata` liefert synchron `{ valid, errors }` mit unabhängigen
-Ajv-Fehlerkopien. Es wird noch nicht automatisch als Metadaten-ESLint-Regel
-aufgerufen. Die öffentliche [Lint-Fassade](./05-lint-vertrag.md) ist in Aufgabe 05 umgesetzt.
+Ajv-Fehlerkopien. Seit Aufgabe 06 verwendet auch die Metadaten-ESLint-Regel diese
+Prüfung. Die öffentliche [Lint-Fassade](./05-lint-vertrag.md) ist in Aufgabe 05 umgesetzt.
 `validateDocument` und sein bisheriges Ergebnis bleiben unverändert.
 
 DocTypes und Schema-Daten werden kopiert. Vorbereitete Definitionen sind
@@ -70,7 +72,7 @@ ist keine Sandbox für beliebigen Plugin-Code.
 ## Identische DocType-Auswahl
 
 Die aktive Standardregel `dokkurator/doctype` benutzt dieselbe vorbereitete
-`selectDocType`-Funktion wie der eingebettete Ablauf. Sie prüft zunächst nur die
+`selectDocType`-Funktion wie der eingebettete Ablauf. Sie prüft zunächst die
 Zuordnung und meldet Fehler über normale ESLint-Rule-/Message-IDs:
 
 | Eingabe                                                        | Verhalten                                                            |
@@ -92,7 +94,8 @@ Dort bezeichnet `$schema` Draft 7, nicht die Dokumentzuordnung.
 
 Die Config nutzt `markdown/gfm`, YAML-Frontmatter und Markdown-Erweiterungen
 `.md`, `.MD`, `.Md`, `.mD`. Standardmäßig werden die Zuordnungsregel und seit
-Aufgabe 05 alle empfohlenen Markdown-Regeln aktiviert. Weitere Regeln, Schweregrade,
+Aufgabe 05 alle empfohlenen Markdown-Regeln aktiviert. Seit Aufgabe 07 ist auch
+`dokkurator/required-headings` standardmäßig aktiv. Weitere Regeln, Schweregrade,
 Optionen und Suppressionen verwenden die normale ESLint-Konfiguration.
 `markdown` und `dokkurator` sind reservierte Plugin-Namensräume.
 

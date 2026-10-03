@@ -34,7 +34,8 @@ und `ReturnType<typeof lint>` ableitbar. Die bisherige Pflichtfeld-API
 
 Die gemeinsame Vorbereitung aktiviert alle Regeln aus
 `@eslint/markdown.configs.recommended` der installierten Version 8.0.3 sowie
-`dokkurator/doctype`. Das gilt auch für direktes ESLint über `createLintConfig`.
+`dokkurator/doctype` sowie seit Aufgabe 07 `dokkurator/required-headings`.
+Das gilt auch für direktes ESLint über `createLintConfig`.
 Eigene `rules`-Einträge haben Vorrang, einschließlich `warn` und `off`.
 Die Config-Schicht führt vorher Projekt- und Repository-Overrides zusammen.
 Codeblöcke werden nicht als eigenständige JavaScript-Dateien gelintet.

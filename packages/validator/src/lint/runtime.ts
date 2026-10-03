@@ -6,6 +6,7 @@ import {
   type PreparedLintConfiguration,
 } from "./configuration.js";
 import { LintConfigurationError, LintRuntimeError } from "./errors.js";
+import { getDiagnosticPhase } from "./diagnostics.js";
 
 export interface LintInput {
   readonly originalText: string;
@@ -106,7 +107,7 @@ export function lint(input: LintInput): LintResult {
       }
     ).getSuppressedMessages();
     const diagnostics = messages.map((message) =>
-      normalize(message, input, source),
+      normalize(message, input, source, config),
     );
     return {
       status: diagnostics.some((diagnostic) => diagnostic.severity === "error")
@@ -114,10 +115,13 @@ export function lint(input: LintInput): LintResult {
         : "passed",
       diagnostics,
       suppressedDiagnostics: suppressed.map((message) =>
-        normalize(message, input, source),
+        normalize(message, input, source, config),
       ),
     };
   } catch (cause) {
+    if (cause instanceof LintConfigurationError) {
+      throw new LintConfigurationError(cause.message, { cause, source });
+    }
     throw new LintRuntimeError("Lint runtime failed.", { cause, source });
   }
 }
@@ -126,6 +130,7 @@ function normalize(
   message: Linter.LintMessage | Linter.SuppressedLintMessage,
   input: LintInput,
   source: NonNullable<LintConfigurationError["source"]>,
+  config: readonly Linter.Config[],
 ): LintDiagnostic {
   const bom = input.originalText.startsWith("\uFEFF") ? 1 : 0;
   const edit = (fix: NonNullable<Linter.LintMessage["fix"]>): TextEdit => ({
@@ -134,12 +139,7 @@ function normalize(
   });
   return {
     ...source,
-    phase:
-      message.fatal ||
-      (message.ruleId === "dokkurator/doctype" &&
-        message.messageId === "invalid-yaml")
-        ? "parse"
-        : "lint",
+    phase: getDiagnosticPhase(message, config),
     ruleId: message.ruleId,
     ...(message.messageId === undefined
       ? {}

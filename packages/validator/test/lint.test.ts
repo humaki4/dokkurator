@@ -22,6 +22,69 @@ const prepare = (
 ) => prepareLintConfiguration({ docTypes: [docType], rules });
 
 describe("synchronous lint", () => {
+  test("message phases come from the configured rule, regardless of its namespace", () => {
+    const rule = {
+      meta: {
+        schema: [],
+        messages: { broken: "Invalid input." },
+        messagePhases: { broken: "parse" as const },
+      },
+      create(context: Parameters<MarkdownRuleDefinition["create"]>[0]) {
+        return {
+          root(
+            node: Parameters<
+              NonNullable<ReturnType<MarkdownRuleDefinition["create"]>["root"]>
+            >[0],
+          ) {
+            context.report({ node, messageId: "broken" });
+          },
+        };
+      },
+    };
+    const configuration = prepareLintConfiguration({
+      docTypes: [docType],
+      plugins: { "@company/yaml": { rules: { check: rule } } },
+      rules: { "@company/yaml/check": "error" },
+    });
+    expect(
+      lint({ originalText: header, source, configuration }).diagnostics,
+    ).toEqual([
+      expect.objectContaining({
+        phase: "parse",
+        ruleId: "@company/yaml/check",
+        messageId: "broken",
+      }),
+    ]);
+  });
+
+  test("rule-owned configuration errors keep their category and source", () => {
+    const cause = new LintConfigurationError("Invalid plugin settings.");
+    const configuration = prepareLintConfiguration({
+      docTypes: [docType],
+      plugins: {
+        local: {
+          rules: {
+            check: {
+              meta: { schema: [] },
+              create() {
+                throw cause;
+              },
+            },
+          },
+        },
+      },
+      rules: { "local/check": "error" },
+    });
+    let error: unknown;
+    try {
+      lint({ originalText: header, source, configuration });
+    } catch (caught) {
+      error = caught;
+    }
+    expect(error).toBeInstanceOf(LintConfigurationError);
+    expect(error).toMatchObject({ cause, source });
+  });
+
   test("activates the complete recommended Markdown profile with explicit overrides", () => {
     const prepared = prepare();
     const recommended = Object.assign(

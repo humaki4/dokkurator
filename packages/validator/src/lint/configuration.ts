@@ -6,7 +6,7 @@ import {
   type MetadataSchema,
   type PreparedDocTypeRegistry,
 } from "./doc-types.js";
-import { createDocTypeRule } from "./doctype-rule.js";
+import { plugin } from "./plugin.js";
 import { LintConfigurationError } from "./errors.js";
 
 export interface LintConfigurationInput {
@@ -45,14 +45,17 @@ export function prepareLintConfiguration(
       plugins: {
         ...input.plugins,
         markdown,
-        dokkurator: { rules: { doctype: createDocTypeRule(registry) } },
+        dokkurator: plugin,
       },
+      settings: { dokkurator: registry },
       rules: {
         ...Object.assign(
           {},
-          ...markdown.configs.recommended.map((config) => config.rules),
+          ...[
+            ...markdown.configs.recommended,
+            ...plugin.configs.recommended,
+          ].map((config) => config.rules),
         ),
-        "dokkurator/doctype": "error",
         ...structuredClone(input.rules ?? {}),
       },
     };
@@ -60,6 +63,7 @@ export function prepareLintConfiguration(
     Object.freeze(entry.files);
     Object.freeze(entry.languageOptions);
     Object.freeze(entry.plugins);
+    Object.freeze(entry.settings);
     freezeOptions(entry.rules);
     Object.freeze(entry);
     return Object.freeze({ ...registry, flatConfig: Object.freeze([entry]) });
@@ -84,6 +88,7 @@ export function createLintConfig(
     ),
     languageOptions: { ...entry.languageOptions },
     plugins: { ...entry.plugins },
+    settings: { ...entry.settings },
     rules: structuredClone(entry.rules),
   }));
 }

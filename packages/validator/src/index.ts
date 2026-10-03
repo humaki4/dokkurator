@@ -10,6 +10,7 @@ export type {
 } from "./lint/configuration.js";
 export { LintConfigurationError, LintRuntimeError } from "./lint/errors.js";
 export { lint } from "./lint/runtime.js";
+export { plugin } from "./lint/plugin.js";
 
 export interface ValidationResult {
   valid: boolean;
