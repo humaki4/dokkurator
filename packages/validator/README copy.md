@@ -1,0 +1,183 @@
+# Validator
+
+Der Validator prüft Markdown synchron mit ESLint. DocTypes bleiben YAML;
+ESLint-Regeln und Plugins werden in JavaScript konfiguriert.
+
+Ein ausführbares [Beispielprojekt](../../examples/validator/README.md) enthält
+acht DocTypes, gültige und fehlerhafte Dokumente sowie Library-, ESLint- und
+Plugin-Aufrufe. Es dokumentiert auch die Migration von der entfernten temporären
+`validateDocument`-API auf `prepareLintConfiguration` und `lint`.
+Für die einfache Projektvalidierung übernimmt
+[Core](../core/README.md) das Laden und die Vorbereitung über `app.validate()`.
+
+## Ablauf und Zuständigkeiten
+
+Es gibt zwei getrennte Phasen:
+
+1. `prepareLintConfiguration` nimmt bereits geladene Daten entgegen. Die
+   DocType-Vorbereitung erstellt unveränderliche Definitionen und eine Suche nach
+   Namen. Die Schema-Vorbereitung kompiliert alle JSON Schemas mit Ajv. Danach
+   entsteht die geprüfte ESLint-Konfiguration mit den empfohlenen Profilen.
+2. `lint` prüft die Eingabe, führt ESLint aus und bereitet dessen Meldungen mit
+   Quellenidentität und Originalpositionen auf. ESLint ruft die aktivierten
+   Regeln auf; nur die Metadaten-Regel verwendet den vorbereiteten Ajv-Validator.
+
+| Bereich unter `src/` | Aufgabe                                                                    |
+| -------------------- | -------------------------------------------------------------------------- |
+| `schemas/`           | Schema-Identitäten, Registrierung und Ajv-Kompilierung; keine ESLint-Regel |
+| `doc-types/`         | Definitionen vorbereiten und DocType anhand von Metadaten auswählen        |
+| `markdown/`          | Frontmatter aus Originaltext lesen und YAML-Positionen erhalten            |
+| `rules/`             | Einzelne fachliche ESLint-Prüfungen                                        |
+| `plugin/`            | Regeln bündeln, empfohlenes Profil und Regel-Settings bereitstellen        |
+| `lint/`              | ESLint-Konfiguration, Ausführung und Ergebnisaufbereitung                  |
+
+Die Einstiegspunkte beschreiben den Ablauf mit benannten Schritten. Die
+Ajv-Optionen, YAML-Knotenauflösung, ESLint-Konfigurationsprobe und
+Diagnoseumwandlung liegen in den jeweiligen Implementierungen. `index.ts`
+enthält ausschließlich Exports; es gibt keine neuen Paketgrenzen.
+
+## Vollständige Konfiguration für die eingebettete Runtime
+
+`eslint.config.js` in einem ESM-Projekt (alternativ `eslint.config.mjs`):
+
+```js
+import { loadDocTypes } from "@dokkurator/loader";
+import { createLintConfig } from "@dokkurator/validator";
+
+const docTypes = await loadDocTypes(process.cwd());
+
+export default createLintConfig({
+  docTypes,
+  rules: {
+    "dokkurator/required-headings": "error",
+    "markdown/no-duplicate-headings": "warn",
+  },
+});
+```
+
+Der Helfer aktiviert `markdown/gfm`, YAML-Frontmatter, das empfohlene Profil von
+`@eslint/markdown` sowie `plugin.configs.recommended`. Die Standardregeln werden
+im Plugin definiert; der Konfigurationshelfer kennt keine einzelnen Rule-IDs.
+DocTypes und zusätzliche Schema-Ressourcen werden vorab geladen;
+die Regelausführung benötigt keine I/O. Projekt- und Repository-Konfigurationen
+können die Regeln jeweils mit `warn` oder `off` überschreiben.
+
+## Plugin direkt importieren
+
+Das Paket exportiert außerdem das normale ESLint-Plugin `plugin`. Es verwendet
+vorbereitete Daten aus `settings.dokkurator`:
+
+```js
+import markdown from "@eslint/markdown";
+import { loadDocTypes } from "@dokkurator/loader";
+import { plugin, prepareDocTypes } from "@dokkurator/validator";
+
+const prepared = prepareDocTypes(await loadDocTypes(process.cwd()));
+
+export default [
+  ...markdown.configs.recommended,
+  ...plugin.configs.recommended,
+  {
+    files: ["**/*.[mM][dD]"],
+    language: "markdown/gfm",
+    languageOptions: { frontmatter: "yaml" },
+    plugins: { markdown },
+    settings: { dokkurator: prepared },
+  },
+];
+```
+
+`prepareDocTypes` bereitet ausschließlich DocType-Daten vor: Es erstellt eine
+unveränderliche Momentaufnahme, kompiliert Metadaten-Schemas und baut die
+DocType-Suche. Es erzeugt keine ESLint-Konfiguration und aktiviert keine Regeln.
+Optional nimmt es als zweites Argument zusätzliche Schema-Ressourcen entgegen.
+
+`settings.dokkurator` übergibt diese Registry an die Regeln. Das recommended-Profil
+aktiviert Regeln, kennt aber keine Projekt-DocTypes. Die Vorbereitung erfolgt
+einmal vor der Ausführung; die Regeln selbst laden keine Dateien.
+
+`prepareLintConfiguration` kombiniert diese Datenvorbereitung mit einer geprüften,
+unveränderlichen vollständigen Flat-Konfiguration für `lint()` und Core.
+
+`createLintConfig` liefert davon eine veränderbare Kopie für ESLint. Diese beiden
+Helfer sind für die direkte Plugin-Einbindung nicht erforderlich. Intern werden
+die empfohlenen Profile mit ESLints `defineConfig` eingebunden; ihre Regeln
+werden nicht separat zusammengemischt.
+
+Ohne vorbereitete `settings.dokkurator` melden aktivierte Dokkurator-Regeln einen
+Konfigurationsfehler. Die Regeln haben keine zusätzlichen Regeloptionen.
+Die Paket-Root ist der einzige Exportpfad; zusätzliche Hilfstypen werden nicht exportiert.
+
+## DocType-Regeln
+
+Das empfohlene Profil aktiviert drei voneinander getrennte Regeln:
+
+- `dokkurator/doctype` prüft YAML und die eindeutige DocType-Zuordnung.
+- `dokkurator/metadata-schema` prüft Metadaten gegen das vorbereitete JSON Schema.
+- `dokkurator/required-headings` prüft Pflichtüberschriften.
+
+Alle drei Regeln sind unabhängig mit `warn` und `off` konfigurierbar. Seit der
+Trennung deaktiviert `dokkurator/doctype: off` die Schema-Prüfung nicht mehr;
+dazu wird `dokkurator/metadata-schema: off` verwendet. Bei fehlerhaftem YAML oder
+ungültiger Zuordnung überspringt die Schema-Regel die Prüfung, damit nur die
+Zuordnungs-Regel den ursprünglichen Fehler meldet.
+
+DocType-Metadaten können als vollständiges JSON Schema Draft 7 oder als kompakte
+Feldbeschreibung in YAML definiert werden. Der Loader erweitert die kompakte
+Schreibweise zu JSON Schema; der Validator verwendet für beide Formen dieselbe
+Schema-Regel. `required: true` markiert dabei ein Pflichtfeld, und beispielsweise
+`pattern`, `enum` oder `items` bleiben reguläre Schema-Keywords. Für Bedingungen
+zwischen Feldern (`if`/`then`) und Objektoptionen wie `additionalProperties`
+steht das vollständige Schema zur Verfügung. Beispiele und die Grenzen der
+Kurzform stehen in der [Loader-Dokumentation](../loader/README.md#metadata-compact-fields-or-json-schema).
+Die DocType-Kennung im Frontmatter bleibt `doctype`.
+
+Pflichtüberschriften stehen in
+`structure.requiredHeadings`, beispielsweise in
+`_dokkurator/.doctypes/decision/definition.yml`:
+
+```yaml
+name: decision
+metadata:
+  type: object
+  required: [doctype]
+  properties:
+    doctype:
+      const: decision
+structure:
+  requiredHeadings: [Context, Decision]
+```
+
+Für Pflichtüberschriften gilt:
+
+- Der sichtbare Text wird wie im Loader mit `mdast-util-to-string` bestimmt.
+  Markdown-Formatierung, Links, Inline-Code und Bild-Alternativtexte zählen mit.
+  Außenliegende Leerzeichen werden entfernt; Groß-/Kleinschreibung und innere
+  Leerzeichen bleiben erhalten.
+- Jede Ebene von H1 bis H6 zählt, ebenso Setext-Überschriften und Überschriften
+  innerhalb von Zitaten. Reihenfolge und Anzahl sind nicht vorgeschrieben.
+- Eine passende Überschrift erfüllt die Anforderung. Wiederholte Anforderungen
+  nach dem Entfernen äußerer Leerzeichen werden einmal ausgewertet. Doppelte
+  Dokumentüberschriften sind bei Bedarf Aufgabe von `markdown/no-duplicate-headings`.
+- Text in Absätzen, HTML-Blöcken oder Codeblöcken zählt nicht als Markdown-Überschrift.
+- Ein fehlender Abschnitt erzeugt `missing-heading` am Frontmatter, mit DocType
+  und Überschriftentext in der Meldung. Bei fehlerhaftem YAML oder ungültiger
+  DocType-Zuordnung werden keine zusätzlichen Überschriftenfehler erzeugt.
+  Bei gültiger Zuordnung läuft die Inhaltsprüfung auch bei Schema-Verletzungen.
+- Die Regeln sind unabhängig abschaltbar. Ungültige Überschriftenanforderungen
+  prüft die aktivierte Überschriften-Regel in ihrem `create`-Schritt selbst und
+  meldet sie als Konfigurationsfehler. Bei `off` erfolgt diese Prüfung nicht.
+  Die allgemeine DocType-Vorbereitung kennt diese Regelkonfiguration nicht.
+
+Zusätzliche Plugins müssen Regeln für den Markdown-AST bereitstellen.
+JavaScript-Regeln können diesen AST nicht als JavaScript-AST auswerten. Es gibt
+keinen Codeblock-Processor, keine Embedded-Code-Runtime und keine Mermaid-Prüfung.
+
+Die Fassade unterscheidet Regel-Konfigurationsfehler von unerwarteten Abstürzen.
+Die Diagnosephase kommt ebenfalls aus der jeweiligen Regel: Optional ordnet
+`meta.messagePhases` Message-IDs `parse` oder `lint` zu. Ohne Zuordnung gilt
+`lint`; fatale ESLint-Parserfehler sind stets `parse`. Dafür sind keine konkreten
+Rule-IDs in der Fassade hinterlegt.
+
+Der synchrone Einstieg
+für vollständiges Markdown ist `lint({ originalText, source, configuration })`.

@@ -17,6 +17,9 @@
 - Never import another package's internal files, source directories, generated
   output, or implementation paths. Do not add package export subpaths to evade
   this rule.
+- Preserve library public APIs by default. Before changing a package's public API
+  (exports, types, signatures, or externally observable behavior), ask for
+  confirmation unless the user explicitly requested that API change.
 - Imports within one package may use local relative paths. Keep implementations
   within their owning core library until there is a deliberate architectural
   decision to split them into a separately versioned and maintained library.

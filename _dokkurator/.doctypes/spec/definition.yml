@@ -1,0 +1,27 @@
+name: spec
+description: Describes observable behavior of a component as testable requirements.
+metadata:
+  type: object
+  required:
+    - title
+    - status
+  properties:
+    title:
+      type: string
+    status:
+      type: string
+      enum: [draft, accepted, deprecated]
+    component:
+      type: string
+    tags:
+      type: array
+      items:
+        type: string
+    tests:
+      type: array
+      items:
+        type: string
+structure:
+  requiredHeadings:
+    - Purpose
+    - Requirements

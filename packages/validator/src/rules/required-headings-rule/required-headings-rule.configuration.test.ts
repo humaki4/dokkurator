@@ -20,7 +20,7 @@ const frontmatter = "---\ndoctype: decision\n---\n";
 
 describe("heading rule configuration", () => {
   test.each(["Context", [""], ["   "], [42]])(
-    "the enabled rule rejects invalid heading requirements: %j",
+    "Configuration: the enabled rule rejects invalid heading requirements: %j",
     (requiredHeadings) => {
       const configuration = prepareLintConfiguration({
         docTypes: [
@@ -50,7 +50,7 @@ describe("heading rule configuration", () => {
       );
     },
   );
-  test("rejects unsupported rule options and missing prepared settings", () => {
+  test("Configuration: rejects unsupported rule options and missing prepared settings", () => {
     expect(() =>
       createLintConfig({
         docTypes: [docType],

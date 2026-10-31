@@ -18,18 +18,24 @@ const prepared = prepareLintConfiguration({ docTypes: [docType] });
 const frontmatter = "---\ndoctype: decision\n---\n";
 
 describe("heading rule invocation and diagnostics", () => {
-  test("heading requirements are independent of metadata validation and overridable", () => {
-    const strict = {
-      ...docType,
-      metadata: { type: "object", required: ["title"] },
-    };
-    const result = (rules: Linter.RulesRecord) =>
-      new Linter().verify(
-        frontmatter,
-        createLintConfig({ docTypes: [strict], rules }),
-        { filename: "test.md" },
-      );
-    expect(result({})).toHaveLength(3);
+  const strict = {
+    ...docType,
+    metadata: { type: "object", required: ["title"] },
+  };
+  const result = (rules: Linter.RulesRecord) =>
+    new Linter().verify(
+      frontmatter,
+      createLintConfig({ docTypes: [strict], rules }),
+      { filename: "test.md" },
+    );
+  test("Applicability: reports missing headings although the metadata is invalid", () => {
+    expect(result({})).toEqual([
+      expect.objectContaining({ messageId: "missing-heading" }),
+      expect.objectContaining({ messageId: "missing-heading" }),
+      expect.objectContaining({ messageId: "invalid-metadata" }),
+    ]);
+  });
+  test("Configuration: severity and off apply to this rule only", () => {
     expect(result({ "dokkurator/required-headings": "off" })).toEqual([
       expect.objectContaining({ messageId: "invalid-metadata" }),
     ]);
@@ -44,7 +50,7 @@ describe("heading rule invocation and diagnostics", () => {
       expect.objectContaining({ messageId: "missing-heading", severity: 1 }),
     ]);
   });
-  test("repeated documents cannot share collected headings", () => {
+  test("Isolation: repeated documents cannot share collected headings", () => {
     const config = createLintConfig(prepared);
     const linter = new Linter();
     const verify = (text: string) =>
@@ -55,7 +61,7 @@ describe("heading rule invocation and diagnostics", () => {
     ]);
     expect(verify("## Context\n## Decision\n")).toEqual([]);
   });
-  test("reports the frontmatter range in the original BOM/CRLF text", () => {
+  test("Location: reports the frontmatter range in the original BOM/CRLF text", () => {
     const result = lint({
       originalText:
         "\uFEFF" + (frontmatter + "## Context\n").replace(/\n/g, "\r\n"),

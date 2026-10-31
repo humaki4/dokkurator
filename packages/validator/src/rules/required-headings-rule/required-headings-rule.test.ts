@@ -44,16 +44,33 @@ tester.run(
   dokkuratorEslintPlugin.rules["required-headings"],
   {
     valid: [
-      { code: frontmatter + "# Context\n## Decision\n" },
-      { code: frontmatter + "###### Decision\n### Context\n### Context\n" },
-      { code: frontmatter + "Context\n=======\nDecision\n--------\n" },
       {
+        name: "Matching: accepts headings of any level",
+        code: frontmatter + "# Context\n## Decision\n",
+      },
+      {
+        name: "Order and repetition: ignores order and repeated headings",
+        code: frontmatter + "###### Decision\n### Context\n### Context\n",
+      },
+      {
+        name: "Matching: accepts setext headings",
+        code: frontmatter + "Context\n=======\nDecision\n--------\n",
+      },
+      {
+        name: "Matching: compares the visible text of emphasis and links",
         code:
           frontmatter + "## **Context**\n## [Decision](https://example.com)\n",
       },
-      { code: frontmatter + "## `Context`\n## ![Decision](example.svg)\n" },
-      { code: frontmatter + "> ## Context\n> ## Decision\n" },
       {
+        name: "Matching: compares the visible text of inline code and images",
+        code: frontmatter + "## `Context`\n## ![Decision](example.svg)\n",
+      },
+      {
+        name: "Matching: accepts headings in block quotes",
+        code: frontmatter + "> ## Context\n> ## Decision\n",
+      },
+      {
+        name: "Findings: counts declared entries equal after trimming once",
         code: frontmatter + "## Context\n## Decision\n",
         settings: {
           dokkurator: prepareLintConfiguration({
@@ -69,6 +86,7 @@ tester.run(
         },
       },
       {
+        name: "Declaration: has no requirements without requiredHeadings",
         code: frontmatter + "Content",
         settings: {
           dokkurator: prepareLintConfiguration({
@@ -76,17 +94,31 @@ tester.run(
           }),
         },
       },
-      { code: "# No frontmatter" },
-      { code: "---\ndoctype: unknown\n---\n" },
-      { code: "---\nscalar\n---\n" },
-      { code: "---\ndoctype: decision\ntitle: [\n---\n" },
       {
+        name: "Applicability: reports nothing without frontmatter",
+        code: "# No frontmatter",
+      },
+      {
+        name: "Applicability: reports nothing for an unknown DocType",
+        code: "---\ndoctype: unknown\n---\n",
+      },
+      {
+        name: "Applicability: reports nothing for non-mapping frontmatter",
+        code: "---\nscalar\n---\n",
+      },
+      {
+        name: "Applicability: reports nothing for invalid YAML",
+        code: "---\ndoctype: decision\ntitle: [\n---\n",
+      },
+      {
+        name: "Applicability: reports nothing for duplicate YAML keys",
         code: frontmatter.replace(
           "doctype: decision",
           "doctype: decision\ndoctype: decision",
         ),
       },
       {
+        name: "Applicability: reports nothing for a conflicting $schema",
         code: frontmatter.replace(
           "doctype: decision",
           "doctype: decision\n$schema: https://example.com/other",
@@ -94,17 +126,28 @@ tester.run(
       },
     ],
     invalid: [
-      { code: frontmatter + "## Context\n", errors: [missing("Decision")] },
-      { code: frontmatter + "## Decision\n", errors: [missing("Context")] },
       {
+        name: "Findings: reports the missing Decision heading",
+        code: frontmatter + "## Context\n",
+        errors: [missing("Decision")],
+      },
+      {
+        name: "Findings: reports the missing Context heading",
+        code: frontmatter + "## Decision\n",
+        errors: [missing("Context")],
+      },
+      {
+        name: "Matching: running text is not a heading",
         code: frontmatter + "Context and Decision\n",
         errors: [missing("Context"), missing("Decision")],
       },
       {
+        name: "Matching: is case-sensitive",
         code: frontmatter + "## context\n## Decision\n",
         errors: [missing("Context")],
       },
       {
+        name: "Matching: a code block is not a heading",
         code: frontmatter + "```md\n## Context\n```\n## Decision\n",
         errors: [missing("Context")],
       },
