@@ -13,9 +13,13 @@
     "demo:plugin": "eslint --config eslint-plugin.config.mjs documents",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.check.json",
-    "lint": "eslint --config ../../eslint.config.mjs src minimal/dokkurator.config.mjs dokkurator.config.mjs eslint.config.mjs eslint-plugin.config.mjs"
+    "lint": "eslint --config ../../eslint.config.mjs src minimal/dokkurator.config.mjs dokkurator.config.mjs eslint.config.mjs eslint-plugin.config.mjs",
+    "knowledge:index": "dokkurator index",
+    "knowledge:search": "dokkurator search",
+    "knowledge:diff": "dokkurator diff"
   },
   "dependencies": {
+    "@dokkurator/cli": "workspace:*",
     "@dokkurator/core": "workspace:*",
     "@dokkurator/validator": "workspace:*",
     "@eslint/markdown": "8.0.3",

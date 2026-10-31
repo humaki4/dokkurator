@@ -1,9 +1,13 @@
+---
+type: readmes
+---
+
 # Validator ausprobieren
 
 Die Beispiele verwenden `createDokkurator` und `app.validate()` für den
 Minimalstart, die Sammlung mit acht DocTypes und einen Editor-Text. Zwei
 zusätzliche Integrationen vergleichen die Ergebnisse direkt mit ESLint. Alle
-Daten bleiben lokal. Ein Knowledge-Index wird nicht benötigt.
+Daten bleiben lokal. Die Validator-Läufe benötigen keinen Knowledge-Index.
 
 ## Einfach starten
 
@@ -120,6 +124,63 @@ Die Fehlersammlung endet absichtlich mit **Exit-Code 1**. Warnungen allein führ
 zu `PASS` und Exit-Code 0: `custom-rule.md` und `duplicate-headings.md` demonstrieren
 diesen Unterschied. Der virtuelle Text erzeugt ebenfalls nur eine Warnung.
 
+## Knowledge per CLI ausprobieren
+
+Dieser optionale Teil verwendet dieselben acht gültigen Dokumente, DocTypes und
+dieselbe Projektkonfiguration. Nach `pnpm install` im Repository-Stammverzeichnis
+startest du mit drei Befehlen (Node.js und pnpm wie oben):
+
+```sh
+pnpm --filter @dokkurator/cli... build
+cd examples/validator
+pnpm run knowledge:index
+```
+
+Die gemeinsame Konfiguration umfasst `documents/valid` und die absichtlich
+fehlerhaften Dokumente in `documents/invalid`. Der Knowledge-Teil ist noch in
+Vorbereitung: Die [tolerante Indexierung](../../docs/task/index-invalid-documents.md)
+muss zuerst umgesetzt werden, damit ungültiges YAML den Indexlauf nicht abbricht. `minimal/` liegt außerhalb des
+Dokumentordners und ist ein eigener Projekt-Root. Ohne konfigurierte Sources
+verwendet die CLI das Projekt als Source `root`; `source add` ist nicht nötig.
+Der lokale Index liegt unter `.dokkurator/index.db` und wird von Git ignoriert.
+
+Alle folgenden Befehle werden in `examples/validator` ausgeführt. pnpm reicht
+Argumente direkt weiter; ein zusätzliches `--` ist nicht erforderlich.
+
+```sh
+# Volltext: die angenommene Entscheidung zur synchronen Validierung
+pnpm run knowledge:search ESLint
+
+# Phrase: die Anführungszeichen gehören zur Suchabfrage
+pnpm run knowledge:search '"Regeln synchron"'
+
+# Metadaten und implizites AND
+pnpm run knowledge:search status:accepted
+pnpm run knowledge:search doctype:decision status:accepted
+
+# OR und Klammern: Anleitung oder Runbook; Entscheidung oder Release
+pnpm run knowledge:search doctype:guide OR doctype:runbook
+pnpm run knowledge:search '(doctype:decision OR doctype:release) AND status:accepted'
+
+# Ergebniszahl begrenzen
+pnpm run knowledge:search ESLint --limit 3
+```
+
+Treffer werden als JSON mit Inhalt, Metadaten und Source-Pfad ausgegeben.
+`index` arbeitet inkrementell: ohne Änderungen werden keine Dokumente erneut
+indexiert. Ergänze zum Ausprobieren einen Satz im Text von
+[`documents/valid/decision.md`](./documents/valid/decision.md), und führe aus:
+
+```sh
+pnpm run knowledge:diff
+pnpm run knowledge:index
+pnpm run knowledge:diff
+```
+
+Das erste `diff` zeigt `modified`, ohne den Index zu verändern. Nach `index`
+zeigt das zweite `diff` keine Änderungen mehr. Siehe auch die
+[CLI-Referenz](../../apps/cli/docs/commands.md).
+
 ## Dateien und DocTypes
 
 | DocType                                                             | Schreibweise | Was er zeigt                                                                         |
@@ -230,7 +291,7 @@ Die direkte Plugin-Konfiguration übernimmt ebenfalls dieses Regelobjekt.
 - Das empfohlene Markdown-Profil zählt ein Frontmatter-Feld `title` als
   Dokumenttitel. Die Beispieldokumente beginnen deshalb direkt mit H2-Abschnitten;
   ein zusätzliches H1 würde `markdown/no-multiple-h1` auslösen.
-- Keine Kontextvalidierung, Knowledge-Abfragen, Multi-Document-Regeln,
+- Keine Kontextvalidierung, Multi-Document-Regeln,
   Codeblock-Ausführung oder neue Dokkurator-CLI. Die vorhandene Dokkurator-CLI
   wird durch dieses Beispiel nicht um einen Validierungsbefehl erweitert.
 

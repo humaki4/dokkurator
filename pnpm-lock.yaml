@@ -146,6 +146,9 @@ importers:
 
   examples/validator:
     dependencies:
+      '@dokkurator/cli':
+        specifier: workspace:*
+        version: link:../../apps/cli
       '@dokkurator/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -259,6 +262,10 @@ importers:
       yaml:
         specifier: 2.9.1
         version: 2.9.1
+    devDependencies:
+      '@types/node':
+        specifier: ^22.20.3
+        version: 22.20.3
 
 packages:
 

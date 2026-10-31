@@ -28,5 +28,8 @@
     "eslint": "10.10.0",
     "mdast-util-to-string": "^4.0.0",
     "yaml": "2.9.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.3"
   }
 }

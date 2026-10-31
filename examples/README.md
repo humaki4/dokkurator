@@ -6,11 +6,12 @@ separat veröffentlichten Pakete.
 
 - [Validator](./validator/README.md): einfacher Start mit `pnpm start` und einem
   Compact-DocType; optional acht weitere DocTypes, gültige und fehlerhafte
-  Dokumente, direkte ESLint-Nutzung und eine eigene Regel.
+  Dokumente, direkte ESLint-Nutzung und eine eigene Regel. Optional lässt sich
+  dieselbe Sammlung über die Knowledge-CLI indexieren und durchsuchen.
 
 Die Installation verwendet lokale Workspace-Pakete. Alle Validator-Läufe verwenden
 `createDokkurator` und `app.validate()`, ohne Knowledge-Index. Die Beispiele bleiben im
 pnpm-Workspace; eine Veröffentlichung ist derzeit nicht vorgesehen.
 
-Beispiele für Knowledge und die spätere Kontextvalidierung kommen in einer
-gesonderten Aufgabe hinzu.
+Der Knowledge-Teil ist optional; der Validator-Minimalstart bleibt unverändert.
+Ein Beispiel für die spätere Kontextvalidierung folgt in einer gesonderten Aufgabe.
