@@ -8,6 +8,10 @@ tags: [frontend]
 
 # Explorer UI
 
+This document describes the planned UI. The current application is a React/Vite
+starter with no Catalog Server integration. The additional libraries and features
+listed below are design options, not implemented functionality.
+
 `Explorer UI` is the browser-based interface for searching, navigating and inspecting indexed documentation.
 
 It consumes the Catalog Server API and contains no direct repository or database access.

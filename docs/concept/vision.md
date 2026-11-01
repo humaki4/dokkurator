@@ -42,4 +42,6 @@ The amount of structure should remain adaptable to the needs of a project or org
 
 ## Open and Extensible
 
-TBD: hier erweiterung der regeln, etc. mit fachlichen/projekt spezifischen types
+Teams can define their own DocTypes and add domain-specific ESLint rules.
+The current implementation supports local document checks; cross-document
+relationships and contextual checks are planned extensions.

@@ -1,5 +1,5 @@
 ---
-doctype: guides
+doctype: guide
 title: Built in Rules
 ---
 
@@ -31,7 +31,7 @@ configuration preparation, before document linting. See the
 [direct plugin integration guide](./eslint-plugin.md) for details.
 
 DocTypes may use the Loader's compact metadata syntax or a complete JSON Schema
-Draft 7 definition. See the [Loader metadata documentation](../../loader/README.md#metadata-compact-fields-or-json-schema)
+Draft 7 definition. See the [Loader metadata documentation](../../../loader/README.md#metadata-compact-fields-or-json-schema)
 for the syntax and its limits.
 
 ## `dokkurator/required-headings`

@@ -124,11 +124,15 @@ Die Fehlersammlung endet absichtlich mit **Exit-Code 1**. Warnungen allein führ
 zu `PASS` und Exit-Code 0: `custom-rule.md` und `duplicate-headings.md` demonstrieren
 diesen Unterschied. Der virtuelle Text erzeugt ebenfalls nur eine Warnung.
 
-## Knowledge per CLI ausprobieren
+## Knowledge per CLI (Vorschau)
 
-Dieser optionale Teil verwendet dieselben acht gültigen Dokumente, DocTypes und
-dieselbe Projektkonfiguration. Nach `pnpm install` im Repository-Stammverzeichnis
-startest du mit drei Befehlen (Node.js und pnpm wie oben):
+Dieser Teil dokumentiert den vorgesehenen Suchablauf, ist aber noch keine
+funktionsfähige Gesamtdemo: Die gemeinsame Konfiguration umfasst auch absichtlich
+fehlerhaftes YAML; das bricht den Indexlauf derzeit ab. Zuerst muss die tolerante
+Indexierung umgesetzt werden. Der Validator-Minimalstart oben funktioniert davon
+unabhängig. Die folgenden Befehle bleiben als Vorschau erhalten.
+
+Vorbereitung nach `pnpm install` im Repository-Stammverzeichnis:
 
 ```sh
 pnpm --filter @dokkurator/cli... build

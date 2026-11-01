@@ -17,7 +17,9 @@ Typical sources are:
 - a local Git repository,
 - repository contents available inside a CI pipeline.
 
-No central Dokkurator server is required.
+No central Dokkurator server is required. Source management, indexing, diffing,
+search, inspection, and watching are implemented. CLI validation and its example
+are planned; validation is already available through Core and ESLint.
 
 ```mermaid
 flowchart LR
@@ -49,12 +51,13 @@ flowchart LR
     DocType --> Validator
     DocType --> Knowledge
 
-    Validator -. cross-document queries .-> Knowledge
+    Validator -. "planned cross-document checks" .-> Knowledge
 
     Knowledge --> LocalIndex
 ```
 
-Possible CLI workflows include:
+The target workflow below includes planned validation integration. Today,
+validation runs independently from indexing through Core or ESLint:
 
 ```text
 repository

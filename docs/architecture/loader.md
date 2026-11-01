@@ -9,21 +9,23 @@ tags: [markdown, metadata]
 # Loader
 
 `@dokkurator/loader` is the core library for loading, parsing and representing
-document type definitions and for parsing documents according to those
-definitions. It was renamed from `@dokkurator/doctype` to distinguish the
+document type definitions and for parsing Markdown documents independently of validation. It was renamed from `@dokkurator/doctype` to distinguish the
 library component from the `DocType` domain concept; public domain types and
 function names remain unchanged.
 
 It therefore has two distinct responsibilities:
 
 1. **DocType parsing** — load and parse DocType definitions.
-2. **Document parsing** — parse Markdown documents using a resolved DocType.
+2. **Document parsing** — parse Markdown and Frontmatter without requiring a resolved DocType.
+
+Loader also owns the source contracts and filesystem/Git adapters described in
+[source adapters](source-adapters.md).
 
 ## Technology
 
 The library is implemented in TypeScript and targets Node.js environments.
 
-Planned building blocks include:
+Implemented building blocks include:
 
 - YAML parsing for DocType definitions and Frontmatter
 - Markdown parsing based on the unified / remark ecosystem [remarkjs](https://github.com/remarkjs/remark)
@@ -32,7 +34,7 @@ Planned building blocks include:
 - plain TypeScript models as the integration boundary to Validator and Knowledge
 - extensible parsing for links, references and embedded content
 
-The library has no dependency on Git providers, databases or the Catalog Server.
+The library uses the local Git client through `simple-git`; it has no GitLab/GitHub API integration and no dependency on databases or the Catalog Server.
 
 ## Responsibilities
 
@@ -50,7 +52,9 @@ decision/
 
 `definition.yml` contains the DocType definition and its metadata schema.
 When `rules.yml` is absent, the normalized DocType contains an empty rule list.
-`template.md` is reserved for document templates and is not parsed yet.
+`template.md` is reserved for document templates and is not parsed yet. Legacy
+`rules.yml` files are parsed, but the current Validator rejects nonempty legacy
+rule lists. Configure executable rules as ESLint rules in JavaScript instead.
 
 The library is responsible for:
 

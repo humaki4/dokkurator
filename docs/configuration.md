@@ -7,10 +7,13 @@ tags: [configuration]
 
 # Dokkurator configuration
 
-each repository can describe its own documents and DocTypes.
-Dokkurator uses `.dokkurator/config.yaml`. The project-root file contains
+Each repository can describe its own documents, DocTypes, and validation rules.
+Dokkurator loads `dokkurator.config.mjs` when present, otherwise
+`.dokkurator/config.yaml`. JavaScript configuration takes precedence rather than
+merging with YAML; it default-exports a configuration object and supports imported
+ESLint plugins and preloaded schemas. The project-root file contains
 project-wide settings and selects repositories. A repository's own config file
-contains only its document and DocType settings. The root file may also contain
+contains its document, DocType, and Validator settings. The root file may also contain
 `documents` and `doctypes` when the project root itself is a repository.
 
 ```yaml
@@ -60,13 +63,33 @@ For repository settings, the central Dokkurator application resolves values in
 this order:
 
 1. built-in defaults;
-2. the active repository's `.dokkurator/config.yaml`.
+2. the active repository's `dokkurator.config.mjs`, falling back to `.dokkurator/config.yaml`.
 
 For project-wide settings, the root config replaces built-in defaults.
 Repository settings from the project-root file apply only when that root is
 itself the active repository. More-specific values replace defaults; exclude
 patterns are not implicitly combined. The central `dokkurator` CLI does not
 override these settings with command-line options.
+
+## JavaScript configuration
+
+```js
+export default {
+  documents: { directory: "docs" },
+  validator: {
+    rules: { "markdown/no-duplicate-headings": "warn" },
+  },
+};
+```
+
+For JavaScript projects, source-management commands save the effective source
+list in `.dokkurator/sources.yaml`. When present, that file replaces the source
+list exported by JavaScript without rewriting executable configuration. Other
+settings still come from the JavaScript file.
+
+Core and CLI use the project directory as source `root` when no sources are
+configured. Project discovery searches upwards from the working directory;
+`--project` explicitly selects a root.
 
 ## Defaults
 

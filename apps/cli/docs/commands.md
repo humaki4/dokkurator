@@ -1,3 +1,8 @@
+---
+doctype: guide
+title: Dokkurator CLI
+---
+
 # Dokkurator CLI – Benutzerreferenz
 
 ## Aufruf und globale Optionen

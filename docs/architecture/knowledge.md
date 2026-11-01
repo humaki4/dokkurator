@@ -8,232 +8,74 @@ tags: [index, search]
 
 # Knowledge
 
-`Knowledge` builds and queries the derived knowledge model created from parsed documents.
-
-It consumes `ParsedDocument` objects from DocType and transforms them into indexable documents.
-
-## Technology
-
-- TypeScript / Node.js
-- storage-independent core
-- adapter-based persistence
-- explicit query API instead of direct database access
-- local development can start with SQLite or an in-memory adapter
-- server deployments can later use PostgreSQL, OpenSearch or another index implementation
+`@dokkurator/knowledge` stores a derived view of parsed documents and provides
+full-text and metadata search. Its SQLite implementation is available today.
+Resolved semantic relationships and cross-document validation remain planned.
 
 ## Responsibilities
 
-- index parsed documents
-- update and remove indexed documents
-- provide search and query APIs
-- support Validator queries across documents
-- expose document relationships for CLI and Catalog Server
-- keep the knowledge model independent of the concrete storage technology
+- Transform Loader's parsed documents into indexable documents.
+- Insert, update, and remove documents with stable source IDs and paths.
+- Apply incremental changes and source checkpoints atomically.
+- Parse the search language and expose backend-independent query contracts.
+- Keep the index rebuildable from source documents.
 
-## Data flow
+## Model and storage
 
-```text
-ParsedDocument
-      ↓
- normalize / enrich
-      ↓
-KnowledgeDocument
-      ↓
- Index Adapter
-      ↓
-   Storage
-```
+The current document model contains content, metadata, headings, links, Markdown
+link references, and source provenance. It does not contain resolved relationships,
+permissions, validation findings, or the Markdown AST. Source provenance includes
+source ID, path, and optional repository and revision. Local roots, working-tree
+status, and author emails are not copied into the index by default.
 
-## Knowledge model
-
-The internal model is derived from the source documents.
-
-```ts
-type KnowledgeDocument = {
-  id: DocumentId;
-  type?: string;
-
-  metadata: Record<string, unknown>;
-
-  source: SourceReference;
-
-  content: string;
-  headings: Heading[];
-  links: Link[];
-  references: Reference[];
-};
-```
-
-Knowledge stores a deliberately smaller source model than the source adapter:
-
-```ts
-type SourceReference = {
-  sourceId: string;
-  path: string;
-  revision?: string;
-  repository?: string;
-};
-```
-
-Transient or sensitive adapter details such as a local root, working-tree
-status, branch and author email remain available on `ParsedDocument`, but are
-not copied into the derived index by default. They can later be introduced as
-an explicit provenance or document-state model when required by a concrete UI
-or assessment feature.
-
-Entities and semantic relations are deliberately deferred. They will be added
-when their identity, ownership and extraction rules are defined by a concrete
-use case.
-
-## Index adapter
-
-Knowledge does not access SQLite, PostgreSQL or OpenSearch directly.
-
-```ts
-interface KnowledgeIndex {
-  upsert(document: KnowledgeDocument): Promise<void>;
-
-  remove(id: DocumentId): Promise<void>;
-
-  get(id: DocumentId): Promise<KnowledgeDocument | undefined>;
-
-  query(query: KnowledgeQuery): Promise<QueryResult>;
-}
-```
-
-Possible implementations:
-
-```text
-MemoryIndex
-SQLiteIndex
-PostgresIndex
-OpenSearchIndex
-```
-
-The initial implementation can stay lightweight while keeping the API stable.
+Knowledge owns `KnowledgeIndex`, `IncrementalKnowledgeIndex`, and `SQLiteIndex`.
+Consumers import them from the public package root. SQLite-specific code stays
+inside Knowledge's internal backend directory. Other backends are future options,
+not existing integrations.
 
 ## Indexing
 
-```ts
-await indexDocuments({ source, index, documentsDirectory: "docs" });
-```
+`indexDocumentChanges` calculates a source diff, loads changed documents, removes
+deleted entries, and persists the new checkpoint in the same transaction.
+`calculateDocumentDiff` previews that comparison without changing the index.
+`indexDocuments` replaces the entire index and clears incremental checkpoints;
+it is not a per-source append operation.
 
-`indexDocumentChanges` is the normal indexing operation. It obtains a
-source-specific diff from DocType, loads added and modified documents, removes
-deleted documents, and advances the persisted source checkpoint in the same
-index transaction. `calculateDocumentDiff` exposes the same comparison without
-changing the index or checkpoint.
+Current limitations:
 
-`indexDocuments` remains available for an explicit complete replacement. A
-full replacement clears incremental source checkpoints so the next incremental
-run reconciles the current source from an empty baseline.
+- Malformed YAML aborts indexing for that source; tolerant indexing is planned.
+- Incremental Git indexing reads committed content, unlike working-tree loading and validation.
+- Include/exclude changes do not yet reliably reconcile existing entries.
 
-A full rebuild must always remain possible.
+## Queries and search
 
-## Query API
-
-The internal query API should be structured and independent of the storage backend.
+`index.query` supports type/source filters and pagination. For metadata queries,
+use the implemented search language through `searchKnowledge`:
 
 ```ts
-const result = await knowledge.query({
-  type: "decision",
-  where: {
-    status: "accepted",
-  },
-});
+import { searchKnowledge } from "@dokkurator/knowledge";
+
+const hits = await searchKnowledge(
+  index,
+  "doctype:decision status:accepted authentication",
+  { limit: 20 },
+);
 ```
 
-More complex queries can later add:
+Unqualified terms search content and metadata. `key:value` selects a metadata
+path; nested objects use dotted paths. Quoted values, parentheses, `AND`, and
+`OR` are supported; adjacent terms imply `AND`. Matching uses substrings rather
+than typed comparisons or exact equality. Range filters, graph queries, and
+reference resolution are not implemented.
 
-```ts
-const result = await knowledge.query({
-  type: "decision",
-
-  where: {
-    status: { equals: "accepted" },
-  },
-
-  sort: [{ field: "date", direction: "desc" }],
-
-  limit: 20,
-});
-```
-
-A user-facing query DSL can be built on top of this API later.
-
-## Search
-
-Full-text search is exposed through the same abstraction.
-
-```ts
-await knowledge.search({
-  expression: {
-    type: "term",
-    value: "authentication",
-  },
-  types: ["decision", "architecture"],
-  limit: 20,
-});
-```
-
-The concrete implementation may map this to:
-
-- SQLite FTS
-- PostgreSQL full-text search
-- OpenSearch
-
-The public search model is a storage-independent expression tree. Terms can
-search content and all metadata, or target one metadata path. `and` and `or`
-nodes combine expressions. A user-facing query language is parsed by Knowledge
-into this model; neither CLI syntax nor database expressions cross the index
-adapter boundary.
-
-```text
-CLI input
-    ↓
-Knowledge query parser
-    ↓
-SearchExpression
-    ↓
-Index adapter
-```
-
-The initial query language supports unqualified terms, `key:value`, quoted
-values, parentheses, and `AND`/`OR`. Adjacent terms imply `AND`, and `AND` binds
-more strongly than `OR`.
-
-## Validator integration
-
-Validator can use Knowledge for rules that require information beyond the current document.
-
-```ts
-const existing = await knowledge.query({
-  type: "decision",
-  where: {
-    id: document.metadata.id,
-  },
-});
-```
-
-Examples:
-
-- reference target exists
-- ID is unique
-- related document has an expected type
-- required relationship exists
-- referenced document has a compatible status
-
-Knowledge itself does not decide whether such conditions are valid. It only provides the data.
+Knowledge parses the language into a search-expression tree. The index adapter
+translates that tree to backend queries. CLI only forwards input and formats
+results. See the [package README](../../packages/knowledge/README.md).
 
 ## Boundaries
 
-Knowledge does not:
-
-- parse Markdown
-- parse DocType definitions
-- define validation rules
-- access GitLab directly
-- decide user authorization
-- own the original documents
-
-Repositories remain the source of truth. The Knowledge index is derived and rebuildable.
+- Consume Loader's public loading contracts and parsed models, not source implementations.
+- Keep parsing of Markdown and DocTypes in Loader.
+- Keep document validation in Validator; no cross-document rule integration exists yet.
+- Keep authorization in the planned server integration.
+- Treat repositories as authoritative and the index as disposable derived data.

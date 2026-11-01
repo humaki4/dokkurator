@@ -25,14 +25,17 @@ A definition describing the expected structure and semantics of a category of do
 A DocType may contain:
 
 - metadata definitions,
-- a Markdown template,
-- validation rules.
-  All parts are optional.
+- required headings,
+- a reserved Markdown template (not processed yet).
+
+Executable rules use JavaScript ESLint configuration. Metadata and headings can
+be introduced gradually; the definition still requires a DocType name.
 
 ## Template
 
 An optional Markdown structure associated with a DocType.
-Templates provide guidance when creating documents but do not replace validation rules.
+Templates are intended to guide document creation; template processing is not
+implemented yet.
 
 ## Rule
 
@@ -72,10 +75,11 @@ The command-line interface for accessing Dokkurator functionality such as valida
 
 It can be used locally, in CI pipelines, by scripts, or by AI agents.
 
-## Hub
+## Catalog
 
-A reference application that provides central access to documentation distributed across repositories.
-The Hub uses Dokkurator's reusable components for search, navigation, validation information, and relationships while keeping the original repositories as the source of truth.
+Name for a showcase application that provides central access to documentation distributed across repositories.
+Both are currently scaffolds. Search, navigation, quality reports, and relationship
+views describe the intended central application, not its present capabilities.
 
 ## Documentation Health
 

@@ -8,6 +8,10 @@ tags: [server, api]
 
 # Catalog Server
 
+This document describes the target architecture. Today the server exposes only
+its prepared OpenAPI contract. Authentication, catalog routes, synchronization,
+permission-filtered search, and Core integration are not implemented.
+
 `Catalog Server` provides centralized access to distributed documentation sources.
 
 It combines source access, indexing, authentication and query execution while keeping repositories as the source of truth.
@@ -19,7 +23,7 @@ It combines source access, indexing, authentication and query execution while ke
 - feature-based application structure
 - Fastify Autoload for automatic registration of features and plugins
 - OpenAPI for API description and client generation
-- GitHub OAuth for user authentication
+- GitLab OAuth for user authentication
 - Source Adapters for accessing remote repositories
 - Knowledge + Index Adapter for central indexing and querying
 - background synchronization based on polling
@@ -31,7 +35,7 @@ It combines source access, indexing, authentication and query execution while ke
 - @fastify/autoload
 - @fastify/swagger
 - @fastify/swagger-ui
-- OAuth / OIDC plugin for GitHub authentication
+- OAuth / OIDC plugin for GitLab authentication
 - Dokkurator core libraries and adapters
 
 A feature owns its routes, service logic and related schemas:
@@ -69,8 +73,8 @@ flowchart LR
     Explorer["Explorer UI"]
     Catalog["Catalog Server"]
 
-    github["github"]
-    Source["github Source Adapter"]
+    GitLab["GitLab"]
+    Source["GitLab Source Adapter"]
 
     DocType["DocType"]
     Validator["Validator"]
@@ -83,7 +87,7 @@ flowchart LR
     Explorer --> Catalog
 
     Catalog --> Source
-    Source --> github
+    Source --> GitLab
 
     Source --> DocType
     DocType --> Validator
@@ -99,16 +103,16 @@ flowchart LR
 
 ## Authentication
 
-Interactive users authenticate through github OAuth.
+Interactive users authenticate through GitLab OAuth.
 
 ```text
 User
   ↓
 Catalog Server
   ↓
-github OAuth
+GitLab OAuth
   ↓
-github identity + access token
+GitLab identity + access token
   ↓
 Catalog session
 ```
@@ -120,9 +124,9 @@ The server owns:
 - access token handling
 - permission resolution
 
-github remains the authority for repository access.
+GitLab remains the authority for repository access.
 
-The Catalog Server may cache or index permission-related information for efficiency, but access decisions must remain compatible with current github permissions.
+The Catalog Server may cache or index permission-related information for efficiency, but access decisions must remain compatible with current GitLab permissions.
 
 Possible strategies include:
 
@@ -137,17 +141,17 @@ Repositories are periodically synchronized with the Knowledge index.
 
 ```mermaid
 flowchart LR
-    github["github Repository"]
+    GitLab["GitLab Repository"]
     Trigger["Polling (MVP)"]
     Catalog["Catalog Server"]
     Source["Source Adapter"]
     Processing["DocType + Validator + Knowledge"]
     Index[("Index")]
 
-    github --> Trigger
+    GitLab --> Trigger
     Trigger --> Catalog
     Catalog --> Source
-    Source --> github
+    Source --> GitLab
     Source --> Processing
     Processing --> Index
 ```
@@ -166,7 +170,7 @@ update derived knowledge
 update index
 ```
 
-A complete reindex must remain possible. Indexing is authenticated by github auth-token.
+A complete reindex must remain possible. Indexing is authenticated by GitLab auth-token.
 
 ## Query flow
 

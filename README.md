@@ -6,7 +6,25 @@ The project follows a docs-as-code approach: repositories remain the source of t
 
 > **Development status**: Early development. APIs, package boundaries, data models, and configuration behavior may change. Some workspace applications are scaffolds, and document validation is not yet integrated into indexing.
 
-This repository contains the implementation workspace as well as architecture notes, decisions, and development plans. Browse the [documentation](./docs/) or read the [project configuration guide](./docs/configuration.md).
+## Getting started
+
+- [Runnable Validator example](./examples/validator/README.md): validate one document, then explore schemas and custom rules.
+- [Project configuration](./docs/configuration.md): sources, paths, JavaScript configuration, and defaults.
+- [CLI reference](./apps/cli/docs/commands.md): currently available commands.
+
+## Concepts and architecture
+
+- [Vision](./docs/concept/vision.md), [problem](./docs/concept/problem-statement.md), and [scope](./docs/concept/scope.md).
+- [Core concepts](./docs/concept/coreconcepts.md) and [glossary](./docs/concept/glossary.md).
+- [Architecture overview](./docs/architecture/overview.md): package responsibilities and implemented versus planned flows.
+- [Core API](./packages/core/README.md): project workflows and validation.
+
+## Decisions and development
+
+- [Project decisions](./docs/adr/), [Loader decisions](./packages/loader/docs/adr/), and [Validator decisions](./packages/validator/docs/adrs/).
+- [Development tasks](./docs/task/): implementation plans; an open task does not imply the feature is available.
+- [Research](./docs/research/): exploratory notes, not API contracts or product promises.
+- [Validator proposals](./packages/validator/docs/proposals/): designs under discussion; current usage is documented in the [Validator README](./packages/validator/README.md).
 
 ## Workspace
 
@@ -31,7 +49,7 @@ The repository is a pnpm monorepo orchestrated with Nx.
 
 ### Packages
 
-- **@dokkurator/config** loads and validates `.dokkurator/config.yaml`, resolves project and source settings, and supports source configuration updates.
+- **@dokkurator/config** loads and validates `dokkurator.config.mjs` or `.dokkurator/config.yaml`, resolves project and source settings, and supports source configuration updates.
 - **@dokkurator/core** orchestrates project validation, loading and index operations. `validate()` uses the Validator without opening a Knowledge index; see the [Core README](./packages/core/README.md).
 - **@dokkurator/loader** owns source contracts and adapters, and loads/parses Markdown documents and DocType definitions. A DocType describes document metadata and structure; its definition may also provide rules and a template.
 - **@dokkurator/knowledge** builds and updates the derived document index, provides SQLite storage, and exposes document queries and search.
@@ -46,13 +64,13 @@ example collection; Knowledge examples are planned separately.
 
 ### Applications
 
-- **@dokkurator/cli** is the current local project interface. It manages and prepares configured sources and offers commands for validating, indexing, diffing, searching, inspecting DocTypes/documents, and watching sources. See the [CLI README](./apps/cli/README.md) and [command reference](./apps/cli/docs/commands.md).
-- **@dokkurator/catalog-server** reference implementation as Fastify service that currently exposes its OpenAPI contract. Catalog routes are not implemented yet; see the [server README](./apps/catalog-server/README.md).
-- **explorer-ui** reference implemantation of ui for dokkurator. currently the React/Vite starter application. It is not yet connected to Dokkurator catalog workflows.
+- **@dokkurator/cli** is the current local project interface. It manages and prepares configured sources and offers commands for indexing, diffing, searching, inspecting DocTypes/documents, and watching sources. CLI validation and its example are planned; validation already works through Core and ESLint. See the [CLI README](./apps/cli/README.md) and [command reference](./apps/cli/docs/commands.md).
+- **@dokkurator/catalog-server** is the scaffold for a Fastify server as a show case. Catalog routes are not implemented yet; see the [server README](./apps/catalog-server/README.md).
+- **explorer-ui** is the placeholder for the show case ui, currently a React/Vite starter. It is not yet connected to Dokkurator catalog workflows.
 
 ## Project configuration
 
-The CLI discovers `.dokkurator/config.yaml` from the current directory or accepts a project root with `--project`. The configuration describes local or remote sources, document and DocType directories, the Knowledge index, and watch settings. See [docs/configuration.md](./docs/configuration.md) for the current format and defaults.
+The CLI discovers project configuration from the current directory upwards or accepts a project root with `--project`. `dokkurator.config.mjs` takes precedence over `.dokkurator/config.yaml`; JavaScript configuration supports imported plugins and rules. Source-management commands persist source overrides in `.dokkurator/sources.yaml` for JavaScript projects. The configuration describes local or remote sources, document and DocType directories, the Knowledge index, and watch settings. See [docs/configuration.md](./docs/configuration.md) for the current format and defaults.
 
 ## Development
 
@@ -69,7 +87,7 @@ pnpm check       # typecheck, lint, and test
 pnpm format:check
 ```
 
-Dokkurator uses its own Validator to check its project documentation. The root ESLint configuration applies the Validator's recommended plugin profile to `docs/**/*.md`, using the DocTypes in `_dokkurator/.doctypes`. It checks DocType association, metadata schemas, required headings, and recommended Markdown rules. `lint:docs` builds the Validator and its dependencies before running these checks; `lint` and `check` include them as well. Findings in the documentation fail these commands and can be addressed in the documents or DocType definitions. The current scope covers `docs/**/*.md`, not package READMEs, templates, or example fixtures.
+Dokkurator uses its own Validator to check its project documentation. The root ESLint configuration applies the Validator's recommended plugin profile to `docs/**/*.md`, using the DocTypes in `_dokkurator/.doctypes`. It checks DocType association, metadata schemas, required headings, and recommended Markdown rules. `lint:docs` builds the Validator and its dependencies before running these checks; `lint` and `check` include them as well. Findings in the documentation fail these commands and can be addressed in the documents or DocType definitions. The root `lint:docs` command covers `docs/**/*.md`; package lint commands also check their own `docs/` directories. READMEs, templates, and example fixtures are outside this documentation profile.
 
 Nx derives the project graph from workspace package relationships. To inspect it:
 
@@ -78,3 +96,7 @@ pnpm nx graph
 ```
 
 Architectural decisions and open questions are documented in [`docs/`](./docs/).
+
+## License
+
+[MIT](./LICENSE), copyright 2026 Dokkurator contributors.
