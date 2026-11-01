@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import { createDokkurator } from "@dokkurator/core";
 import { beforeEach, expect, test, vi } from "vitest";
 import { createCommand } from "../command.js";
+import { validationExitCodes } from "./validate.js";
 
 vi.mock("@dokkurator/core", () => ({ createDokkurator: vi.fn() }));
 
@@ -165,5 +166,27 @@ test.each(["load", "format"])(
     expect(writeOut).not.toHaveBeenCalled();
     expect(app.close).toHaveBeenCalledOnce();
     if (stage === "load") expect(app.validate).not.toHaveBeenCalled();
+  },
+);
+
+test.each([
+  { results: [], errors: [], expected: 0 },
+  { results: [{ documents: [{ status: "passed" }] }], errors: [], expected: 0 },
+  {
+    results: [{ documents: [{ status: "failed" }, { status: "passed" }] }],
+    errors: [],
+    expected: 1,
+  },
+  { results: [], errors: [{ message: "failed source" }], expected: 1 },
+])(
+  "keeps exit status on the command: %j",
+  async ({ results, errors, expected }) => {
+    const before = process.exitCode;
+    app.validate.mockResolvedValue({ results, errors });
+    const command = createCommand({ writeOut: vi.fn() });
+    await command.parseAsync(["validate"], { from: "user" });
+    expect(validationExitCodes.get(command)).toBe(expected);
+    expect(process.exitCode).toBe(before);
+    expect(app.close).toHaveBeenCalledOnce();
   },
 );

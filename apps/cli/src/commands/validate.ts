@@ -2,6 +2,8 @@ import { Command } from "commander";
 import type { WriteOutput } from "../command.js";
 import { withDokkurator } from "../core-runtime.js";
 
+export const validationExitCodes = new WeakMap<Command, number>();
+
 export function addValidateCommand(
   command: Command,
   writeOut: WriteOutput,
@@ -30,7 +32,19 @@ export function addValidateCommand(
                 },
               );
             }
+            const failed =
+              report.errors.length > 0 ||
+              report.results.some(({ documents }) =>
+                documents.some(({ status }) => status === "failed"),
+              );
+            if (
+              options.format === "stylish" &&
+              !failed &&
+              report.results.every(({ documents }) => documents.length === 0)
+            )
+              output = "No documents to validate.\n";
             writeOut(output);
+            validationExitCodes.set(command, failed ? 1 : 0);
           },
           { sourceId, reportReadiness: false },
         );

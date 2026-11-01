@@ -1,13 +1,21 @@
 #!/usr/bin/env node
+import { CommanderError } from "commander";
 import { createCommand } from "./command.js";
+import { validationExitCodes } from "./commands/validate.js";
 
 try {
-  await createCommand(
+  const command = createCommand(
     {},
     { cwd: process.env.INIT_CWD ?? process.cwd() },
-  ).parseAsync(process.argv);
+  );
+  await command.exitOverride().parseAsync(process.argv);
+  process.exitCode = validationExitCodes.get(command) ?? 0;
 } catch (error) {
-  const message = error instanceof Error ? error.message : String(error);
-  process.stderr.write(`error: ${message}\n`);
-  process.exitCode = 1;
+  if (error instanceof CommanderError) {
+    process.exitCode = error.exitCode === 0 ? 0 : 1;
+  } else {
+    const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`error: ${message}\n`);
+    process.exitCode = 1;
+  }
 }
