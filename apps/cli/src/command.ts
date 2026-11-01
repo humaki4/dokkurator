@@ -42,7 +42,7 @@ export function createCommand(
 
   addSourceCommands(command, writeOut);
   addPrepareCommand(command, writeOut, writeErr);
-  addValidateCommand(command, writeErr);
+  addValidateCommand(command, writeOut, writeErr);
   addKnowledgeCommands(command, writeOut, writeErr);
   addDocTypeCommands(command, writeOut, writeErr);
   addWatchCommand(command, writeOut, writeErr);

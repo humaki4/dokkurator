@@ -1,11 +1,17 @@
 ---
 doctype: task
 title: Gemeinsame Validierungsberichte in der CLI ausgeben
-status: open
+status: done
 component: cli
 ---
 
 # Gemeinsame Validierungsberichte in der CLI ausgeben
+
+Umgesetzt: `validate --format <name>` verwendet die öffentliche Core-API,
+standardmäßig `stylish`. Der vollständige Bericht geht auf stdout; operative
+Fehler stehen im Bericht, ohne zusätzliche Readiness-Ausgabe auf stderr.
+CLI-Tests vergleichen alle drei geforderten Formate mit Core für erfolgreiche
+und teilweise fehlgeschlagene Läufe.
 
 ## Voraussetzung
 
