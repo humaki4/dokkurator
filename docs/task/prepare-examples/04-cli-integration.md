@@ -1,11 +1,18 @@
 ---
 doctype: task
 title: CLI-Validierung über Paketgrenzen hinweg absichern
-status: open
+status: done
 component: cli
 ---
 
 # CLI-Validierung über Paketgrenzen hinweg absichern
+
+Umgesetzt: Vier Integrationstests starten die gebaute CLI mit temporären
+Projekten und prüfen Projektfindung, Legacy-YAML, Plugins, externe Schemas,
+Source-Regeloverrides, Source-Auswahl und gemischte Fehler. Der CLI-Bericht
+wird mit Core verglichen; ein lokales Git-Repository und Git-Trace sichern
+ab, dass Validierung weder Clone noch Fetch ausführt. Build samt Abhängigkeiten,
+54 CLI-Tests, CLI-Typecheck und Lint sind erfolgreich.
 
 ## Voraussetzung
 
