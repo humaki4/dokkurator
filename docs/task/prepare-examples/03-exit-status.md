@@ -1,11 +1,17 @@
 ---
 doctype: task
 title: Exit-Codes für CLI-Validierung festlegen und umsetzen
-status: open
+status: done
 component: cli
 ---
 
 # Exit-Codes für CLI-Validierung festlegen und umsetzen
+
+Umgesetzt: Die CLI leitet den Exit-Status aus dem vollständigen Bericht ab;
+der Programmeinstieg setzt ihn nach Ausgabe und Aufräumen. Leere erfolgreiche
+Läufe sind im Textbericht erkennbar. Direkte Command-Aufrufe ändern keinen
+globalen Exit-Status. Geprüft mit 50 CLI-Tests einschließlich Prozess-Tests
+des gebauten Einstiegs sowie CLI-Typecheck, Build und Lint.
 
 ## Voraussetzung
 
