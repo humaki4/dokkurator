@@ -8,7 +8,7 @@ status: open
 
 Status: planned; not yet implemented.
 
-Dependency: [Core project validation](../../packages/core/README.md#validate-local-documents).
+Dependency: [Core project validation](../../../packages/core/README.md#validate-local-documents).
 
 ## Goal
 

@@ -66,7 +66,7 @@ Knowledge bildet fehlende Metadaten bereits auf `{}` ab und lässt den DocType w
 
 ## Abhängiges Beispiel
 
-[Knowledge-Beispiel](./KnowledgeExample.md) anschließend ohne umgebungsabhängigen
+[Knowledge-Beispiel](05d-knowledge-example.md) anschließend ohne umgebungsabhängigen
 Ausschluss der Fehlersammlung abschließen. Die gemeinsame Konfiguration bleibt
 unverändert; die README erklärt, dass auch absichtlich fehlerhafte Dokumente
 indexiert werden. Alle Suchbeispiele und der Ablauf Ändern → `diff` → `index`
