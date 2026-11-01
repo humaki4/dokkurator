@@ -5,6 +5,7 @@ import { addKnowledgeCommands } from "./commands/knowledge.js";
 import { addPrepareCommand } from "./commands/prepare.js";
 import { addSourceCommands } from "./commands/source.js";
 import { addWatchCommand } from "./commands/watch.js";
+import { addValidateCommand } from "./commands/validate.js";
 import { findProjectRoot } from "@dokkurator/config";
 
 export interface CommandOutput {
@@ -41,6 +42,7 @@ export function createCommand(
 
   addSourceCommands(command, writeOut);
   addPrepareCommand(command, writeOut, writeErr);
+  addValidateCommand(command, writeErr);
   addKnowledgeCommands(command, writeOut, writeErr);
   addDocTypeCommands(command, writeOut, writeErr);
   addWatchCommand(command, writeOut, writeErr);

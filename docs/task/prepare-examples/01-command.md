@@ -1,7 +1,7 @@
 ---
 doctype: task
 title: Validate-Befehl mit Core verbinden
-status: open
+status: done
 component: cli
 ---
 
