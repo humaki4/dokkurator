@@ -40,7 +40,7 @@ severities or add rules from other Markdown-compatible ESLint plugins.
 - `dokkurator/required-headings` checks headings declared by the DocType.
 
 The recommended configuration enables these rules as errors. See the
-[rule reference](./docs/rules.md) for behavior and configuration details.
+[rule reference](./docs/guides/rules.md) for behavior and configuration details.
 
 ## Public API
 
@@ -53,14 +53,19 @@ main entry points are:
 - `prepareDocTypes` and `dokkuratorEslintPlugin` for direct ESLint plugin
   integration.
 
-See [direct ESLint plugin integration](./docs/eslint-plugin.md) for the plugin
+See [direct ESLint plugin integration](./docs/guides/eslint-plugin.md) for the plugin
 setup. Project-level validation is also available through
 [`@dokkurator/core`](../core/README.md).
 
 ## Documentation
 
-- [Rule reference](./docs/rules.md)
-- [Direct ESLint plugin integration](./docs/eslint-plugin.md)
+- [Rule reference](./docs/guides/rules.md)
+- [Direct ESLint plugin integration](./docs/guides/eslint-plugin.md)
 - [Validator example project](../../examples/validator/README.md)
 - [Loader metadata schemas](../loader/README.md#metadata-compact-fields-or-json-schema)
   - [Loader metadata schemas](../loader/README.md#metadata-compact-fields-or-json-schema)
+
+## Runtime specifications
+
+- [Shared ESLint configuration](docs/specs/lint-configuration.md)
+- [Synchronous lint contract](docs/specs/synchronous-lint.md)

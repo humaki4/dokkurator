@@ -68,6 +68,16 @@ DocTypes and schemas to ESLint and to map YAML schema errors to source
 positions. This keeps the integration under Dokkurator's control, at the cost
 of maintaining that mapping and its tests.
 
+## Runtime contract
+
+Use synchronous `Linter.verify` with explicitly prepared flat configuration,
+without automatic config discovery, resource loading or fix application. Retain
+source identity and normalize positions against unchanged original text. Treat
+configuration failures and plugin crashes separately from document findings.
+
+See [shared configuration](../specs/lint-configuration.md) and the
+[synchronous lint contract](../specs/synchronous-lint.md).
+
 ## Consequences
 
 - Users can configure local checks through familiar ESLint conventions and use

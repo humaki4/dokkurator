@@ -1,12 +1,12 @@
 # @dokkurator/cli
 
-Die zentrale Kommandozeilenanwendung für ein Dokkurator-Projekt. Sie verwaltet
-die konfigurierten Dokumentations-Repositories und bündelt die öffentlichen
-Funktionen von DocType und Knowledge unter dem Befehl `dokkurator`.
+The central command-line application for a Dokkurator project. It manages
+configured documentation repositories and combines the public functionality
+of DocType and Knowledge under the `dokkurator` command.
 
-## Schnellstart
+## Quick start
 
-Im Workspace:
+In the workspace:
 
 ```bash
 pnpm install
@@ -14,7 +14,7 @@ pnpm --filter @dokkurator/cli build
 pnpm --filter @dokkurator/cli start -- --help
 ```
 
-Ein Projekt mit zwei lokalen Repositories konfigurieren und indexieren:
+Configure and index a project with two local repositories:
 
 ```bash
 dokkurator source add . --id project
@@ -25,29 +25,29 @@ dokkurator index
 dokkurator search "architecture decision"
 ```
 
-## Projektkonfiguration
+## Project configuration
 
-Die CLI unterstützt `dokkurator.config.mjs` im Projekt-Root für importierte
-Plugins und Validator-Regeln. Diese Datei hat Vorrang vor der bisherigen YAML-Datei:
+The CLI supports `dokkurator.config.mjs` at the project root for imported
+plugins and Validator rules. This file takes precedence over the legacy YAML file:
 
 ```text
 <project-root>/.dokkurator/config.yaml
 ```
 
-Projekt- und Repository-Regeln sowie ihre Zusammenführung sind in der
-[Config-Dokumentation](../../packages/config/README.md) beschrieben. Bei
-JavaScript-Projekten speichern Source-Verwaltungsbefehle die effektive Source-Liste
-in `.dokkurator/sources.yaml`, ohne den JavaScript-Code zu überschreiben.
+Project and repository rules and their merge behavior are described in the
+[Config documentation](../../packages/config/README.md). For JavaScript projects,
+source administration commands store the effective source list in
+`.dokkurator/sources.yaml` without overwriting JavaScript code.
 
-Ohne explizite Angabe sucht die CLI vom Arbeitsverzeichnis nach oben nach der
-Config. Mit der globalen Option `--project <directory>` kann der Root
-ausdrücklich gesetzt werden:
+Unless explicitly specified, the CLI searches upward from the working directory
+for configuration. The global `--project <directory>` option explicitly selects
+the root:
 
 ```bash
 dokkurator --project /work/documentation source list
 ```
 
-Die Config enthält stabile Source-IDs und Pfade relativ zum Projekt-Root:
+Configuration contains stable source IDs and paths relative to the project root:
 
 ```yaml
 sources:
@@ -57,31 +57,29 @@ sources:
     path: ../shared-docs
 ```
 
-Der abgeleitete Knowledge-Index liegt standardmäßig in:
+The derived Knowledge index is stored by default at:
 
 ```text
 <project-root>/.dokkurator/index.db
 ```
 
-`.dokkurator/config.yaml` ist Benutzerkonfiguration. `index.db` sowie dessen
-SQLite-Begleitdateien sind erzeugte Daten und sollten normalerweise nicht
-versioniert werden.
+`.dokkurator/config.yaml` is user configuration. `index.db` and its SQLite
+companion files are generated data and should normally not be versioned.
 
-Dokument- und DocType-Verzeichnisse, Indexpfad und Watch-Debounce werden nur
-über die Projekt- beziehungsweise Repository-Konfiguration gesteuert. Die CLI
-bietet dafür keine temporären Override-Optionen.
+Document and DocType directories, the index path and watch debounce are controlled
+only through project or repository configuration. The CLI offers no temporary
+override options for these settings.
 
-## Dokumentation
+## Documentation
 
-Die vollständige Referenz mit allen Befehlen, Argumenten, Optionen, Defaults
-und Auswirkungen steht in [docs/commands.md](./docs/commands.md).
-Sie beschreibt außerdem die Verwendung bestehender Git-/SSH-Credentials für
-Remote-Sources.
+The complete reference for commands, arguments, options, defaults and effects
+is in [docs/commands.md](./docs/commands.md). It also describes using existing
+Git/SSH credentials for remote sources.
 
-Die Architektur und der weitere Multi-Repository-Plan stehen in
-[../../docs/task/multiRepo.md](../../docs/task/multiRepo.md).
+The decision on shared project orchestration is documented in
+[Core orchestration](../../packages/core/docs/adrs/0001-coordinate-project-workflows-in-core.md).
 
-## Entwicklung
+## Development
 
 ```bash
 pnpm --filter @dokkurator/cli typecheck
@@ -90,5 +88,5 @@ pnpm --filter @dokkurator/cli test
 pnpm --filter @dokkurator/cli build
 ```
 
-Tests liegen direkt neben der jeweils geprüften Source-Datei, beispielsweise
-`src/command.test.ts` neben `src/command.ts`.
+Tests live alongside the source file they cover, for example
+`src/command.test.ts` next to `src/command.ts`.

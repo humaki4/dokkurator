@@ -26,6 +26,7 @@ from intended architecture; architecture documents remain drafts.
 
 ## Decisions and development
 
+- [Core decisions](../packages/core/docs/adrs/) and [Config decisions](../packages/config/docs/adrs/).
 - [Project decisions](./adr/), [Loader decisions](../packages/loader/docs/adr/), and [Validator decisions](../packages/validator/docs/adrs/).
 - [Development tasks](./task/): implementation plans; an open task does not imply the feature is available.
 - [Research](./research/): exploratory notes, not API contracts or product promises.

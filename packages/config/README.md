@@ -103,3 +103,7 @@ JavaScript configuration. To resume using the module's declarations, remove the
 sidecar. For legacy YAML projects, source commands continue updating
 `.dokkurator/config.yaml` as before. Direct serialization of a JavaScript config
 is rejected.
+
+## Decisions
+
+- [JavaScript project configuration](docs/adrs/0001-use-javascript-project-configuration.md)

@@ -1,55 +1,54 @@
 ---
 doctype: task
-title: Validierungsreports mit ESLint-Formattern
+title: Validation reports with ESLint formatters
 status: open
 ---
 
-# Validierungsreports mit ESLint-Formattern
+# Validation reports with ESLint formatters
 
-Status: geplant; noch nicht implementiert.
+Status: planned; not yet implemented.
 
-Abhängigkeit: [Core-Validator-Integration](./core-validator-integration.md).
+Dependency: [Core project validation](../../packages/core/README.md#validate-local-documents).
 
-## Ziel
+## Goal
 
-Validierungsergebnisse lassen sich über eine kleine öffentliche API als lesbarer
-Report oder JSON ausgeben. Die Formatnamen und die Ausgabe orientieren sich an
-ESLint. Vorhandene ESLint-Formatter werden über dessen öffentliche API
-wiederverwendet, statt ihre Darstellung nachzubauen.
+Expose validation results as a readable report or JSON through a small public
+API. Format names and output follow ESLint conventions. Reuse existing ESLint
+formatters through its public API rather than reimplementing their presentation.
 
-Dokumentbefunde, unterdrückte Befunde und operative Source-Fehler bleiben
-unterscheidbar. Die Formatierung führt keine erneute Validierung aus.
+Document findings, suppressed findings and operational source errors remain
+distinguishable. Formatting does not run validation again.
 
-## Abgleich mit ESLint
+## Comparison with ESLint
 
-Geprüft am 03.10.2026 anhand der offiziellen Dokumentation und der im Workspace
-installierten Version ESLint 10.10.0.
+Checked on 2026-10-03 against the official documentation and ESLint 10.10.0
+installed in the workspace.
 
-ESLint bietet vier eingebaute Formate. Die CLI wählt sie über `--format`; die
-Node-API lädt sie über `eslint.loadFormatter(name)`. Der geladene Formatter nimmt
-`ESLint.LintResult[]` entgegen und liefert über `format(results)` einen String
-oder ein Promise darauf. Schreiben ins Terminal oder in Dateien bleibt beim
-Aufrufer. Quellen: [Formatter-Übersicht](https://eslint.org/docs/latest/use/formatters/),
-[Node-API](https://eslint.org/docs/latest/integrate/nodejs-api#-eslintloadformatternameorpath).
+ESLint provides four built-in formats. Its CLI selects them through `--format`;
+the Node API loads them through `eslint.loadFormatter(name)`. The loaded formatter
+accepts `ESLint.LintResult[]` and returns a string or a promise of a string through
+`format(results)`. Writing to the terminal or files remains the caller's
+responsibility. Sources: [formatter overview](https://eslint.org/docs/latest/use/formatters/),
+[Node API](https://eslint.org/docs/latest/integrate/nodejs-api#-eslintloadformatternameorpath).
 
-| Format               | ESLint-Verhalten                                                                           | Geplanter Umfang                                                                                             |
-| -------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `stylish`            | Lesbare Terminalausgabe mit Dateien, Positionen, Schweregraden, Regeln und Zusammenfassung | Umsetzen; Standardformat                                                                                     |
-| `json`               | JSON-Array der Dateiergebnisse                                                             | Umsetzen; Dokumentbefunde in ESLint-Struktur, Core-Erweiterungen gesondert festlegen                         |
-| `json-with-metadata` | JSON mit `results` und `metadata`, einschließlich Regel-Metadaten                          | Umsetzen; Metadaten aus der verwendeten Regelkonfiguration sichern                                           |
-| `html`               | HTML-Report für die Darstellung im Browser                                                 | Wiederverwendung prüfen; bei zusätzlichem Aufwand zunächst zurückstellen und die Einschränkung dokumentieren |
+| Format               | ESLint behavior                                                                 | Planned scope                                                                              |
+| -------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `stylish`            | Readable terminal output with files, positions, severities, rules and a summary | Implement; default format                                                                  |
+| `json`               | JSON array of file results                                                      | Implement; document findings in ESLint structure, Core extensions defined separately       |
+| `json-with-metadata` | JSON with `results` and `metadata`, including rule metadata                     | Implement; preserve metadata from the rule configuration actually used                     |
+| `html`               | HTML report for browser display                                                 | Evaluate reuse; defer initially if it requires additional work and document the limitation |
 
-`json-with-metadata` ist nicht bloß die Dokkurator-Ergebnisliste mit zusätzlichen
-Source-Angaben. ESLint liefert dabei insbesondere Metadaten der beteiligten
-Regeln. Die JSON-Strukturen sollen diese Bedeutung erhalten; notwendige
-Dokkurator-Erweiterungen werden ausdrücklich dokumentiert.
-Quelle: [Formatbeschreibung](https://eslint.org/docs/latest/use/formatters/#json-with-metadata).
+`json-with-metadata` is more than the Dokkurator result list with additional
+source details. In particular, ESLint includes metadata for the rules involved.
+JSON structures must preserve this meaning; necessary Dokkurator extensions
+must be documented explicitly.
+Source: [format description](https://eslint.org/docs/latest/use/formatters/#json-with-metadata).
 
-## Ziel-API und asynchroner Ablauf
+## Target API and asynchronous flow
 
-Der Aufruf folgt ESLints Trennung von Validierung, Formatter-Laden und
-Formatierung. `validate()` liefert weiterhin strukturierte Daten; keine
-`format`-Methode am Ergebnis und kein angepasster Promise-Vertrag:
+Calls follow ESLint's separation of validation, formatter loading and formatting.
+`validate()` continues to return structured data; no `format` method on the
+result and no modified promise contract:
 
 ```js
 const report = await app.validate();
@@ -58,47 +57,44 @@ const text = await formatter.format(report);
 console.log(text);
 ```
 
-`app.loadFormatter()` verwendet standardmäßig `stylish`. Für den Dokkurator-
-Wrapper gilt einheitlich `format(report): Promise<string>`. Ein Report kann
-mehrfach und in verschiedenen Formaten ausgegeben werden.
+`app.loadFormatter()` defaults to `stylish`. The Dokkurator wrapper consistently
+uses `format(report): Promise<string>`. A report can be output repeatedly and
+in different formats.
 
-Der geladene Dokkurator-Formatter ist ein dünner Adapter: Er nimmt den
-vollständigen Core-Report entgegen und übergibt dessen Dokumentbefunde im
-passenden Format an den geladenen ESLint-Formatter. Die gleiche Aufrufstruktur
-bedeutet nicht, dass das Core-Ergebnis selbst ein `ESLint.LintResult[]` ist.
+The loaded Dokkurator formatter is a thin adapter: it accepts the complete Core
+report and passes its document findings to the loaded ESLint formatter in the
+appropriate format. An equivalent calling structure does not mean the Core
+result itself is an `ESLint.LintResult[]`.
 
-Die Ausgabe gehört nicht in `dokkurator.config.mjs`: Formatwahl, Terminal-/Datei-
-Ausgabe und Exit-Code bleiben Aufgaben der aufrufenden Anwendung. Formatierung
-soll auch nach `app.close()` auf dem bereits erzeugten Report funktionieren.
-Der Formatter muss dafür die benötigten Daten aus dem Report verwenden können,
-ohne eine offene Anwendung oder erneute Source-Zugriffe vorauszusetzen.
+Output settings do not belong in `dokkurator.config.mjs`: format selection,
+terminal/file output and exit codes remain the calling application's responsibility.
+Formatting an existing report must also work after `app.close()`. The formatter
+must obtain the necessary data from the report without requiring an open
+application or further source access.
 
-## Wie eng an ESLint orientieren?
+## How closely should this follow ESLint?
 
-Bei Aufruf, Formatnamen und Dokumentbefunden ist die Orientierung sinnvoll:
-Unsere Regeln laufen bereits in ESLint und erzeugen dort reguläre Nachrichten.
-Regel-ID, Meldung, Schweregrad, Position, Fixes und Suggestions haben dieselbe
-fachliche Bedeutung. Dokkurator normalisiert lediglich ihre Darstellung und
-fügt Quellenidentität sowie die Phase hinzu.
+Following ESLint makes sense for calls, format names and document findings:
+our rules already run in ESLint and produce standard messages. Rule ID, message,
+severity, position, fixes and suggestions have the same domain meaning.
+Dokkurator only normalizes their representation and adds source identity and phase.
 
-Der vollständige Core-Report hat einen größeren Umfang: Er gruppiert Dokumente
-nach Sources und enthält operative Fehler mit Phase und Recovery. Dafür gibt
-es im ESLint-Dateiergebnis keinen gleichwertigen Vertrag. Deshalb die eigene
-strukturierte API erhalten und nur die Dokumentbefunde adaptieren. Source-Fehler
-nicht zur Wiederverwendung eines Formatters in scheinbare Lint-Befunde umwandeln.
+The complete Core report has a broader scope: it groups documents by source
+and includes operational errors with phase and recovery. ESLint's file result
+has no equivalent contract for these errors. Preserve the structured API and
+adapt only document findings. Do not turn source errors into apparent lint
+findings merely to reuse a formatter.
 
-Die Formatnamen orientieren sich an ESLint. Exakte Ausgabe-Kompatibilität gilt
-für den Dokumentbefund-Teil; Erweiterungen für den gesamten Core-Report werden
-separat festgelegt und dokumentiert. Insbesondere ist `json` nicht automatisch
-ein unverändertes ESLint-Array, sobald zusätzlich operative Fehler abgebildet
-werden müssen.
+Format names follow ESLint. Exact output compatibility applies to the document
+findings portion; extensions for the complete Core report are defined and
+documented separately. In particular, `json` is not automatically an unchanged
+ESLint array when operational errors also need to be represented.
 
-## Direkte ESLint-Plugin-Nutzung
+## Direct ESLint plugin usage
 
-Das vorhandene Dokkurator-Plugin benötigt keinen eigenen Formatter. Seine Regeln
-melden über ESLints `context.report`; ESLint erstellt daraus selbst reguläre
-Dateiergebnisse samt Regel-Metadaten. Die eingebauten Formatter funktionieren
-bereits mit diesen Ergebnissen:
+The existing Dokkurator plugin needs no custom formatter. Its rules report
+through ESLint's `context.report`; ESLint creates standard file results with
+rule metadata. Built-in formatters already work with these results:
 
 ```sh
 pnpm exec eslint --config eslint-plugin.config.mjs --format stylish documents
@@ -106,130 +102,128 @@ pnpm exec eslint --config eslint-plugin.config.mjs --format json documents
 pnpm exec eslint --config eslint-plugin.config.mjs --format json-with-metadata documents
 ```
 
-Bei direkter Plugin-Nutzung wäre auch `--format html` bereits ESLints Aufgabe;
-ein Zurückstellen von HTML in Dokkurator betrifft nur die neue Core-Report-API.
-Der geplante Adapter wird ausschließlich für die von `app.validate()` gelieferten
-Dokkurator-Ergebnisse benötigt. Das Plugin bleibt ein normales ESLint-Plugin.
+With direct plugin usage, `--format html` is likewise already ESLint's
+responsibility; deferring HTML in Dokkurator affects only the new Core report
+API. The proposed adapter is needed only for Dokkurator results returned by
+`app.validate()`. The plugin remains a standard ESLint plugin.
 
-## Zuständigkeiten und Wiederverwendung
+## Responsibilities and reuse
 
-- Validator behält die synchrone Dokumentprüfung. Er erfasst bei Bedarf die für
-  Formatter erforderlichen ursprünglichen ESLint-Daten und Regel-Metadaten
-  während der ohnehin stattfindenden Vorbereitung/Prüfung.
-- Core besitzt das Report-Ergebnis und ein separates internes Reporting-Modul.
-  `app.loadFormatter` delegiert dorthin und liefert einen Formatter-Adapter;
-  Formatierung wird nicht Bestandteil der Validator-Regelausführung oder der
-  Lifecycle-Logik.
-- Die Reporting-Integration lädt ESLint-Formatter über die öffentliche Root-API
-  `import { ESLint } from "eslint"` und `loadFormatter`. Keine Imports aus
-  `eslint/lib/...`, keine Kopien eingebauter Formatter und keine Export-Subpaths.
-- Adapter und Metadatenbehandlung bleiben innerhalb der vorhandenen Pakete.
-  Kein neues Reporting-Paket. Wenn Core ESLint direkt importiert, die direkte
-  Dependency und den Lockfile-Eintrag passend ergänzen, ohne Versionsupgrade.
-- Öffentliche Exports klein halten. `app.loadFormatter` soll keinen weiteren
-  zwingenden Funktionsimport verlangen. Notwendige Ergebnistypen gezielt prüfen.
+- Validator retains synchronous document checking. If needed, it captures
+  original ESLint data and rule metadata required by formatters during the
+  preparation/checking that already takes place.
+- Core owns the report result and a separate internal reporting module.
+  `app.loadFormatter` delegates there and returns a formatter adapter;
+  formatting does not become part of Validator rule execution or lifecycle logic.
+- The reporting integration loads ESLint formatters through the public root API
+  `import { ESLint } from "eslint"` and `loadFormatter`. No imports from
+  `eslint/lib/...`, copies of built-in formatters or export subpaths.
+- Adapters and metadata handling stay within existing packages. No new reporting
+  package. If Core imports ESLint directly, add the matching direct dependency
+  and lockfile entry without a version upgrade.
+- Keep public exports small. `app.loadFormatter` must not require another
+  mandatory function import. Review necessary result types individually.
 
-ESLint trennt selbst Regelausführung, Formatter-Laden und Ausgabe. Seine
-Formatter liegen intern unter `lib/cli-engine/formatters`; dieser Pfad dient
-hier nur der Architektur-Einordnung und ist kein zulässiger Importpfad.
+ESLint itself separates rule execution, formatter loading and output. Its
+formatters reside internally under `lib/cli-engine/formatters`; that path is
+mentioned only to explain architecture and is not an allowed import path.
 
-## Vor der Umsetzung klären und nachweisen
+## Resolve and demonstrate before implementation
 
-### Adapter auf das ESLint-Ergebnisformat
+### Adapter to the ESLint result format
 
-Die bisherigen Dokkurator-Diagnosen sind keine `ESLint.LintResult[]`. Übersetzung
-oder gezieltes Erhalten der originalen Daten festlegen:
+Existing Dokkurator diagnostics are not `ESLint.LintResult[]`. Define their
+translation or the selective preservation of original data:
 
-- Absolute `filePath`-Werte aus der jeweiligen Source-Wurzel und dem Dokumentpfad;
-  gleichnamige Dokumente verschiedener Sources dürfen nicht zusammenfallen.
-- `messages`, `suppressedMessages`, numerische Schweregrade und Quellpositionen.
-- Fehler-, Warnungs-, Fatal- und Fixable-Zähler sowie Fixes und Suggestions.
-- Tatsächliche ESLint-Fatal-Information erhalten. Dokkurators Phase `parse` ist
-  nicht automatisch ein fataler ESLint-Parserfehler.
-- Vorhandene BOM-Korrekturen und Originaltextbezug der Dokkurator-Diagnosen
-  berücksichtigen. Keine doppelte Korrektur beim Rückübersetzen.
-- Source-ID und Revision für die vorhandene strukturierte API erhalten.
+- Absolute `filePath` values based on each source root and document path;
+  documents with identical names in different sources must not collapse.
+- `messages`, `suppressedMessages`, numeric severities and source positions.
+- Error, warning, fatal and fixable counters, plus fixes and suggestions.
+- Preserve actual ESLint fatal information. Dokkurator's `parse` phase does
+  not automatically imply a fatal ESLint parser error.
+- Account for existing BOM corrections and the original-text reference of
+  Dokkurator diagnostics. Do not correct positions twice when translating back.
+- Preserve source ID and revision for the existing structured API.
 
-Der genaue ESLint-Vertrag ist in der
-[Node-API](https://eslint.org/docs/latest/integrate/nodejs-api#-lintresult-type)
-beschrieben. Fehlende Informationen nicht durch erfundene Werte ersetzen.
+The exact ESLint contract is described in the
+[Node API](https://eslint.org/docs/latest/integrate/nodejs-api#-lintresult-type).
+Do not replace missing information with invented values.
 
-### Regel-Metadaten ohne erneutes Laden oder Prüfen
+### Rule metadata without reloading or checking again
 
-Die aktuelle normalisierte Validator-Ausgabe enthält keine Regel-Metadaten.
-Diese müssen aus der tatsächlich verwendeten Konfiguration erhalten bleiben,
-einschließlich Dokkurator-, Markdown- und eigener Plugin-Regeln.
+The current normalized Validator output contains no rule metadata. Preserve it
+from the configuration actually used, including Dokkurator, Markdown and custom
+plugin rules.
 
-Bei ESLint 10.10.0 ermittelt der von `loadFormatter` erzeugte Wrapper seine
-`rulesMeta` über `getRulesMetaForResults`. Einfaches Übergeben eines zusätzlichen
-Metadatenobjekts an `format` reicht deshalb nicht als angenommene Lösung.
-Die öffentliche Integration muss mit einer passenden, bereits vorbereiteten
-Konfiguration funktionieren; kein Rückgriff auf private Formatter-Module.
-Quelle: [Regel-Metadaten-API](https://eslint.org/docs/latest/integrate/nodejs-api#-eslintgetrulesmetaforresultsresults).
+In ESLint 10.10.0, the wrapper created by `loadFormatter` obtains `rulesMeta`
+through `getRulesMetaForResults`. Simply passing an additional metadata object
+to `format` therefore cannot be assumed to solve this. Public integration must
+work with suitable, already prepared configuration; do not fall back to private
+formatter modules.
+Source: [rule metadata API](https://eslint.org/docs/latest/integrate/nodejs-api#-eslintgetrulesmetaforresultsresults).
 
-Zuerst einen fokussierten Integrationsnachweis für alle drei Pflichtformate
-und unterschiedliche Source-Konfigurationen durchführen. Falls die öffentliche
-API nicht ausreicht, die konkrete Einschränkung und eine Alternative dokumentieren,
-bevor eine eigene Formatter-Implementierung beschlossen wird.
+First demonstrate focused integration for all three required formats and
+different source configurations. If the public API is insufficient, document
+the specific limitation and an alternative before deciding to implement a
+custom formatter.
 
-### Operative Fehler im vollständigen Report
+### Operational errors in the complete report
 
-Source-, Lade-, Konfigurations- und unerwartete Laufzeitfehler sind bislang
-separate Core-Fehler. ESLints Dateiergebnisformat hat dafür keinen gleichwertigen
-Source-Fehlervertrag.
+Source, loading, configuration and unexpected runtime errors are currently
+separate Core errors. ESLint's file result format has no equivalent source
+error contract.
 
-Vor der Implementierung die Ausgabe der separaten `errors` festlegen:
-Textformate können einen ausdrücklich als operative Fehler gekennzeichneten
-Abschnitt ergänzen. JSON braucht eine dokumentierte Erweiterung beziehungsweise
-einen umschließenden Report-Vertrag; kein angehängter Text, der JSON ungültig macht.
-Die JSON-Ergebnisse der Dokumentprüfung sollen weiterhin aus dem ESLint-Formatter
-stammen. Auch Source-ID, Phase und Recovery müssen erhalten bleiben.
+Before implementation, define how the separate `errors` are output:
+text formats may add a section explicitly labeled as operational errors.
+JSON requires a documented extension or enclosing report contract, without
+appended text that would invalidate JSON. Document-check JSON results must
+still come from the ESLint formatter. Source ID, phase and recovery must also
+be preserved.
 
-Die endgültige Abbildung im Integrationsnachweis festhalten. Keine erfundenen
-Regel-IDs, Dateipositionen oder künstlichen ESLint-Parserfehler für Source-Fehler.
-Fehler dürfen auch bei einer fehlgeschlagenen Source nicht verloren gehen.
+Record the final mapping in the integration demonstration. Do not invent rule
+IDs, file positions or artificial ESLint parser errors for source failures.
+Errors must not be lost even when a source fails.
 
-## Umsetzungsschritte
+## Implementation steps
 
-1. Öffentliche ESLint-Formatter-Integration, Metadaten und Fehlerabbildung
-   nachweisen und den Datenvertrag dokumentieren; Aufwand für `html` einordnen.
-2. Notwendige Formatter-Daten während der Validierung erhalten und
-   `app.loadFormatter` mit einem dünnen asynchronen Formatter-Adapter bereitstellen.
-   Das Report-Ergebnis behält seinen Datenvertrag.
-3. Reporting-Modul mit `stylish`, `json` und `json-with-metadata` integrieren;
-   `html` bei einfacher Wiederverwendung ergänzen, sonst ausdrücklich auslassen.
-4. Beispiele auf die gemeinsame Report-Ausgabe umstellen. Gruppenfilter der
-   ausführlichen Sammlung erhalten, ohne Metadaten oder operative Fehler zu verlieren.
-5. Anleitung, API-Dokumentation und fokussierte Tests ergänzen. Tests neben den
-   zugehörigen Quelldateien nach dem Repository-Namensschema ablegen.
+1. Demonstrate public ESLint formatter integration, metadata and error mapping;
+   document the data contract and assess the work required for `html`.
+2. Preserve necessary formatter data during validation and provide
+   `app.loadFormatter` with a thin asynchronous formatter adapter. The report
+   result retains its data contract.
+3. Integrate the reporting module with `stylish`, `json` and `json-with-metadata`;
+   add `html` if reuse is straightforward, otherwise explicitly omit it.
+4. Update examples to use shared report output. Preserve group filters for
+   the detailed collection without losing metadata or operational errors.
+5. Add guidance, API documentation and focused tests. Place tests alongside
+   their source files following the repository naming convention.
 
-## Abnahme
+## Acceptance criteria
 
-- Die drei Pflichtformate verwenden die eingebauten ESLint-Formatter über eine
-  unterstützte öffentliche API. Standard-ESLint und Dokkurator liefern für
-  dieselben Dokumentbefunde äquivalente Reports.
-- JSON-Verträge, Regel-Metadaten und Dokkurator-Erweiterungen sind dokumentiert
-  und automatisiert geprüft. Metadaten verschiedener Sources bleiben korrekt.
-- Positionen, Fixes, Suggestions, unterdrückte Befunde, Parserfehler, reine
-  Warnungen, leere erfolgreiche Läufe und operative Fehler sind abgedeckt.
-- Formatierung verändert keine Befunde oder Zähler, lintet nicht erneut und
-  benötigt keine erneuten Source-/Schema-/Projektzugriffe oder einen Index.
-- Wiederholte Formatierung, Formatwechsel und Formatierung nach `close()`
-  funktionieren. Formatter erhalten bei Bedarf Kopien, da ESLint Ergebnisse sortiert.
-- Unbekannte Formate liefern einen verständlichen Formatter-Fehler und werden
-  nicht stillschweigend als anderes Format ausgegeben. Ist `html` zurückgestellt,
-  wird es als noch nicht unterstützt gemeldet und im Beispiel dokumentiert.
-- Report und Formatierung schreiben nicht selbst auf die Konsole oder ins
-  Dateisystem und setzen keinen Prozess-Exit-Code. Beispiele übernehmen das.
-- Bestehende strukturierte `results`/`errors` bleiben zugänglich und als Daten
-  serialisierbar; interne Konfiguration gelangt nicht in die Datenausgabe.
-- Paketgrenzen, direkte Dependencies, fokussierte Tests, betroffene Builds,
-  Typechecks, Lint und Formatierung sind geprüft.
+- The three required formats use built-in ESLint formatters through a supported
+  public API. Standard ESLint and Dokkurator produce equivalent reports for
+  identical document findings.
+- JSON contracts, rule metadata and Dokkurator extensions are documented and
+  checked automatically. Metadata remains correct across different sources.
+- Positions, fixes, suggestions, suppressed findings, parser errors, warning-only
+  runs, empty successful runs and operational errors are covered.
+- Formatting changes no findings or counters, does not lint again and requires
+  no further source/schema/project access or index.
+- Repeated formatting, format changes and formatting after `close()` work.
+  Formatters receive copies when needed because ESLint sorts results.
+- Unknown formats produce a clear formatter error rather than silently using
+  another format. If `html` is deferred, report it as unsupported and document
+  that in the example.
+- Neither report generation nor formatting writes to the console or filesystem
+  or sets a process exit code. Examples handle those concerns.
+- Existing structured `results`/`errors` remain accessible and serializable as
+  data; internal configuration does not leak into output.
+- Package boundaries, direct dependencies, focused tests, affected builds,
+  typechecks, linting and formatting are checked.
 
-## Umfangsgrenze
+## Scope boundary
 
-Diese Aufgabe plant die Report-API und deren spätere Umsetzung. Das Anlegen
-dieses Dokuments implementiert noch keinen Formatter. Keine neue CLI, keine
-Knowledge-Funktionen, keine Veröffentlichung und keine zusätzlichen Formate
-wie Markdown, SARIF oder JUnit. Drittanbieter-Formatter sind zunächst nicht Teil
-der öffentlichen Dokkurator-API.
+This task plans the report API and its later implementation. Creating this
+document does not implement a formatter. No new CLI, Knowledge features,
+publication or additional formats such as Markdown, SARIF or JUnit. Third-party
+formatters are initially outside the public Dokkurator API.

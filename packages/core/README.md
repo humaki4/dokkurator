@@ -1,11 +1,11 @@
 # Dokkurator Core
 
-Core orchestriert Projekte und Sources über die öffentlichen APIs von Config,
-Loader, Validator und Knowledge. Fachregeln und Adapter bleiben in diesen Paketen.
-Die Use-Cases werden bei ihrem Aufruf asynchron geladen und liegen unter
-`document-use-cases`, `validation-use-cases` und `index-use-cases`.
+Core orchestrates projects and sources through the public APIs of Config,
+Loader, Validator and Knowledge. Domain rules and adapters remain in those packages.
+Use-cases are loaded asynchronously when called and live in
+`document-use-cases`, `validation-use-cases` and `index-use-cases`.
 
-## Lokale Dokumente prüfen
+## Validate local documents
 
 ```js
 import { createDokkurator } from "@dokkurator/core";
@@ -20,32 +20,32 @@ try {
 }
 ```
 
-Ohne konfigurierte Sources wird das Projektverzeichnis als Source `root` verwendet.
-Die Defaults suchen Markdown rekursiv und DocTypes unter `_dokkurator/.doctypes`.
-Ein Projektpfad, eine DocType-Definition und ein Dokument reichen für den Einstieg.
-Das [minimale Beispiel](../../examples/validator/README.md) zeigt diesen Ablauf.
+Without configured sources, the project directory is used as source `root`.
+Defaults discover Markdown recursively and DocTypes under `_dokkurator/.doctypes`.
+A project path, one DocType definition and one document are enough to get started.
+The [minimal example](../../examples/validator/README.md) demonstrates this flow.
 
-`validate({ sourceId: "docs" })` beschränkt die Prüfung auf eine Source.
-Core lädt deren Konfiguration, DocTypes und Originaltexte, bereitet die Schemas
-und recommended-Regeln vor und führt für jedes Dokument `lint` aus. Laden und
-Vorbereitung sind asynchron; jede einzelne Regelausführung bleibt synchron.
+`validate({ sourceId: "docs" })` restricts validation to one source.
+Core loads its configuration, DocTypes and original texts, prepares schemas
+and recommended rules, and calls `lint` for each document. Loading and
+preparation are asynchronous; each individual rule execution remains synchronous.
 
-Das Ergebnis enthält `results` und `errors`. Unter `results` steht pro Source
-`{ sourceId, documents }`. Jedes Dokument enthält `path`, `status`, `diagnostics`
-und `suppressedDiagnostics`. Warnungen allein ergeben `passed`. Fehlende Quellen,
-ungültige Konfiguration oder Regelabstürze stehen separat in `errors` mit Phase
-und Handlungsempfehlung. Eine fehlgeschlagene Source verhindert nicht die Prüfung
-weiterer Sources. Ungültiges Dokument-YAML wird als Parse-Finding gemeldet.
-Fehler beim Laden der Projektkonfiguration selbst lassen bereits `open()`
-fehlschlagen; sie werden nicht einer einzelnen Source zugeschrieben.
+The result contains `results` and `errors`. Each source entry in `results` has
+`{ sourceId, documents }`. Each document contains `path`, `status`, `diagnostics`
+and `suppressedDiagnostics`. Warnings alone produce `passed`. Missing sources,
+invalid configuration and rule crashes appear separately in `errors` with a phase
+and recovery guidance. A failed source does not prevent validation of other
+sources. Invalid document YAML is reported as a parse finding.
+Failure to load the project configuration itself causes `open()` to fail;
+it is not attributed to an individual source.
 
-Projektkonfiguration wird bei `open()` aufgelöst; Source-Konfiguration und
-Dokumente werden bei jeder Validierung erneut geladen. Nach Änderungen an der
-Projektkonfiguration wird die App geschlossen und erneut geöffnet.
+Project configuration is resolved during `open()`; source configuration and
+documents are reloaded for every validation. After changing project configuration,
+close and reopen the app.
 
-## Eigene Regeln und Schemas
+## Custom rules and schemas
 
-Die optionale `dokkurator.config.mjs` verwendet die vorhandene Config-Auflösung:
+The optional `dokkurator.config.mjs` uses the existing configuration resolution:
 
 ```js
 import company from "./company-plugin.mjs";
@@ -61,27 +61,32 @@ export default {
 };
 ```
 
-Projekt- und Repository-Regeln sowie vorab geladene Schemas werden zusammengeführt;
-Repository-Werte überschreiben gleichnamige Projektwerte. Unterschiedliche Plugins
-unter demselben Namespace werden als Konfigurationskonflikt abgelehnt. Core kennt
-keine konkreten Rule-IDs. Nicht auflösbare Schema-Referenzen scheitern bei der
-Vorbereitung; während der Regelausführung werden keine Ressourcen nachgeladen.
+Project and repository rules and preloaded schemas are merged; repository values
+override project values with the same keys. Different plugins under the same
+namespace are rejected as configuration conflicts. Core knows no specific rule
+IDs. Unresolved schema references fail during preparation; no resources are
+loaded during rule execution.
 
-## Lifecycle und Index
+## Lifecycle and index
 
-`createDokkurator({ root })` erzeugt eine geschlossene App. `open()` entdeckt die
-Projektkonfiguration und meldet Source-Readiness. Es gibt keinen Index-Schalter:
+`createDokkurator({ root })` creates a closed app. `open()` discovers project
+configuration and reports source readiness. There is no index toggle:
 
-| Methode                                             | Knowledge-Index                                      |
-| --------------------------------------------------- | ---------------------------------------------------- |
-| `open`, `validate`, `listDocTypes`, `listDocuments` | wird nicht benötigt oder geöffnet                    |
-| `prepare`, `sync`, `diff`, `search`                 | wird beim ersten Aufruf geöffnet und wiederverwendet |
+| Method                                              | Knowledge index                |
+| --------------------------------------------------- | ------------------------------ |
+| `open`, `validate`, `listDocTypes`, `listDocuments` | not required or opened         |
+| `prepare`, `sync`, `diff`, `search`                 | opened on first use and reused |
 
-Alle fachlichen Methoden benötigen eine geöffnete App. Wiederholtes `open()` und
-`close()` bleibt unschädlich. `close()` wartet auf bereits gestartete Operationen
-und schließt den eventuell geöffneten Index. Eine spätere Öffnung lädt die
-Projektkonfiguration neu und erzeugt den Index wieder erst bei Bedarf.
+All use-case methods require an open app. Repeated `open()` and `close()` calls
+are harmless. `close()` waits for operations already started and closes the
+index if opened. Reopening reloads project configuration and creates the index
+again only when needed.
 
-Validierung und Inspektion klonen oder aktualisieren keine Sources. Fehlende
-Checkouts müssen über den bestehenden Preparation-Use-Case vorbereitet werden.
-Core startet keine Watcher und bestimmt keine Textausgabe oder Prozess-Exit-Codes.
+Validation and inspection do not clone or update sources. Missing checkouts must
+be prepared through the existing preparation use-case. Core does not start
+watchers or determine text output or process exit codes.
+
+## Contracts and decisions
+
+- [Core orchestration](docs/adrs/0001-coordinate-project-workflows-in-core.md)
+- [Project lifecycle](docs/specs/project-lifecycle.md)

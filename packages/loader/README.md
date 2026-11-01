@@ -154,3 +154,8 @@ The package root is the supported integration boundary. It exports:
 - parse error types and default directory constants
 
 Raw reading and parser helpers are internal implementation details.
+
+## Contracts and decisions
+
+- [Package naming and ownership](docs/adr/0002-name-the-loading-package-loader.md)
+- [Original text and parse diagnostics](docs/specs/document-text-and-diagnostics.md)

@@ -1,33 +1,34 @@
 ---
 doctype: task
-title: Interaktiver CLI-Modus
+title: Interactive CLI mode
 status: open
 ---
 
-# Interaktiver CLI-Modus
+# Interactive CLI mode
 
-Status: Nachgelagerter Produkt- und Architektur-Task  
-Abhängigkeit: stabiler Core-Lifecycle aus `core-and-loader-boundaries.md`
+Status: subsequent product and architecture task
 
-## Ziel
+Dependency: stable [Core lifecycle](../../packages/core/docs/specs/project-lifecycle.md)
 
-Einen optionalen interaktiven Dokkurator-Modus konzipieren, der eine geöffnete
-Core-App über mehrere Benutzereingaben hinweg wiederverwendet.
+## Goal
 
-## Zu klärende Punkte
+Design an optional interactive Dokkurator mode that reuses an open Core app
+across multiple user inputs.
 
-- Startsyntax und Abgrenzung zu den bestehenden Einmal-Kommandos.
-- Erhalt der Skriptfähigkeit und Rückwärtskompatibilität.
-- Prompt, History, Hilfe, Autovervollständigung und Beenden.
-- Parsing und Wiederverwendung der bestehenden Commander-Kommandos.
-- Verhalten von `open()`, `close()` und erneutem Öffnen.
-- Abbruch laufender Operationen sowie `SIGINT`-/`SIGTERM`-Semantik.
-- Darstellung gesammelter Source-Fehler und Exit-Status im interaktiven Modus.
-- Umgang mit geänderter Projekt- oder Repository-Konfiguration.
-- Tests für mehrere aufeinanderfolgende Kommandos und Cleanup.
+## Questions to resolve
 
-## Erwartetes Ergebnis
+- Startup syntax and distinction from existing one-shot commands.
+- Preserving scriptability and backward compatibility.
+- Prompt, history, help, autocompletion and exit.
+- Parsing and reusing existing Commander commands.
+- Behavior of `open()`, `close()` and reopening.
+- Cancellation of running operations and `SIGINT`/`SIGTERM` semantics.
+- Display of collected source errors and exit status in interactive mode.
+- Handling changes to project or repository configuration.
+- Tests for multiple consecutive commands and cleanup.
 
-- Entscheidung, ob und wie ein interaktiver Modus angeboten wird.
-- Host-Konzept ohne interaktive Verantwortung in `@dokkurator/core`.
-- Die nicht-interaktive CLI bleibt weiterhin für Skripte nutzbar.
+## Expected outcome
+
+- A decision on whether and how to offer an interactive mode.
+- A host design without interactive responsibilities in `@dokkurator/core`.
+- The non-interactive CLI remains usable for scripts.
