@@ -26,9 +26,9 @@ cd examples/validator
 pnpm start
 ```
 
-Der Lauf liefert `results` pro Source und eine separate `errors`-Liste für
-Lade-, Konfigurations- und Laufzeitfehler. Im Beispiel enthält `results[0].documents`
-ein Dokument mit `"status": "passed"` und leerer Diagnoseliste.
+Der Lauf verwendet den gemeinsamen JSON-Formatter. `results` enthält ESLint-
+Dateiergebnisse, `sources` ordnet Dokumente und normalisierte Diagnosen den
+Sources zu. `errors` enthält getrennte Lade-, Konfigurations- und Laufzeitfehler.
 
 [`src/minimal.mjs`](./src/minimal.mjs) verwendet ausschließlich Core:
 
@@ -37,7 +37,8 @@ const app = createDokkurator({ root });
 await app.open();
 try {
   const result = await app.validate();
-  console.log(result);
+  const formatter = await app.loadFormatter("json");
+  console.log(await formatter.format(result));
 } finally {
   await app.close();
 }
@@ -307,3 +308,20 @@ Beispiele verwenden stattdessen
 weiterhin DocTypes und Originaltext laden, die Konfiguration vorbereiten und
 `lint` verwenden. Pflichtfelder stehen im Metadatenschema; Pflichtüberschriften werden von einer eigenen Regel geprüft.
 Die Paket-Root-APIs bleiben die einzigen unterstützten Importpfade.
+
+## Reportformate
+
+Die ausführliche Sammlung akzeptiert nach der Gruppe ein Format:
+
+```sh
+node src/run.mjs invalid stylish
+node src/run.mjs all json
+node src/run.mjs valid json-with-metadata
+node src/run.mjs all html > report.html
+```
+
+Standard ist `stylish`. Alle vier Formate verwenden ESLints eingebaute Formatter.
+Die Gruppenfilter behalten Metadaten und Betriebsfehler bei. JSON bleibt auch
+bei Betriebsfehlern gültig; diese stehen getrennt unter `errors`. Ausgabe und
+Exit-Code setzt das Beispiel. Direkte ESLint-Plugin-Nutzung benötigt weiterhin
+keinen Dokkurator-Formatter.

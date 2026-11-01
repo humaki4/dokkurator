@@ -31,6 +31,14 @@ describe("lint invocation isolation and source identity", () => {
         ],
       }),
     ]);
+    expect(suppressed.reporting.suppressedMessages[0]).toMatchObject({
+      ruleId: "markdown/require-alt-text",
+      severity: 2,
+      suppressions: [{ kind: "directive", justification: "decorative image" }],
+    });
+    expect(
+      suppressed.reporting.rulesMeta["markdown/require-alt-text"],
+    ).toBeDefined();
     const second = lint({
       originalText: `${header}![](image.png)\n`,
       source: { ...source, sourceId: "other" },

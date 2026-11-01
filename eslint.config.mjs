@@ -16,6 +16,7 @@ export default defineConfig(
   {
     files: ["**/*.{js,mjs,ts}"],
     extends: [js.configs.recommended, tseslint.configs.recommended],
+    languageOptions: { parserOptions: { tsconfigRootDir: root } },
   },
   {
     files: ["**/docs/**/*.[mM][dD]"],

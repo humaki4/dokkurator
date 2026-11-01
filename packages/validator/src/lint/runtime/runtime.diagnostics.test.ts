@@ -145,6 +145,16 @@ describe("lint locations, messages and edits", () => {
         ],
       }),
     ]);
+    expect(result.reporting.messages).toEqual([
+      expect.objectContaining({
+        column: 1,
+        fix: { range: [0, 1], text: "##" },
+        suggestions: [
+          expect.objectContaining({ fix: { range: [0, 1], text: "##" } }),
+        ],
+      }),
+    ]);
+    expect(result.reporting.rulesMeta["example/local"]).toEqual(rule.meta);
     expect(originalText).toBe("\uFEFF# Grüße 😀\r\n");
   });
 });

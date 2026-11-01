@@ -38,6 +38,11 @@ class DefaultDokkuratorApp implements DokkuratorApp {
     this.#root = root;
   }
 
+  async loadFormatter(name?: string) {
+    const { loadValidationFormatter } = await import("./reporting.js");
+    return loadValidationFormatter(name);
+  }
+
   async open(): Promise<OpenResult> {
     if (this.#state === "open") return this.#openResult!;
     if (this.#state === "opening") return this.#opening!;

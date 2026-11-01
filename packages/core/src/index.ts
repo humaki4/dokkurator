@@ -16,4 +16,5 @@ export type {
   SourceSelection,
   SyncSourceResult,
   ValidationSourceResult,
+  ValidationFormatter,
 } from "./types.js";

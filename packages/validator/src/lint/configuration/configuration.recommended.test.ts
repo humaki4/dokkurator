@@ -65,6 +65,10 @@ describe("recommended Markdown profile", () => {
         source,
         configuration: prepare({ "markdown/require-alt-text": "off" }),
       }),
-    ).toEqual({ status: "passed", diagnostics: [], suppressedDiagnostics: [] });
+    ).toMatchObject({
+      status: "passed",
+      diagnostics: [],
+      suppressedDiagnostics: [],
+    });
   });
 });

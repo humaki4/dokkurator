@@ -1,4 +1,4 @@
-import { Linter } from "eslint";
+import { Linter, type ESLint, type Rule } from "eslint";
 import type { SourceMetadata } from "@dokkurator/loader";
 import type { PreparedLintConfiguration } from "../configuration/configuration.js";
 import { LintConfigurationError, LintRuntimeError } from "../errors.js";
@@ -14,6 +14,13 @@ export interface LintInput {
 }
 
 export interface LintResult {
+  /** Original ESLint coordinates (before Dokkurator's BOM normalization). */
+  readonly reporting: {
+    readonly usedDeprecatedRules: ESLint.LintResult["usedDeprecatedRules"];
+    readonly messages: readonly Linter.LintMessage[];
+    readonly suppressedMessages: readonly Linter.SuppressedLintMessage[];
+    readonly rulesMeta: ReturnType<ESLint["getRulesMetaForResults"]>;
+  };
   readonly status: "passed" | "failed";
   readonly diagnostics: readonly LintDiagnostic[];
   readonly suppressedDiagnostics: readonly LintDiagnostic[];
@@ -61,7 +68,63 @@ function createLintResult(
   const normalize = (message: Linter.LintMessage) =>
     normalizeMessage(message, input, source, config);
   const diagnostics = result.messages.map(normalize);
+  const rulesMeta: ReturnType<ESLint["getRulesMetaForResults"]> = {};
+  for (const { ruleId } of [...result.messages, ...result.suppressed]) {
+    if (!ruleId) continue;
+    const separator = ruleId.lastIndexOf("/");
+    for (const entry of [...config].reverse()) {
+      const rule = entry.plugins?.[ruleId.slice(0, separator)]?.rules?.[
+        ruleId.slice(separator + 1)
+      ] as Rule.RuleModule | undefined;
+      if (rule) {
+        if (rule.meta) rulesMeta[ruleId] = structuredClone(rule.meta);
+        break;
+      }
+    }
+  }
+  const usedDeprecatedRules: ESLint.LintResult["usedDeprecatedRules"] = [];
+  const rules = Object.assign(
+    {},
+    ...config.map((entry) => entry.rules),
+  ) as Linter.RulesRecord;
+  for (const [ruleId, setting] of Object.entries(rules)) {
+    const severity = Array.isArray(setting) ? setting[0] : setting;
+    if (severity === 0 || severity === "off") continue;
+    const separator = ruleId.lastIndexOf("/");
+    const rule = [...config]
+      .reverse()
+      .map(
+        (entry) =>
+          entry.plugins?.[ruleId.slice(0, separator)]?.rules?.[
+            ruleId.slice(separator + 1)
+          ],
+      )
+      .find(Boolean) as Rule.RuleModule | undefined;
+    const meta = rule?.meta;
+    if (!meta?.deprecated) continue;
+    const info =
+      typeof meta.deprecated === "object" ? meta.deprecated : undefined;
+    usedDeprecatedRules.push({
+      ruleId,
+      replacedBy: info
+        ? (info.replacedBy ?? []).map(({ plugin, rule }) => {
+            const namespace = plugin?.name?.replace(
+              /(^|\/)eslint-plugin-/,
+              "$1",
+            );
+            return `${namespace ? `${namespace}/` : ""}${rule?.name ?? ""}`;
+          })
+        : [...(meta.replacedBy ?? [])],
+      ...(info ? { info: structuredClone(info) } : {}),
+    });
+  }
   return {
+    reporting: {
+      usedDeprecatedRules,
+      messages: structuredClone(result.messages),
+      suppressedMessages: structuredClone(result.suppressed),
+      rulesMeta,
+    },
     status: diagnostics.some((diagnostic) => diagnostic.severity === "error")
       ? "failed"
       : "passed",

@@ -24,7 +24,8 @@
     "@dokkurator/config": "workspace:*",
     "@dokkurator/knowledge": "workspace:*",
     "@dokkurator/loader": "workspace:*",
-    "@dokkurator/validator": "workspace:*"
+    "@dokkurator/validator": "workspace:*",
+    "eslint": "10.10.0"
   },
   "devDependencies": {
     "simple-git": "^3.36.0"

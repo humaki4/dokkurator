@@ -185,6 +185,9 @@ importers:
       '@dokkurator/validator':
         specifier: workspace:*
         version: link:../validator
+      eslint:
+        specifier: 10.10.0
+        version: 10.10.0
     devDependencies:
       simple-git:
         specifier: ^3.36.0

@@ -96,6 +96,7 @@ structure:
     });
     expect(result.results[0]!.documents[0]).toEqual({
       path: document!.source.path,
+      filePath: join(resolved.root, document!.source.path),
       ...lint({
         originalText: document!.originalText,
         source: document!.source,

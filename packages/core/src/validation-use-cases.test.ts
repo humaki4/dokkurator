@@ -58,7 +58,12 @@ test.each([compact, native])(
       });
       expect(await app.validate()).toEqual({
         results: [
-          { sourceId: "root", documents: [{ path: "guide.md", ...direct }] },
+          {
+            sourceId: "root",
+            documents: [
+              { path: "guide.md", filePath: join(root, "guide.md"), ...direct },
+            ],
+          },
         ],
         errors: [],
       });

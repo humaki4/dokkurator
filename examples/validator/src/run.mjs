@@ -13,30 +13,25 @@ const app = createDokkurator({
 });
 await app.open();
 try {
-  const { results, errors } = await app.validate();
-  // Validate the collection once; the argument selects which findings to display.
-  const documents = results
-    .flatMap(({ documents }) => documents)
-    .filter(
-      ({ path }) => group === "all" || path.startsWith(`documents/${group}/`),
-    );
-
-  for (const { path, status, diagnostics } of documents) {
-    console.log(`${status === "failed" ? "FAIL" : "PASS"} ${path}`);
-    for (const diagnostic of diagnostics) {
-      const position = diagnostic.location
-        ? `${diagnostic.location.line}:${diagnostic.location.column}`
-        : "?";
-      console.log(
-        `  ${position} ${diagnostic.severity} ${diagnostic.ruleId ?? "parser"}: ${diagnostic.message}`,
-      );
-    }
-  }
-  for (const { sourceId, phase, message } of errors) {
-    console.error(`ERROR ${sourceId} (${phase}): ${message}`);
-  }
+  const report = await app.validate();
+  // Keep the complete source result while selecting documents for display.
+  const selected = {
+    ...report,
+    results: report.results.map((source) => ({
+      ...source,
+      documents: source.documents.filter(
+        ({ path }) => group === "all" || path.startsWith(`documents/${group}/`),
+      ),
+    })),
+  };
+  const format = process.argv[3] ?? "stylish";
+  const formatter = await app.loadFormatter(format);
+  console.log(await formatter.format(selected));
+  const documents = selected.results.flatMap(({ documents }) => documents);
+  const { errors } = selected;
   const failed = documents.filter(({ status }) => status === "failed").length;
-  console.log(`\n${documents.length} documents, ${failed} failed.`);
+  if (format === "stylish")
+    console.log(`\n${documents.length} documents, ${failed} failed.`);
   process.exitCode = failed || errors.length ? 1 : 0;
 } finally {
   await app.close();

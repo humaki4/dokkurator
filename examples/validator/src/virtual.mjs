@@ -19,7 +19,8 @@ const app = createDokkurator({ root });
 try {
   await app.open();
   const result = await app.validate();
-  console.log(JSON.stringify(result, null, 2));
+  const formatter = await app.loadFormatter("json");
+  console.log(await formatter.format(result));
   process.exitCode =
     result.errors.length ||
     result.results.some(({ documents }) =>

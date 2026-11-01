@@ -28,8 +28,32 @@ test.each([
     if (group === "valid") {
       expect(stdout).not.toContain("documents/invalid/");
     } else {
-      expect(stdout).toContain("warning example/no-todo");
-      expect(stdout).toContain("error dokkurator/metadata-schema");
+      expect(stdout).toContain("example/no-todo");
+      expect(stdout).toContain("dokkurator/metadata-schema");
     }
   },
 );
+
+test("keeps filtered metadata reports valid JSON", () => {
+  const { stdout, stderr, status, error } = spawnSync(
+    process.execPath,
+    [
+      fileURLToPath(new URL("./run.mjs", import.meta.url)),
+      "invalid",
+      "json-with-metadata",
+    ],
+    { cwd: tmpdir(), encoding: "utf8" },
+  );
+  expect(error).toBeUndefined();
+  expect(stderr).toBe("");
+  expect(status).toBe(1);
+  const report = JSON.parse(stdout);
+  expect(report.results).toHaveLength(16);
+  expect(report.errors).toEqual([]);
+  expect(report.metadata.rulesMeta["example/no-todo"]).toBeDefined();
+  expect(
+    report.sources[0].documents.every(({ path }: { path: string }) =>
+      path.startsWith("documents/invalid/"),
+    ),
+  ).toBe(true);
+});

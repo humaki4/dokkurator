@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import { loadDocTypes, loadDocuments } from "@dokkurator/loader";
 import {
   lint,
@@ -43,6 +44,7 @@ export async function validateProjectDocuments(
       try {
         results.push({
           path: document.source.path,
+          filePath: resolve(source.root, document.source.path),
           ...lint({
             originalText: document.originalText,
             source: document.source,

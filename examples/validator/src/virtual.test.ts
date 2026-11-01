@@ -18,11 +18,10 @@ test("validates an editor buffer through Core and removes the temporary project"
   const result = JSON.parse(stdout);
   expect(result.errors).toEqual([]);
   expect(result.results).toHaveLength(1);
-  expect(result.results[0].sourceId).toBe("editor-buffer");
-  expect(result.results[0].documents).toHaveLength(1);
-  expect(result.results[0].documents[0]).toMatchObject({
+  expect(result.sources[0].sourceId).toBe("editor-buffer");
+  expect(result.sources[0].documents).toHaveLength(1);
+  expect(result.sources[0].documents[0]).toMatchObject({
     path: "virtual/guide.md",
-    status: "passed",
     diagnostics: [{ ruleId: "example/no-todo", severity: "warning" }],
   });
   expect(

@@ -1,12 +1,12 @@
 ---
 doctype: task
 title: Validation reports with ESLint formatters
-status: open
+status: done
 ---
 
 # Validation reports with ESLint formatters
 
-Status: planned; not yet implemented.
+Status: implemented. See [integration contract and demonstration](./validation-report-integration.md).
 
 Dependency: [Core project validation](../../../packages/core/README.md#validate-local-documents).
 

@@ -93,18 +93,26 @@ export interface DocumentsSourceResult {
 
 export interface ValidationSourceResult {
   readonly sourceId: string;
-  readonly documents: readonly ({ readonly path: string } & ReturnType<
-    typeof lint
-  >)[];
+  readonly documents: readonly ({
+    readonly path: string;
+    readonly filePath: string;
+  } & ReturnType<typeof lint>)[];
 }
 
 export interface SearchOptions extends SourceSelection {
   readonly limit?: number;
 }
 
+export interface ValidationFormatter {
+  format(
+    report: SourceOperationResult<ValidationSourceResult>,
+  ): Promise<string>;
+}
+
 /** Reusable application lifecycle and supported application use-cases. */
 export interface DokkuratorApp {
   open(): Promise<OpenResult>;
+  loadFormatter(name?: string): Promise<ValidationFormatter>;
   validate(
     options?: SourceSelection,
   ): Promise<SourceOperationResult<ValidationSourceResult>>;

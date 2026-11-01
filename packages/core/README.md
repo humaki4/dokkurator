@@ -77,7 +77,8 @@ configuration and reports source readiness. There is no index toggle:
 | `open`, `validate`, `listDocTypes`, `listDocuments` | not required or opened         |
 | `prepare`, `sync`, `diff`, `search`                 | opened on first use and reused |
 
-All use-case methods require an open app. Repeated `open()` and `close()` calls
+Validation and source use-case methods require an open app. Formatter loading and
+formatting also work on a closed app. Repeated `open()` and `close()` calls
 are harmless. `close()` waits for operations already started and closes the
 index if opened. Reopening reloads project configuration and creates the index
 again only when needed.
@@ -90,3 +91,31 @@ watchers or determine text output or process exit codes.
 
 - [Core orchestration](docs/adrs/0001-coordinate-project-workflows-in-core.md)
 - [Project lifecycle](docs/specs/project-lifecycle.md)
+
+## Format validation reports
+
+```js
+const report = await app.validate();
+const formatter = await app.loadFormatter(); // defaults to stylish
+await app.close();
+console.log(await formatter.format(report));
+```
+
+Supported built-in ESLint formats are `stylish`, `json`, `json-with-metadata`,
+and `html`. Unknown names are rejected. Formatting returns `Promise<string>`,
+does not validate again, and never writes output or sets exit codes. A report
+can be formatted repeatedly, including after serialization or `close()`.
+
+Validation documents additionally contain absolute `filePath` and serializable
+`reporting` data: original ESLint messages, suppressed messages, deprecated-rule
+usage and captured rule metadata. Normalized diagnostics retain their original
+text coordinates and source identity; reporting messages use ESLint coordinates.
+No configuration or rule implementation is included.
+
+JSON output encloses ESLint's document `results` in `{ results, sources, errors }`.
+`json-with-metadata` also preserves ESLint's `metadata`, including `rulesMeta`.
+The `sources` extension maps source IDs to paths and normalized diagnostics;
+`errors` contains separate operational failures with phase and recovery.
+Text and HTML output add a labeled Operational errors section when needed.
+See the [integration contract](../../docs/task/prepare-examples/validation-report-integration.md)
+for metadata handling and exact field mapping.

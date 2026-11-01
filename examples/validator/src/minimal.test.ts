@@ -15,20 +15,15 @@ test("starts the Compact example with defaults from another working directory", 
   expect(status).toBe(0);
   expect(stderr).toBe("");
   expect(stdout, entry).not.toBe("");
-  expect(JSON.parse(stdout)).toEqual({
-    results: [
-      {
-        sourceId: "root",
-        documents: [
-          {
-            path: "documents/guide.md",
-            status: "passed",
-            diagnostics: [],
-            suppressedDiagnostics: [],
-          },
-        ],
-      },
-    ],
-    errors: [],
-  });
+  const report = JSON.parse(stdout);
+  expect(report.errors).toEqual([]);
+  expect(report.sources).toMatchObject([
+    {
+      sourceId: "root",
+      documents: [{ path: "documents/guide.md", diagnostics: [] }],
+    },
+  ]);
+  expect(report.results).toMatchObject([
+    { messages: [], errorCount: 0, warningCount: 0 },
+  ]);
 });
