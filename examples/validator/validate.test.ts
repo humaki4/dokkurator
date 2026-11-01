@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { expect, test } from "vitest";
 
 test("starts the Compact example with defaults from another working directory", () => {
-  const entry = fileURLToPath(new URL("./minimal.mjs", import.meta.url));
+  const entry = fileURLToPath(new URL("./validate.mjs", import.meta.url));
   const { stdout, stderr, status, error } = spawnSync(
     process.execPath,
     [entry],

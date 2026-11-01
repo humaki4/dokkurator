@@ -1,7 +1,7 @@
 ---
 doctype: task
 title: ESLint-Integration in ein eigenes Nutzerbeispiel auslagern
-status: open
+status: done
 component: examples
 ---
 

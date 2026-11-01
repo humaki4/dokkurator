@@ -1,7 +1,7 @@
 ---
 doctype: task
 title: Gemeinsame Beispieldaten für Validator, ESLint und Knowledge vorbereiten
-status: open
+status: done
 component: examples
 ---
 

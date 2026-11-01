@@ -1,0 +1,25 @@
+{
+  "name": "@dokkurator/example-validator-eslint",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "cd ../validator && eslint --config ../validator-eslint/eslint.config.mjs documents",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.check.json",
+    "lint": "eslint --config ../../eslint.config.mjs *.mjs *.ts"
+  },
+  "dependencies": {
+    "@dokkurator/core": "workspace:*",
+    "@dokkurator/validator": "workspace:*",
+    "eslint": "10.10.0"
+  },
+  "nx": {
+    "targets": {
+      "test": {
+        "dependsOn": [
+          "^build"
+        ]
+      }
+    }
+  }
+}

@@ -2,10 +2,11 @@ import { ESLint } from "eslint";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { createDokkurator } from "@dokkurator/core";
-import { createLintConfig } from "@dokkurator/validator";
+import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
-import { prepareExample, root } from "./setup.mjs";
-import pluginConfig from "../eslint-plugin.config.mjs";
+import config from "./eslint.config.mjs";
+
+const root = fileURLToPath(new URL("../validator/", import.meta.url));
 
 const expectedRule = {
   "api-auth": "dokkurator/metadata-schema",
@@ -27,24 +28,28 @@ const expectedRule = {
 };
 
 describe("runnable Validator examples", () => {
-  test("compares all example findings with standard ESLint and the direct plugin profile", async () => {
-    const { configuration } = await prepareExample();
+  test("compares Core findings with the shared ESLint configuration", async () => {
     const app = createDokkurator({ root });
     await app.open();
     let validation;
     try {
+      const listed = await app.listDocTypes();
+      expect(listed.errors).toEqual([]);
+      expect(listed.results.flatMap(({ doctypes }) => doctypes)).toHaveLength(
+        8,
+      );
       validation = await app.validate();
     } finally {
       await app.close();
     }
     expect(validation.errors).toEqual([]);
     const documents = validation.results.flatMap(({ documents }) => documents);
-    const engines = [createLintConfig(configuration), pluginConfig].map(
-      (overrideConfig) =>
-        new ESLint({ cwd: root, overrideConfigFile: true, overrideConfig }),
-    );
+    const engine = new ESLint({
+      cwd: root,
+      overrideConfigFile: true,
+      overrideConfig: config,
+    });
     expect(documents).toHaveLength(24);
-    expect(configuration.docTypes).toHaveLength(8);
     for (const document of documents) {
       const result = document;
       const originalText = await readFile(join(root, document.path), "utf8");
@@ -65,37 +70,51 @@ describe("runnable Validator examples", () => {
         if (name === "malformed-yaml")
           expect(result.diagnostics[0].phase).toBe("parse");
       }
-      for (const engine of engines) {
-        const [direct] = await engine.lintText(originalText, {
-          filePath: document.path,
-        });
-        expect(
-          result.diagnostics.map(({ ruleId, severity, message, location }) => ({
+      const [direct] = await engine.lintText(originalText, {
+        filePath: join(root, document.path),
+      });
+      expect(
+        result.diagnostics.map(({ ruleId, severity, message, location }) => ({
+          ruleId,
+          severity,
+          message,
+          location,
+        })),
+        document.path,
+      ).toEqual(
+        direct.messages.map(
+          ({
             ruleId,
             severity,
             message,
-            location,
-          })),
-          document.path,
-        ).toEqual(
-          direct.messages.map(
-            ({
-              ruleId,
-              severity,
-              message,
-              line,
-              column,
-              endLine,
-              endColumn,
-            }) => ({
-              ruleId,
-              severity: severity === 1 ? "warning" : "error",
-              message,
-              location: { line, column, endLine, endColumn },
-            }),
-          ),
-        );
-      }
+            line,
+            column,
+            endLine,
+            endColumn,
+          }) => ({
+            ruleId,
+            severity: severity === 1 ? "warning" : "error",
+            message,
+            location: { line, column, endLine, endColumn },
+          }),
+        ),
+      );
     }
   });
+});
+
+test("runs ESLint from its own example directory", async () => {
+  const { spawnSync } = await import("node:child_process");
+  const result = spawnSync("pnpm", ["--silent", "start", "--format", "json"], {
+    cwd: fileURLToPath(new URL("./", import.meta.url)),
+    encoding: "utf8",
+  });
+  expect(result.error).toBeUndefined();
+  expect(result.status).toBe(1);
+  expect(result.stderr).toBe("");
+  const reports = JSON.parse(result.stdout);
+  expect(reports).toHaveLength(24);
+  expect(
+    reports.filter((report: { errorCount: number }) => report.errorCount > 0),
+  ).toHaveLength(14);
 });

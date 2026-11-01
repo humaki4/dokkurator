@@ -1,7 +1,7 @@
 ---
 doctype: task
 title: Validator-Beispiele auf einen einfachen CLI-Einstieg reduzieren
-status: open
+status: done
 component: examples
 ---
 

@@ -1,17 +1,15 @@
 # Dokkurator ausprobieren
 
-Dieser Ordner enthält ausführbare Beispiele, die ausschließlich die öffentlichen
-Paket-APIs verwenden. Die Beispiele gehören zum Workspace und benötigen keine
-separat veröffentlichten Pakete.
+Die Beispiele gehören zum Workspace und verwenden öffentliche Paket-Root-APIs.
+Installation und Build sind in den jeweiligen READMEs beschrieben.
 
-- [Validator](./validator/README.md): einfacher Start mit `pnpm start` und einem
-  Compact-DocType; optional acht weitere DocTypes, gültige und fehlerhafte
-  Dokumente, direkte ESLint-Nutzung und eine eigene Regel. Der vorgesehene Knowledge-CLI-Ablauf ist als Vorschau dokumentiert;
-  die Sammlung kann wegen absichtlich fehlerhaften YAMLs noch nicht vollständig indexiert werden.
+- [Validator](./validator/README.md): CLI-Minimalstart mit einem Compact-DocType,
+  Sammlung mit acht DocTypes und 24 Dokumenten, eigene Regel und ein kurzes
+  JS-Beispiel für Core. Validierung benötigt keinen Knowledge-Index.
+- [ESLint](./validator-eslint/README.md): direkte Integration mit derselben
+  Sammlung, denselben DocTypes, Schemas und Regeln.
 
-Die Installation verwendet lokale Workspace-Pakete. Alle Validator-Läufe verwenden
-`createDokkurator` und `app.validate()`, ohne Knowledge-Index. Die Beispiele bleiben im
-pnpm-Workspace; eine Veröffentlichung ist derzeit nicht vorgesehen.
-
-Der Knowledge-Teil ist optional; der Validator-Minimalstart bleibt unverändert.
-Ein Beispiel für die spätere Kontextvalidierung folgt in einer gesonderten Aufgabe.
+Der optionale Knowledge-CLI-Ablauf verwendet ebenfalls das Validator-Projekt.
+Er ist als Vorschau dokumentiert und wartet auf tolerante Indexierung für die
+absichtlich fehlerhaften YAML-Dokumente. Der Validator-Minimalstart funktioniert
+unabhängig davon.

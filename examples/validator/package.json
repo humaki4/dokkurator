@@ -3,27 +3,21 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node src/minimal.mjs",
-    "demo": "node src/minimal.mjs",
-    "demo:all": "node src/run.mjs",
-    "demo:valid": "node src/run.mjs valid",
-    "demo:invalid": "node src/run.mjs invalid",
-    "demo:virtual": "node src/virtual.mjs",
-    "demo:eslint": "eslint --config eslint.config.mjs documents",
-    "demo:plugin": "eslint --config eslint-plugin.config.mjs documents",
+    "start": "dokkurator --project minimal validate",
+    "demo": "dokkurator --project minimal validate",
+    "demo:all": "dokkurator validate",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.check.json",
-    "lint": "eslint --config ../../eslint.config.mjs src minimal/dokkurator.config.mjs dokkurator.config.mjs eslint.config.mjs eslint-plugin.config.mjs",
+    "lint": "eslint --config ../../eslint.config.mjs *.mjs *.ts rules minimal/dokkurator.config.mjs",
     "knowledge:index": "dokkurator index",
     "knowledge:search": "dokkurator search",
-    "knowledge:diff": "dokkurator diff"
+    "knowledge:diff": "dokkurator diff",
+    "demo:json": "dokkurator validate --format json",
+    "demo:core": "node validate.mjs"
   },
   "dependencies": {
     "@dokkurator/cli": "workspace:*",
-    "@dokkurator/core": "workspace:*",
-    "@dokkurator/validator": "workspace:*",
-    "@eslint/markdown": "8.0.3",
-    "eslint": "10.10.0"
+    "@dokkurator/core": "workspace:*"
   },
   "nx": {
     "targets": {
@@ -33,5 +27,8 @@
         ]
       }
     }
+  },
+  "devDependencies": {
+    "@eslint/markdown": "8.0.3"
   }
 }

@@ -4,60 +4,59 @@ type: readmes
 
 # Validator ausprobieren
 
-Die Beispiele verwenden `createDokkurator` und `app.validate()` für den
-Minimalstart, die Sammlung mit acht DocTypes und einen Editor-Text. Zwei
-zusätzliche Integrationen vergleichen die Ergebnisse direkt mit ESLint. Alle
-Daten bleiben lokal. Die Validator-Läufe benötigen keinen Knowledge-Index.
+Der Standardweg verwendet die CLI: Dokumente und DocTypes anlegen, bei Bedarf
+Regeln konfigurieren und `dokkurator validate` starten. Ein Knowledge-Index ist
+für Validierung nicht nötig. Alle Daten bleiben lokal.
 
 ## Einfach starten
 
-Der Standardstart prüft **ein Dokument mit einem Compact-DocType**. Er benötigt
-keine eigene JavaScript-Konfiguration, keine zusätzlichen Plugins und keine
-externen Schema-Ressourcen. Die recommended-Regeln sind automatisch aktiv.
-
-Die Pakete sind derzeit lokale Workspace-Abhängigkeiten. Einmalig im
-Repository-Stammverzeichnis installieren und bauen (Node.js `>=22.13.0 <23`
-oder `>=24.0.0`, pnpm `>=10 <11`):
+Einmalig im Repository-Stammverzeichnis installieren und bauen
+(Node.js `>=22.13.0 <23` oder `>=24.0.0`, pnpm `>=10 <11`):
 
 ```sh
 pnpm install
-pnpm --filter @dokkurator/core... build
+pnpm --filter @dokkurator/cli... build
 cd examples/validator
 pnpm start
 ```
 
-Der Lauf verwendet den gemeinsamen JSON-Formatter. `results` enthält ESLint-
-Dateiergebnisse, `sources` ordnet Dokumente und normalisierte Diagnosen den
-Sources zu. `errors` enthält getrennte Lade-, Konfigurations- und Laufzeitfehler.
+`start` und `demo` führen `dokkurator --project minimal validate` aus.
+Dieser Minimalfall prüft ein Dokument mit einem Compact-DocType und endet mit
+Exit-Code 0; der Standardformatter gibt bei Erfolg nichts aus. Die leere `minimal/dokkurator.config.mjs` verhindert, dass die
+Konfiguration des Elternordners geladen wird. Im eigenständigen Projekt kann sie
+entfallen; die recommended-Regeln sind automatisch aktiv.
 
-[`src/minimal.mjs`](./src/minimal.mjs) verwendet ausschließlich Core:
+## Die Sammlung prüfen
 
-```js
-const app = createDokkurator({ root });
-await app.open();
-try {
-  const result = await app.validate();
-  const formatter = await app.loadFormatter("json");
-  console.log(await formatter.format(result));
-} finally {
-  await app.close();
-}
+```sh
+pnpm run demo:all
+pnpm run demo:json
+# dieselben Aufrufe direkt:
+pnpm exec dokkurator validate
+pnpm exec dokkurator validate --format json
 ```
 
-Die leere `minimal/dokkurator.config.mjs` grenzt den Minimalstart von der
-ausführlichen Konfiguration im Elternordner ab. In einem eigenständigen Projekt
-kann diese leere Datei entfallen.
+Die Sammlung enthält acht DocTypes und 24 Dokumente. 14 Dokumente schlagen fehl,
+daher enden diese Aufrufe absichtlich mit Exit-Code 1. Die Ordner `documents/valid`
+und `documents/invalid` unterscheiden gültige und gezielt fehlerhafte Beispiele.
+`custom-rule.md` und `duplicate-headings.md` enthalten nur Warnungen und bleiben
+erfolgreich. JSON ist auch bei Fehlern parsebar: `results` enthält Dateiergebnisse,
+`sources` die Dokumentdiagnosen und `errors` operative Fehler.
 
-Core löst die Projektkonfiguration auf, lädt DocTypes und Dokumente, bereitet die
-recommended-Regeln vor und ruft den Validator pro Dokument synchron auf. Ohne
-konfigurierte Sources ist das Projektverzeichnis die Source `root`. Hier genügt
-der Projektpfad: eine `dokkurator.config.mjs` ist für den Standardfall nicht nötig.
-`open()` und `validate()` öffnen keinen Knowledge-Index. Erst Index-Operationen
-wie `prepare()`, `sync()`, `diff()` oder `search()` benötigen ihn. Dafür ist kein
-Schalter in `createDokkurator` nötig.
+## Direkte Core-Einbindung
 
-Die Beispiele bleiben Teil des pnpm-Workspace und verwenden lokale Pakete;
-eine Veröffentlichung oder eigenständige Paketinstallation ist nicht vorgesehen.
+Das einzige ausführbare JS-Beispiel [validate.mjs](./validate.mjs) öffnet den
+Minimalfall, validiert, gibt den gemeinsamen JSON-Bericht aus und schließt die
+Anwendung in `finally`:
+
+```sh
+pnpm run demo:core
+pnpm test
+```
+
+Core lädt Dokumente, DocTypes und Regeln selbst. `open()` und `validate()`
+benötigen keinen Index. Die [separate ESLint-Integration](../validator-eslint/README.md)
+verwendet dieselbe Sammlung und Konfiguration.
 
 ## Compact-Schreibweise ausprobieren
 
@@ -87,105 +86,6 @@ Auch [guide](./_dokkurator/.doctypes/guide/definition.yml),
 [runbook](./_dokkurator/.doctypes/runbook/definition.yml) in der größeren Sammlung
 verwenden Compact.
 
-## Weitere Funktionen ausprobieren
-
-Die übrigen Beispiele sind optional. Sie zeigen zusätzliche Möglichkeiten und
-verwenden deshalb mehr Konfiguration. Alle folgenden Befehle werden direkt in
-**`examples/validator`** ausgeführt:
-
-```sh
-# Ergebnisse der acht gültigen Dokumente anzeigen
-pnpm run demo:valid
-
-# Alle 24 Dokumente der ausführlichen Sammlung prüfen
-pnpm run demo:all
-
-# Ergebnisse der 16 gezielten Fehler- und Warnungsbeispiele anzeigen
-pnpm run demo:invalid
-
-# Identische Dokumente direkt mit ESLint prüfen
-pnpm run demo:eslint
-
-# Alternativ das Plugin mit seinem recommended-Profil direkt einbinden
-pnpm run demo:plugin
-
-# Einen Editor-Text über eine temporäre Dateiquelle prüfen
-pnpm run demo:virtual
-
-# Beispielmeldungen mit beiden ESLint-Konfigurationen vergleichen
-pnpm test
-```
-
-`demo:all`, `demo:valid` und `demo:invalid` prüfen die Sammlung über dieselbe
-Core-Anwendung. Das Argument wählt die angezeigte Gruppe und die für den Exit-Code
-gezählten Dokumentbefunde; Fehler beim Laden oder Prüfen der Source führen immer
-zu Exit-Code 1.
-
-Die Fehlersammlung endet absichtlich mit **Exit-Code 1**. Warnungen allein führen
-zu `PASS` und Exit-Code 0: `custom-rule.md` und `duplicate-headings.md` demonstrieren
-diesen Unterschied. Der virtuelle Text erzeugt ebenfalls nur eine Warnung.
-
-## Knowledge per CLI (Vorschau)
-
-Dieser Teil dokumentiert den vorgesehenen Suchablauf, ist aber noch keine
-funktionsfähige Gesamtdemo: Die gemeinsame Konfiguration umfasst auch absichtlich
-fehlerhaftes YAML; das bricht den Indexlauf derzeit ab. Zuerst muss die tolerante
-Indexierung umgesetzt werden. Der Validator-Minimalstart oben funktioniert davon
-unabhängig. Die folgenden Befehle bleiben als Vorschau erhalten.
-
-Vorbereitung nach `pnpm install` im Repository-Stammverzeichnis:
-
-```sh
-pnpm --filter @dokkurator/cli... build
-cd examples/validator
-pnpm run knowledge:index
-```
-
-Die gemeinsame Konfiguration umfasst `documents/valid` und die absichtlich
-fehlerhaften Dokumente in `documents/invalid`. Der Knowledge-Teil ist noch in
-Vorbereitung: Die [tolerante Indexierung](../../docs/task/index-invalid-documents.md)
-muss zuerst umgesetzt werden, damit ungültiges YAML den Indexlauf nicht abbricht. `minimal/` liegt außerhalb des
-Dokumentordners und ist ein eigener Projekt-Root. Ohne konfigurierte Sources
-verwendet die CLI das Projekt als Source `root`; `source add` ist nicht nötig.
-Der lokale Index liegt unter `.dokkurator/index.db` und wird von Git ignoriert.
-
-Alle folgenden Befehle werden in `examples/validator` ausgeführt. pnpm reicht
-Argumente direkt weiter; ein zusätzliches `--` ist nicht erforderlich.
-
-```sh
-# Volltext: die angenommene Entscheidung zur synchronen Validierung
-pnpm run knowledge:search ESLint
-
-# Phrase: die Anführungszeichen gehören zur Suchabfrage
-pnpm run knowledge:search '"Regeln synchron"'
-
-# Metadaten und implizites AND
-pnpm run knowledge:search status:accepted
-pnpm run knowledge:search doctype:decision status:accepted
-
-# OR und Klammern: Anleitung oder Runbook; Entscheidung oder Release
-pnpm run knowledge:search doctype:guide OR doctype:runbook
-pnpm run knowledge:search '(doctype:decision OR doctype:release) AND status:accepted'
-
-# Ergebniszahl begrenzen
-pnpm run knowledge:search ESLint --limit 3
-```
-
-Treffer werden als JSON mit Inhalt, Metadaten und Source-Pfad ausgegeben.
-`index` arbeitet inkrementell: ohne Änderungen werden keine Dokumente erneut
-indexiert. Ergänze zum Ausprobieren einen Satz im Text von
-[`documents/valid/decision.md`](./documents/valid/decision.md), und führe aus:
-
-```sh
-pnpm run knowledge:diff
-pnpm run knowledge:index
-pnpm run knowledge:diff
-```
-
-Das erste `diff` zeigt `modified`, ohne den Index zu verändern. Nach `index`
-zeigt das zweite `diff` keine Änderungen mehr. Siehe auch die
-[CLI-Referenz](../../apps/cli/docs/commands.md).
-
 ## Dateien und DocTypes
 
 | DocType                                                             | Schreibweise | Was er zeigt                                                                         |
@@ -204,78 +104,40 @@ Die zugehörigen Dokumente liegen in [`documents/valid`](./documents/valid/) und
 benennt die geprüfte Bedingung. Weitere Beispiele zeigen ungültiges YAML,
 fehlende oder unbekannte DocTypes, doppelte Überschriften und die eigene Regel.
 
-## Vorbereitung, Konfiguration und Ausführung
+## Konfiguration und eigene Regel
 
-Die Beispiele trennen drei Aufgaben:
-
-| Aufgabe                  | Datei                                                      | Was dort passiert                                                       |
-| ------------------------ | ---------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Ressourcen vorbereiten   | [`src/prepare-resources.mjs`](./src/prepare-resources.mjs) | Gemeinsames JSON Schema lesen und parsen; keine Regeln aktivieren       |
-| Dokkurator konfigurieren | [`dokkurator.config.mjs`](./dokkurator.config.mjs)         | Dokumentpfade wählen, Schema und Plugin registrieren, Regeln aktivieren |
-| Dokkurator ausführen     | [`src/run.mjs`](./src/run.mjs)                             | `createDokkurator`, `open`, `validate`, Ergebnisse ausgeben und `close` |
-
-Das Lesen des externen Schemas ist eine Vorbereitung für dieses `$ref`-Beispiel.
-Es ist kein Pflichtschritt für Dokkurator. DocTypes und Dokumente lädt Core selbst.
-Auch das eigene Plugin hat seine Implementierung separat in `src/custom-plugin.mjs`;
-erst die Projektkonfiguration registriert es und aktiviert seine Regel.
-
-Beim Editor-Beispiel richtet [`src/prepare-virtual-project.mjs`](./src/prepare-virtual-project.mjs)
-die temporären Dateien ein. Die eigentliche Konfiguration steht separat in
-[`src/virtual.dokkurator.config.mjs`](./src/virtual.dokkurator.config.mjs).
-[`src/virtual.mjs`](./src/virtual.mjs) kennzeichnet Vorbereitung, Dokkurator-Aufruf
-und Aufräumen als drei Schritte. Diese temporären Dateien sind nur wegen der
-aktuellen Dateiquellen-API nötig.
-
-[`src/setup.mjs`](./src/setup.mjs) ist ausschließlich eine Vorbereitung für den
-direkten ESLint-Vergleich. Die Konfiguration in `eslint*.config.mjs` gehört zu
-ESLint. Für `app.validate()` werden diese Integrationsdateien nicht benötigt.
-
-## So funktioniert die ausführliche Core-Variante
-
-[`dokkurator.config.mjs`](./dokkurator.config.mjs) enthält die eigentliche
-Dokkurator-Konfiguration: Dokumentpfade, Schema-Zuordnung, Plugin-Registrierung und
-Regelaktivierung. Die Datei übernimmt bereits vorbereitete Ressourcen.
+[dokkurator.config.mjs](./dokkurator.config.mjs) legt den Dokumentordner fest,
+importiert [das gemeinsame Schema](./schemas/common.schema.json) direkt mit
+`with { type: "json" }` und registriert [rules/no-todo.mjs](./rules/no-todo.mjs).
 `validator.schemas`, `validator.plugins` und `validator.rules` konfigurieren die
-Prüfung. Die recommended-Regeln von Dokkurator und `@eslint/markdown` sind
-standardmäßig aktiv; zwei Regeln werden hier als Warnung überschrieben.
+Prüfung. Die beiden zusätzlichen Regeln sind als Warnungen aktiviert.
 
-[`src/run.mjs`](./src/run.mjs) öffnet die Anwendung, ruft `app.validate()` auf und
-schließt sie in `finally`. Core übernimmt das Laden, die Vorbereitung und die
-Prüfung. Die Ergebnisse enthalten pro Source die Dokumente mit Status und
-Diagnosen. YAML-Parsefehler erscheinen als Dokumentbefunde; Lade-, Konfigurations-
-und unerwartete Regelfehler stehen in der separaten `errors`-Liste. Mehrere
-Dokumente werden unabhängig geprüft; Beziehungen zwischen ihnen sind nicht Teil
-dieser Beispiele.
+`example/no-todo` meldet TODO-Platzhalter in sichtbaren Textknoten; Codeblöcke
+und Inline-Code werden nicht geprüft. `$ref` im Reference-DocType nutzt das
+importierte Schema ohne Netzwerkzugriff. Änderungen an Dokumenten, DocTypes,
+Schema oder Regel gelten auch für ESLint ohne Kopier- oder Vorbereitungsschritt.
 
-[`src/virtual.mjs`](./src/virtual.mjs) zeigt einen Editor-Text mit derselben
-Core-API. Da Core bisher Dateiquellen unterstützt, schreibt das Beispiel den
-Text in ein temporäres Projekt, übernimmt die DocTypes sowie die gemeinsame
-Validator-Konfiguration und verwendet die Source-ID `editor-buffer`. Anwendung
-und temporäres Projekt werden anschließend auch bei Fehlern aufgeräumt. Ein
-In-Memory-Adapter für Editor-Texte ist noch nicht Teil der Core-API.
+## Knowledge per CLI (Vorschau)
 
-## Direktes ESLint und eigene Regeln
+Knowledge verwendet dasselbe Dokkurator-Projekt und dieselbe vollständige
+Sammlung. Die Demo wartet noch auf [tolerante Indexierung](../../docs/task/prepare-examples/05c-tolerant-indexing.md):
+absichtlich ungültiges YAML bricht den Indexlauf derzeit ab. Der Minimalfall ist
+ein eigener Projekt-Root und liegt außerhalb der gemeinsamen Sammlung.
+Nach Umsetzung der Voraussetzung ist der vorgesehene Ablauf:
 
-[`eslint.config.mjs`](./eslint.config.mjs) verwendet `createLintConfig` mit denselben
-Validator-Einstellungen wie die Core-Anwendung.
-[`src/setup.mjs`](./src/setup.mjs) lädt hierfür die DocTypes über
-`createDokkurator` und `app.listDocTypes()`. Nur für die direkte ESLint-Anbindung
-übersetzt es sie mit `prepareLintConfiguration` in eine ESLint-Konfiguration.
-Das alternative
-[`eslint-plugin.config.mjs`](./eslint-plugin.config.mjs) bindet `plugin` und
-`plugin.configs.recommended` explizit ein. Es setzt Markdown als Sprache,
-YAML-Frontmatter und `settings.dokkurator` für die vorbereiteten DocTypes.
+```sh
+pnpm run knowledge:index
+pnpm run knowledge:search ESLint
+pnpm run knowledge:search status:accepted
+# documents/valid/decision.md bearbeiten, dann:
+pnpm run knowledge:diff
+pnpm run knowledge:index
+pnpm run knowledge:diff
+```
 
-[`src/custom-plugin.mjs`](./src/custom-plugin.mjs) definiert eine unabhängige
-Markdown-Regel: `example/no-todo` meldet sichtbare Textknoten mit einem
-`TODO`-Platzhalter. Codeblöcke und Inline-Code werden dabei nicht geprüft. Das
-Plugin wird in JavaScript importiert und die Regel mit `warn` aktiviert. Die
-Validator-Runtime kennt weder diese Regel noch ihre fachliche Bedeutung.
-
-Zum Experimentieren kannst du ein gültiges Dokument kopieren oder eine Definition
-ändern und den passenden Lauf erneut starten. Weitere Regeln lassen sich in
-`dokkurator.config.mjs` hinzufügen, überschreiben oder mit `off` abschalten.
-Die direkte Plugin-Konfiguration übernimmt ebenfalls dieses Regelobjekt.
+`diff` verändert den Index nicht; `index` arbeitet inkrementell. Der lokale Index
+liegt unter `.dokkurator/index.db` und wird von Git ignoriert. Weitere Befehle
+stehen in der [CLI-Referenz](../../apps/cli/docs/commands.md).
 
 ## Grenzen und Hinweise
 
@@ -296,32 +158,3 @@ Die direkte Plugin-Konfiguration übernimmt ebenfalls dieses Regelobjekt.
 - Das empfohlene Markdown-Profil zählt ein Frontmatter-Feld `title` als
   Dokumenttitel. Die Beispieldokumente beginnen deshalb direkt mit H2-Abschnitten;
   ein zusätzliches H1 würde `markdown/no-multiple-h1` auslösen.
-- Keine Kontextvalidierung, Multi-Document-Regeln,
-  Codeblock-Ausführung oder neue Dokkurator-CLI. Die vorhandene Dokkurator-CLI
-  wird durch dieses Beispiel nicht um einen Validierungsbefehl erweitert.
-
-## Migration vom temporären Validator
-
-Die frühere `validateDocument`-Funktion mit `requiredFields` ist entfernt. Die
-Beispiele verwenden stattdessen
-`createDokkurator` und `app.validate()`. Direkte Validator-Integrationen können
-weiterhin DocTypes und Originaltext laden, die Konfiguration vorbereiten und
-`lint` verwenden. Pflichtfelder stehen im Metadatenschema; Pflichtüberschriften werden von einer eigenen Regel geprüft.
-Die Paket-Root-APIs bleiben die einzigen unterstützten Importpfade.
-
-## Reportformate
-
-Die ausführliche Sammlung akzeptiert nach der Gruppe ein Format:
-
-```sh
-node src/run.mjs invalid stylish
-node src/run.mjs all json
-node src/run.mjs valid json-with-metadata
-node src/run.mjs all html > report.html
-```
-
-Standard ist `stylish`. Alle vier Formate verwenden ESLints eingebaute Formatter.
-Die Gruppenfilter behalten Metadaten und Betriebsfehler bei. JSON bleibt auch
-bei Betriebsfehlern gültig; diese stehen getrennt unter `errors`. Ausgabe und
-Exit-Code setzt das Beispiel. Direkte ESLint-Plugin-Nutzung benötigt weiterhin
-keinen Dokkurator-Formatter.

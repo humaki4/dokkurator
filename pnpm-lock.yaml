@@ -152,12 +152,19 @@ importers:
       '@dokkurator/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@dokkurator/validator':
-        specifier: workspace:*
-        version: link:../../packages/validator
+    devDependencies:
       '@eslint/markdown':
         specifier: 8.0.3
         version: 8.0.3
+
+  examples/validator-eslint:
+    dependencies:
+      '@dokkurator/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@dokkurator/validator':
+        specifier: workspace:*
+        version: link:../../packages/validator
       eslint:
         specifier: 10.10.0
         version: 10.10.0

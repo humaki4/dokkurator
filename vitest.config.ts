@@ -2,7 +2,12 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    projects: ["apps/*", "packages/*", "examples/validator"],
+    projects: [
+      "apps/*",
+      "packages/*",
+      "examples/validator",
+      "examples/validator-eslint",
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "json-summary"],

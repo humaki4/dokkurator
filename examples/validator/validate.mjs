@@ -4,7 +4,7 @@ import { fileURLToPath, URL } from "node:url";
 import { createDokkurator } from "@dokkurator/core";
 
 const app = createDokkurator({
-  root: fileURLToPath(new URL("../minimal/", import.meta.url)),
+  root: fileURLToPath(new URL("./minimal/", import.meta.url)),
 });
 await app.open();
 try {
