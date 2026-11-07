@@ -8,7 +8,7 @@ import {
 import { parseDocument, parseDocuments } from "./parse.js";
 import { readDocument, readDocuments } from "./read.js";
 import type {
-  SourceAdapter,
+  DocumentSource,
   SourceDocument,
   SourceEntry,
 } from "../source-adapter/index.js";
@@ -16,7 +16,7 @@ import type {
 describe("document loading", () => {
   test("loads one document through the source adapter", async () => {
     const sourceDocument = document("docs/example.md", "# Example\n");
-    const source: SourceAdapter = {
+    const source: DocumentSource = {
       list: vi.fn(),
       read: vi.fn(async () => sourceDocument),
     };
@@ -94,7 +94,7 @@ describe("public document workflow", () => {
       "docs/guide.md",
       "---\ndoctype: guide\n---\n\n# Guide\n",
     );
-    const source: SourceAdapter = {
+    const source: DocumentSource = {
       list: vi.fn(),
       read: vi.fn(async () => sourceDocument),
     };
@@ -266,9 +266,9 @@ function document(path: string, content: string): SourceDocument {
   };
 }
 
-function sourceWithEntries(entries: SourceEntry[]): SourceAdapter & {
-  list: ReturnType<typeof vi.fn<SourceAdapter["list"]>>;
-  read: ReturnType<typeof vi.fn<SourceAdapter["read"]>>;
+function sourceWithEntries(entries: SourceEntry[]): DocumentSource & {
+  list: ReturnType<typeof vi.fn<DocumentSource["list"]>>;
+  read: ReturnType<typeof vi.fn<DocumentSource["read"]>>;
 } {
   const documents = new Map(
     entries.map((entry) => [entry.id, entry as SourceDocument]),

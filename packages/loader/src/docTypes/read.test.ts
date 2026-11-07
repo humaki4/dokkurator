@@ -2,7 +2,7 @@ import { expect, test, vi } from "vitest";
 import { DEFAULT_DOCTYPES_DIRECTORY } from "./types.js";
 import { readDocType, readDocTypes } from "./read.js";
 import type {
-  SourceAdapter,
+  DocumentSource,
   SourceDocument,
   SourceEntry,
 } from "../source-adapter/index.js";
@@ -20,7 +20,7 @@ test("loads all DocType files through the source adapter without parsing", async
     ],
     ["decision/rules.yml", document("decision/rules.yml", "rules: []\n")],
   ]);
-  const source: SourceAdapter = {
+  const source: DocumentSource = {
     list: vi.fn(),
     read: vi.fn(async (id) => {
       const result = documents.get(id);
@@ -43,7 +43,7 @@ test("loads a DocType without optional template and rules", async () => {
     "decision/definition.yml",
     "name: decision\nmetadata:\n  type: object\n",
   );
-  const source: SourceAdapter = {
+  const source: DocumentSource = {
     list: vi.fn(),
     read: vi.fn(async (id) => {
       if (id === definition.id) return definition;
@@ -101,9 +101,9 @@ function document(path: string, content: string): SourceDocument {
 function sourceWithDocTypes(
   root: string,
   names: string[],
-): SourceAdapter & {
-  list: ReturnType<typeof vi.fn<SourceAdapter["list"]>>;
-  read: ReturnType<typeof vi.fn<SourceAdapter["read"]>>;
+): DocumentSource & {
+  list: ReturnType<typeof vi.fn<DocumentSource["list"]>>;
+  read: ReturnType<typeof vi.fn<DocumentSource["read"]>>;
 } {
   const documents = new Map<string, SourceDocument>();
   const entries: SourceEntry[] = [];

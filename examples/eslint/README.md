@@ -1,4 +1,10 @@
-# Dieselbe Sammlung mit ESLint prüfen
+---
+doctype: guide
+title: Dieselbe Sammlung mit ESLint prüfen
+audience: developer
+---
+
+## Einstieg
 
 Dieses Beispiel verwendet Dokumente, acht DocTypes, Schema und eigene Regel aus
 [der gemeinsamen Sammlung](../documentation/README.md). Es enthält keine Kopien der Beispieldaten.

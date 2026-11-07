@@ -5,7 +5,7 @@ import {
   loadDocument,
   loadDocuments,
 } from "./index.js";
-import type { SourceAdapter } from "./index.js";
+import type { DocumentSource } from "./index.js";
 import type { ParsedDocType, ParsedDocument } from "./index.js";
 
 test("exposes parsed results at all public loading boundaries", () => {
@@ -18,6 +18,8 @@ test("exposes parsed results at all public loading boundaries", () => {
 });
 
 test("accepts the source adapter abstraction at the public boundary", () => {
-  expectTypeOf(loadDocTypes).parameter(0).toEqualTypeOf<SourceAdapter>();
-  expectTypeOf(loadDocuments).parameter(0).toEqualTypeOf<SourceAdapter>();
+  expectTypeOf(loadDocTypes)
+    .parameter(0)
+    .toEqualTypeOf<DocumentSource | string>();
+  expectTypeOf(loadDocuments).parameter(0).toEqualTypeOf<DocumentSource>();
 });

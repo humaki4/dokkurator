@@ -2,7 +2,10 @@ import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, test, vi } from "vitest";
-import type { SourceAdapter, SourceDocument } from "../source-adapter/index.js";
+import type {
+  DocumentSource,
+  SourceDocument,
+} from "../source-adapter/index.js";
 import { SourceNotFoundError } from "../source-adapter/index.js";
 import { loadDocType, loadDocTypes } from "./index.js";
 
@@ -44,8 +47,8 @@ test("loadDocTypes exposes the complete workflow at the public boundary", async 
 function sourceWithDefinition(
   directory: string,
   name: string,
-): SourceAdapter & {
-  list: ReturnType<typeof vi.fn<SourceAdapter["list"]>>;
+): DocumentSource & {
+  list: ReturnType<typeof vi.fn<DocumentSource["list"]>>;
 } {
   const definition = document(
     `${directory}/definition.yml`,

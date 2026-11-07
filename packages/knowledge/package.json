@@ -17,7 +17,7 @@
   "scripts": {
     "generate": "mkdir -p src/search/generated && peggy --format es --dts --output src/search/generated/search-query-parser.js src/search/search-query.peggy",
     "prebuild": "pnpm generate",
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.build.json",
     "pretypecheck": "pnpm generate",
     "typecheck": "tsc -p tsconfig.check.json",
     "pretest": "pnpm generate",
