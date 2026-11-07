@@ -39,4 +39,4 @@ the second argument, keyed by schema URI.
 For a complete configuration that includes Markdown setup and the recommended
 Dokkurator profile, use [`createLintConfig`](../README.md#quick-start) instead.
 For an executable integration, see the
-[validator example](../../../examples/validator/eslint-plugin.config.mjs).
+[ESLint example](../../../../examples/eslint/eslint.config.mjs).

@@ -189,6 +189,13 @@ Die Ausgabe nennt pro Source die Anzahl neu oder erneut indexierter sowie
 entfernter Dokumente. `.git`, `.dokkurator`, `.nx`, `node_modules` und `dist`
 werden standardmäßig von der Dokumenterkennung ausgeschlossen.
 
+Indexierung ist unabhängig von Validierung. Auch bei YAML-Syntax- oder
+Konvertierungsfehlern in der Frontmatter bleibt der Markdown-Inhalt durchsuchbar.
+Diese Dokumente erhalten leere Metadaten und keinen DocType; entsprechende
+Metadatenfilter finden sie daher nicht. `validate` meldet die Parsefehler weiterhin.
+Gültig geparste, aber schemawidrige Metadaten werden unverändert indexiert.
+Lese-, Source- und Datenbankfehler bleiben operative Fehler.
+
 ## `diff [source-id]`
 
 Vergleicht den aktuellen Stand einer oder aller Sources mit dem zuletzt

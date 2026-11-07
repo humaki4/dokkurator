@@ -7,7 +7,7 @@ JavaScript.
 
 The package is currently private and used from this pnpm workspace; it is not
 published to npm. For an end-to-end example, see the
-[validator example project](../../examples/validator/README.md).
+[validator example project](../../examples/documentation/validation.md).
 
 ## Quick start
 
@@ -61,7 +61,7 @@ setup. Project-level validation is also available through
 
 - [Rule reference](./docs/guides/rules.md)
 - [Direct ESLint plugin integration](./docs/guides/eslint-plugin.md)
-- [Validator example project](../../examples/validator/README.md)
+- [Validator example project](../../examples/documentation/validation.md)
 - [Loader metadata schemas](../loader/README.md#metadata-compact-fields-or-json-schema)
   - [Loader metadata schemas](../loader/README.md#metadata-compact-fields-or-json-schema)
 

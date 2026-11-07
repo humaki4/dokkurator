@@ -12,22 +12,25 @@ const cli = fileURLToPath(
 );
 
 test.each([
-  { project: "minimal", count: 1, failed: 0, status: 0 },
+  { project: "../minimal-validation", count: 1, failed: 0, status: 0 },
   { project: ".", count: 24, failed: 14, status: 1 },
 ])(
   "validates $project through the CLI without preparing an index",
   ({ project, count, failed, status }) => {
     const fixture = mkdtempSync(join(tmpdir(), "dokkurator-example-"));
     onTestFinished(() => rmSync(fixture, { recursive: true, force: true }));
-    for (const entry of [
-      "minimal",
-      "documents",
-      "_dokkurator",
-      "schemas",
-      "rules",
-      "dokkurator.config.mjs",
-    ]) {
-      cpSync(join(root, entry), join(fixture, entry), { recursive: true });
+    for (const entry of count === 1
+      ? ["documents", "_dokkurator", "dokkurator.config.mjs", "README.md"]
+      : [
+          "documents",
+          "_dokkurator",
+          "schemas",
+          "rules",
+          "dokkurator.config.mjs",
+        ]) {
+      cpSync(join(root, project, entry), join(fixture, entry), {
+        recursive: true,
+      });
     }
     for (const format of ["stylish", "json"]) {
       const result = spawnSync(
@@ -36,7 +39,7 @@ test.each([
           "--disable-warning=ExperimentalWarning",
           cli,
           "--project",
-          join(fixture, project),
+          fixture,
           "validate",
           "--format",
           format,
@@ -76,8 +79,6 @@ test.each([
         expect(result.stdout).toBe("");
       }
     }
-    expect(existsSync(join(fixture, project, ".dokkurator/index.db"))).toBe(
-      false,
-    );
+    expect(existsSync(join(fixture, ".dokkurator/index.db"))).toBe(false);
   },
 );

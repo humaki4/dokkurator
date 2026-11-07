@@ -14,8 +14,8 @@ component: examples
 
 ## Umfang
 
-`examples/validator-eslint` als eigenes privates Workspace-Beispiel anlegen.
-Die ESLint-Integration aus `examples/validator` dorthin verschieben, ohne
+`examples/eslint` als eigenes privates Workspace-Beispiel anlegen.
+Die ESLint-Integration aus `examples/documentation` dorthin verschieben, ohne
 Dokumente, DocTypes, Schemas oder Custom Rule zu kopieren.
 
 Eine gut lesbare `eslint.config.mjs` als Standardweg zeigen. Die zweite vorhandene

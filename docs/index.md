@@ -13,7 +13,7 @@ from intended architecture; architecture documents remain drafts.
 
 ## Getting started
 
-- [Runnable Validator example](../examples/validator/README.md): validate one document, then explore schemas and custom rules.
+- [Validation and Knowledge/Search example](../examples/documentation/README.md): validate and search the same document collection.
 - [Project configuration](./configuration.md): sources, paths, JavaScript configuration, and defaults.
 - [CLI reference](../apps/cli/docs/commands.md): currently available commands.
 

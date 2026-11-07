@@ -4,10 +4,10 @@ import {
   createLintConfig,
   prepareLintConfiguration,
 } from "@dokkurator/validator";
-import projectConfig from "../validator/dokkurator.config.mjs";
+import projectConfig from "../documentation/dokkurator.config.mjs";
 
 const app = createDokkurator({
-  root: fileURLToPath(new URL("../validator/", import.meta.url)),
+  root: fileURLToPath(new URL("../documentation/", import.meta.url)),
 });
 await app.open();
 let configuration;

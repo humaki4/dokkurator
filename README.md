@@ -8,7 +8,7 @@ The project follows a docs-as-code approach: repositories remain the source of t
 
 ## Getting started
 
-- [Runnable Validator example](./examples/validator/README.md): validate one document, then explore schemas and custom rules.
+- [Validation and Knowledge/Search example](./examples/documentation/README.md): validate and search the same document collection.
 - [Project configuration](./docs/configuration.md): sources, paths, JavaScript configuration, and defaults.
 - [CLI reference](./apps/cli/docs/commands.md): currently available commands.
 
@@ -41,9 +41,13 @@ The repository is a pnpm monorepo orchestrated with Nx.
 │   ├── core/
 │   ├── knowledge/
 │   ├── loader/
-│   └── validator/
+│   ├── documentation/
+│   ├── minimal-validation/
+│   └── eslint/
 ├── examples/
-│   └── validator/
+│   ├── documentation/
+│   ├── minimal-validation/
+│   └── eslint/
 └── docs/
 ```
 
@@ -57,14 +61,14 @@ The repository is a pnpm monorepo orchestrated with Nx.
 
 Each package can be consumed through its public package root. Package responsibilities and dependency rules are described in [AGENTS.md](./AGENTS.md).
 
-Runnable [Validator examples](./examples/validator/README.md) demonstrate eight
+Runnable [validation and search examples](./examples/documentation/README.md) demonstrate eight
 DocTypes, compact and full JSON Schemas, valid and invalid documents, a custom
-rule, and direct ESLint integration. See [examples](./examples/README.md) for the
-example collection; Knowledge examples are planned separately.
+rule, Knowledge indexing and search, and direct ESLint integration. See [examples](./examples/README.md) for the
+example collection.
 
 ### Applications
 
-- **@dokkurator/cli** is the current local project interface. It manages and prepares configured sources and offers commands for indexing, diffing, searching, inspecting DocTypes/documents, and watching sources. CLI validation and its example are planned; validation already works through Core and ESLint. See the [CLI README](./apps/cli/README.md) and [command reference](./apps/cli/docs/commands.md).
+- **@dokkurator/cli** is the current local project interface. It manages and prepares configured sources and offers commands for indexing, diffing, searching, inspecting DocTypes/documents, and watching sources. Validation is available through the CLI, Core, and ESLint. See the [CLI README](./apps/cli/README.md) and [command reference](./apps/cli/docs/commands.md).
 - **@dokkurator/catalog-server** is the scaffold for a Fastify server as a show case. Catalog routes are not implemented yet; see the [server README](./apps/catalog-server/README.md).
 - **explorer-ui** is the placeholder for the show case ui, currently a React/Vite starter. It is not yet connected to Dokkurator catalog workflows.
 

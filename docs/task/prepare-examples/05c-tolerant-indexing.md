@@ -1,12 +1,15 @@
 ---
 doctype: task
 title: Dokumente trotz ungültiger Frontmatter indexieren
-status: open
+status: done
 component: knowledge
 tags: [indexing, loader, cli]
 ---
 
 # Dokumente trotz ungültiger Frontmatter indexieren
+
+Das verbindliche Verhalten und seine Testabdeckung sind in der
+[Knowledge-Spec](../../../packages/knowledge/docs/specs/tolerant-indexing.md) beschrieben.
 
 ## Ziel
 
@@ -71,3 +74,15 @@ Ausschluss der Fehlersammlung abschließen. Die gemeinsame Konfiguration bleibt
 unverändert; die README erklärt, dass auch absichtlich fehlerhafte Dokumente
 indexiert werden. Alle Suchbeispiele und der Ablauf Ändern → `diff` → `index`
 werden gegen die vollständige Sammlung geprüft.
+
+## Umsetzung und Prüfung
+
+Beide Knowledge-Einstiege (`indexDocuments` und `indexDocumentChanges`) laden
+Frontmatter jetzt mit `parseErrors: "collect"`. Git liest weiterhin die Revision
+des Diffs. Signaturen, Rückgabetypen und strikter Loader-Default bleiben erhalten.
+
+Regressionstests decken vollständige und inkrementelle Indexierung, YAML-Syntax-
+und Konvertierungsfehler, Metadatenwechsel, Löschung, unveränderte Checkpoints,
+Git-Revisionsbindung, Leseprobleme, SQLite-Rollback sowie Core und CLI ab.
+Knowledge-README und CLI-Referenz erklären die Trennung von Indexierung und
+Validierung. Die ausführbare Beispieldokumentation bleibt Aufgabe von 05d.

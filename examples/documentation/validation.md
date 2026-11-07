@@ -1,36 +1,13 @@
----
-type: readmes
----
+# Dokumente validieren
 
-# Validator ausprobieren
-
-Der Standardweg verwendet die CLI: Dokumente und DocTypes anlegen, bei Bedarf
-Regeln konfigurieren und `dokkurator validate` starten. Ein Knowledge-Index ist
-für Validierung nicht nötig. Alle Daten bleiben lokal.
-
-## Einfach starten
-
-Einmalig im Repository-Stammverzeichnis installieren und bauen
-(Node.js `>=22.13.0 <23` oder `>=24.0.0`, pnpm `>=10 <11`):
-
-```sh
-pnpm install
-pnpm --filter @dokkurator/cli... build
-cd examples/validator
-pnpm start
-```
-
-`start` und `demo` führen `dokkurator --project minimal validate` aus.
-Dieser Minimalfall prüft ein Dokument mit einem Compact-DocType und endet mit
-Exit-Code 0; der Standardformatter gibt bei Erfolg nichts aus. Die leere `minimal/dokkurator.config.mjs` verhindert, dass die
-Konfiguration des Elternordners geladen wird. Im eigenständigen Projekt kann sie
-entfallen; die recommended-Regeln sind automatisch aktiv.
+Voraussetzung: [Installation und Build](./README.md#vorbereitung).
+Alle Befehle laufen in `examples/documentation`.
 
 ## Die Sammlung prüfen
 
 ```sh
-pnpm run demo:all
-pnpm run demo:json
+pnpm run validate
+pnpm run validate:json
 # dieselben Aufrufe direkt:
 pnpm exec dokkurator validate
 pnpm exec dokkurator validate --format json
@@ -45,46 +22,22 @@ erfolgreich. JSON ist auch bei Fehlern parsebar: `results` enthält Dateiergebni
 
 ## Direkte Core-Einbindung
 
-Das einzige ausführbare JS-Beispiel [validate.mjs](./validate.mjs) öffnet den
-Minimalfall, validiert, gibt den gemeinsamen JSON-Bericht aus und schließt die
-Anwendung in `finally`:
+Das einzige ausführbare JS-Beispiel [validate.mjs](./validate.mjs) öffnet die
+gemeinsame Sammlung, validiert, gibt den gemeinsamen JSON-Bericht aus und schließt die
+Anwendung in `finally`. Auch dieser Aufruf endet wegen der absichtlichen
+Fehler mit Exit-Code 1:
 
 ```sh
-pnpm run demo:core
+pnpm run validate:core
 pnpm test
 ```
 
 Core lädt Dokumente, DocTypes und Regeln selbst. `open()` und `validate()`
-benötigen keinen Index. Die [separate ESLint-Integration](../validator-eslint/README.md)
+benötigen keinen Index. Die [separate ESLint-Integration](../eslint/README.md)
 verwendet dieselbe Sammlung und Konfiguration.
 
-## Compact-Schreibweise ausprobieren
-
-Der minimale [DocType](./minimal/_dokkurator/.doctypes/guide/definition.yml)
-sieht so aus:
-
-```yaml
-name: guide
-metadata:
-  title:
-    type: string
-    required: true
-structure:
-  requiredHeadings: [Einstieg]
-```
-
-Das zugehörige [Dokument](./minimal/documents/guide.md) verwendet `doctype: guide`
-und enthält einen Titel sowie die Überschrift `Einstieg`. Entferne zum
-Ausprobieren den Titel oder die Überschrift und starte erneut `pnpm start`.
-Jetzt erhältst du einen Fehler mit seiner Position im Dokument und Exit-Code 1.
-
-Bei Compact stehen die Felder direkt unter `metadata`; Pflichtfelder verwenden
-`required: true`. Bei vollständigem JSON Schema stehen die Felder unter
-`metadata.properties`, und `metadata.required` enthält eine Liste ihrer Namen.
-Auch [guide](./_dokkurator/.doctypes/guide/definition.yml),
-[release](./_dokkurator/.doctypes/release/definition.yml) und
-[runbook](./_dokkurator/.doctypes/runbook/definition.yml) in der größeren Sammlung
-verwenden Compact.
+Der eigenständige [Minimalfall](../minimal-validation/README.md) zeigt die
+Compact-Schreibweise mit einem Dokument.
 
 ## Dateien und DocTypes
 
@@ -116,28 +69,6 @@ Prüfung. Die beiden zusätzlichen Regeln sind als Warnungen aktiviert.
 und Inline-Code werden nicht geprüft. `$ref` im Reference-DocType nutzt das
 importierte Schema ohne Netzwerkzugriff. Änderungen an Dokumenten, DocTypes,
 Schema oder Regel gelten auch für ESLint ohne Kopier- oder Vorbereitungsschritt.
-
-## Knowledge per CLI (Vorschau)
-
-Knowledge verwendet dasselbe Dokkurator-Projekt und dieselbe vollständige
-Sammlung. Die Demo wartet noch auf [tolerante Indexierung](../../docs/task/prepare-examples/05c-tolerant-indexing.md):
-absichtlich ungültiges YAML bricht den Indexlauf derzeit ab. Der Minimalfall ist
-ein eigener Projekt-Root und liegt außerhalb der gemeinsamen Sammlung.
-Nach Umsetzung der Voraussetzung ist der vorgesehene Ablauf:
-
-```sh
-pnpm run knowledge:index
-pnpm run knowledge:search ESLint
-pnpm run knowledge:search status:accepted
-# documents/valid/decision.md bearbeiten, dann:
-pnpm run knowledge:diff
-pnpm run knowledge:index
-pnpm run knowledge:diff
-```
-
-`diff` verändert den Index nicht; `index` arbeitet inkrementell. Der lokale Index
-liegt unter `.dokkurator/index.db` und wird von Git ignoriert. Weitere Befehle
-stehen in der [CLI-Referenz](../../apps/cli/docs/commands.md).
 
 ## Grenzen und Hinweise
 

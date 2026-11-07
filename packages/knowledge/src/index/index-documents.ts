@@ -23,6 +23,7 @@ export async function indexDocuments({
   excludeDirectories,
 }: IndexDocumentsOptions): Promise<IndexDocumentsResult> {
   const parsedDocuments = await loadDocuments(source, {
+    parseErrors: "collect",
     ...(documentsDirectory === undefined ? {} : { documentsDirectory }),
     ...(excludeDirectories === undefined ? {} : { excludeDirectories }),
   });

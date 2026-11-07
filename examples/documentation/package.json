@@ -1,0 +1,32 @@
+{
+  "name": "@dokkurator/example-documentation",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "dokkurator --project . validate",
+    "validate:json": "dokkurator --project . validate --format json",
+    "validate:core": "node validate.mjs",
+    "index": "dokkurator --project . index",
+    "search": "dokkurator --project . search",
+    "diff": "dokkurator --project . diff",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.check.json",
+    "lint": "eslint --config ../../eslint.config.mjs *.mjs *.ts rules"
+  },
+  "dependencies": {
+    "@dokkurator/cli": "workspace:*",
+    "@dokkurator/core": "workspace:*"
+  },
+  "nx": {
+    "targets": {
+      "test": {
+        "dependsOn": [
+          "^build"
+        ]
+      }
+    }
+  },
+  "devDependencies": {
+    "@eslint/markdown": "8.0.3"
+  }
+}

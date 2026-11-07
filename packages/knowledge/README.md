@@ -44,3 +44,15 @@ contract and does not depend on a concrete source adapter.
 Knowledge is a library package and has no standalone CLI. User-facing index,
 diff and search commands are provided by the global `dokkurator` CLI through
 `@dokkurator/core`.
+
+Indexing is independent of validation. Both indexing entry points tolerate YAML
+syntax and conversion errors in frontmatter: Markdown content and source data
+remain searchable, but the document has empty metadata and no DocType. Metadata
+filters therefore cannot match fields from invalid frontmatter. Parse diagnostics
+are not persisted in the index; use `validate` to inspect them. Validly parsed
+metadata is indexed even when it violates a DocType schema. Source, read, and
+database failures remain operational errors.
+
+The [Knowledge/Search example](../../examples/documentation/search.md) demonstrates
+indexing, metadata filters, and incremental updates on the same collection used
+by the [validation example](../../examples/documentation/validation.md).

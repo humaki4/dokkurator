@@ -1,19 +1,19 @@
 # Dieselbe Sammlung mit ESLint prüfen
 
 Dieses Beispiel verwendet Dokumente, acht DocTypes, Schema und eigene Regel aus
-[validator](../validator/README.md). Es enthält keine Kopien der Beispieldaten.
+[der gemeinsamen Sammlung](../documentation/README.md). Es enthält keine Kopien der Beispieldaten.
 
 Einmalig im Repository-Stammverzeichnis:
 
 ```sh
 pnpm install
 pnpm --filter @dokkurator/core... build
-cd examples/validator-eslint
+cd examples/eslint
 pnpm start
 ```
 
 `start` wechselt in das gemeinsame Projekt und führt
-`eslint --config ../validator-eslint/eslint.config.mjs documents` aus.
+`eslint --config ../eslint/eslint.config.mjs documents` aus.
 So bleiben ESLints Dateimuster innerhalb seines Arbeitsverzeichnisses.
 Die 24 Dokumente enthalten gezielte Fehler und zwei reine Warnungsfälle;
 ESLint endet deshalb absichtlich mit Exit-Code 1.
@@ -30,4 +30,4 @@ pnpm typecheck
 pnpm lint
 ```
 
-Der Vergleichstest prüft Regeln, Schweregrade und Positionen gegen Core ; ein CLI-Test prüft den Einstieg aus diesem Beispielverzeichnis.
+Der Vergleichstest prüft Regeln, Schweregrade und Positionen gegen Core; ein CLI-Test prüft den Einstieg aus diesem Beispielverzeichnis.

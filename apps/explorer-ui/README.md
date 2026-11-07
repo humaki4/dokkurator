@@ -5,7 +5,7 @@ currently contains a React/TypeScript/Vite starter, including its starter screen
 It does not yet connect to Catalog Server or offer document search or navigation.
 
 For a working Dokkurator example, start with the
-[Validator demo](../../examples/validator/README.md). The intended UI scope is
+[documentation example](../../examples/documentation/README.md). The intended UI scope is
 outlined in the [architecture draft](../../docs/architecture/explorer-ui.md).
 
 ## Development

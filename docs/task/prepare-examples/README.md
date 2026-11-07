@@ -29,7 +29,7 @@ Validierungsengine. Dieser Ordner plant die Umsetzung; er implementiert sie nich
   [withDokkurator](../../../apps/cli/src/core-runtime.ts) bietet bereits den
   Lebenszyklus und Source-Hinweise. Der Programmeinstieg setzt bei geworfenen
   Fehlern Status 1; zurückgegebene Validierungsfehler benötigen eigene Behandlung.
-- [Beispiele](../../../examples/validator/package.json) starten eigene
+- [Beispiele](../../../examples/documentation/package.json) starten eigene
   `.mjs`-Programme. Minimalstart und Sammlung verwenden schon Core; zusätzliche
   Beispiele demonstrieren Editor-Text und die direkte ESLint-Integration.
 - Die Sammlung hat 24 Dokumente: acht gültige, 16 negative Beispiele, darunter
@@ -82,7 +82,7 @@ Nicht vorgesehen sind neue Konfigurationsformate, Dateiglob-Argumente,
 Gruppenfilter im allgemeinen CLI-Befehl, stdin/Editor-Text, Watch-Validierung,
 Auto-Fixes, Warnungsschwellen oder eine Kopplung von Validierung und Indexierung.
 Die Gruppenrunner und das virtuelle Beispiel entfallen; eine kleine direkte
-JS-Einbindung bleibt. ESLint zieht nach `examples/validator-eslint` um.
+JS-Einbindung bleibt. ESLint zieht nach `examples/eslint` um.
 Knowledge/Search soll denselben Datenbestand und dasselbe Dokkurator-Projekt
 weiterverwenden, ohne Dokumente oder Konfiguration zu kopieren.
 Die tolerante Knowledge-Indexierung ist keine Voraussetzung für `validate`.
@@ -91,17 +91,19 @@ Die tolerante Knowledge-Indexierung ist keine Voraussetzung für `validate`.
 
 ```text
 examples/
-├── validator/
-│   ├── README.md                 # CLI zuerst; Knowledge/Search als weiterer Ablauf
+├── documentation/
+│   ├── README.md                 # gemeinsamer Einstieg
+│   ├── validation.md             # Validator
+│   ├── search.md                 # Knowledge/Search
 │   ├── package.json
-│   ├── dokkurator.config.mjs     # gemeinsame Projektkonfiguration
-│   ├── documents/               # gemeinsame erweiterte Sammlung
+│   ├── dokkurator.config.mjs
+│   ├── documents/
 │   ├── _dokkurator/.doctypes/
 │   ├── schemas/
 │   ├── rules/no-todo.mjs
-│   ├── validate.mjs              # einziges kleines JS-Einbindungsbeispiel
-│   └── minimal/                  # bewusst eigenständiger Minimalfall
-└── validator-eslint/
+│   └── validate.mjs
+├── minimal-validation/           # eigenständiger Minimalfall
+└── eslint/
     ├── README.md
     ├── package.json
     └── eslint.config.mjs         # nutzt die gemeinsame Sammlung

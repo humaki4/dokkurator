@@ -16,13 +16,13 @@ und kein neues Hilfspaket oder allgemeines Setup-Framework.
 
 ## Vorgeschlagene Festlegung
 
-`examples/validator` bleibt der kanonische Datenbestand und das Dokkurator-Projekt.
-Knowledge/Search wird als weiterer CLI-Ablauf auf demselben Projekt umgesetzt,
-mit eigenem kurzen README-Abschnitt oder Guide. Dafür sind weder ein zweiter
+`examples/documentation` bleibt der kanonische Datenbestand und das Dokkurator-Projekt.
+Knowledge/Search wird als gleichwertiger CLI-Ablauf auf demselben Projekt umgesetzt,
+mit eigener Anleitung neben der Validierungsanleitung. Dafür sind weder ein zweiter
 Datenordner noch eine zweite Dokkurator-Konfiguration erforderlich.
 
-`examples/validator-eslint` enthält nur seine spezifische ESLint-Konfiguration,
-Scripts, README und Tests. Es verweist auf die Sammlung unter `../validator` und
+`examples/eslint` enthält nur seine spezifische ESLint-Konfiguration,
+Scripts, README und Tests. Es verweist auf die Sammlung unter `../documentation` und
 verwendet deren Dokkurator-Konfiguration für Plugins, Schemas und Regeln wieder.
 Ein solches gemeinsames Beispiel-Asset ist kein Import fremder Paketinternals;
 alle Bibliotheksimporte bleiben öffentliche Paket-Root-APIs. Kein Import von

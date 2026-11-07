@@ -15,9 +15,9 @@ component: documentation
 ## Umfang
 
 `apps/cli/docs/commands.md`, CLI-README, `docs/architecture/cli.md` und
-`examples/validator/README.md` auf den tatsächlich umgesetzten Ablauf bringen.
+`examples/documentation/README.md` auf den tatsächlich umgesetzten Ablauf bringen.
 Den CLI-Einstieg vor dem kleinen JS-Beispiel erklären. ESLint unter
-`examples/validator-eslint` mit eigener README verlinken; Virtual- und
+`examples/eslint` mit eigener README verlinken; Virtual- und
 Gruppenrunner-Anleitungen entfernen. Die Beispielübersicht aktualisieren.
 
 Befehlssyntax, Projektfindung, optionale Source-ID, Formate, Ausgabekanäle und

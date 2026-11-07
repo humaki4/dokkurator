@@ -5,8 +5,9 @@ export default defineConfig({
     projects: [
       "apps/*",
       "packages/*",
-      "examples/validator",
-      "examples/validator-eslint",
+      "examples/documentation",
+      "examples/minimal-validation",
+      "examples/eslint",
     ],
     coverage: {
       provider: "v8",

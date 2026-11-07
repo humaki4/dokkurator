@@ -174,3 +174,41 @@ async function temporaryDirectory(): Promise<string> {
   temporaryDirectories.push(directory);
   return directory;
 }
+
+test("prepares and syncs invalid frontmatter while validation still reports it", async () => {
+  const root = await localProject();
+  const path = join(root, "repo/docs/broken.md");
+  await writeFile(path, "---\ntitle: [\n---\n# Recoverable\n");
+  const app = createDokkurator({ root });
+  await app.open();
+  try {
+    await expect(app.prepare()).resolves.toMatchObject({
+      errors: [],
+      results: [{ indexedDocuments: 2 }],
+    });
+    expect(await app.search("Recoverable")).toHaveLength(1);
+    const validation = await app.validate();
+    expect(validation.errors).toEqual([]);
+    expect(
+      validation.results
+        .flatMap(({ documents }) => documents)
+        .find(({ path }) => path.endsWith("broken.md"))?.diagnostics,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ phase: "parse", severity: "error" }),
+      ]),
+    );
+    await writeFile(path, "---\nvalue: *missing\n---\n# Converted\n");
+    await expect(app.sync()).resolves.toMatchObject({
+      errors: [],
+      results: [{ indexedDocuments: 1 }],
+    });
+    expect(await app.search("Converted")).toHaveLength(1);
+    await expect(app.diff()).resolves.toMatchObject({
+      errors: [],
+      results: [{ diff: { changes: [] } }],
+    });
+  } finally {
+    await app.close();
+  }
+});

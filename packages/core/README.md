@@ -23,7 +23,7 @@ try {
 Without configured sources, the project directory is used as source `root`.
 Defaults discover Markdown recursively and DocTypes under `_dokkurator/.doctypes`.
 A project path, one DocType definition and one document are enough to get started.
-The [minimal example](../../examples/validator/README.md) demonstrates this flow.
+The [minimal example](../../examples/minimal-validation/README.md) demonstrates this flow.
 
 `validate({ sourceId: "docs" })` restricts validation to one source.
 Core loads its configuration, DocTypes and original texts, prepares schemas

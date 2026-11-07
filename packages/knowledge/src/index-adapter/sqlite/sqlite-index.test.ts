@@ -252,6 +252,34 @@ describe("SQLiteIndex", () => {
   });
 });
 
+test("rolls back document mutations and checkpoint when a source update fails", async () => {
+  const { index } = await createIndex();
+  try {
+    const document = exampleDocument();
+    const state = {
+      sourceId: "docs",
+      revision: { type: "content-hash" as const, id: "before" },
+      files: [],
+    };
+    await index.applySourceUpdate({ state, upsert: [document], remove: [] });
+    await expect(
+      index.applySourceUpdate({
+        state: { ...state, revision: { type: "content-hash", id: "after" } },
+        remove: [document.id],
+        upsert: [
+          { ...document, id: "docs:broken.md", metadata: { unsupported: 1n } },
+        ],
+      }),
+    ).rejects.toThrow();
+    expect(await index.get(document.id)).toEqual(document);
+    expect(await index.get("docs:broken.md")).toBeUndefined();
+    expect(await index.getSourceState("docs")).toEqual(state);
+    expect(await index.search({ text: "authentication" })).toHaveLength(1);
+  } finally {
+    index.close();
+  }
+});
+
 async function createIndex(): Promise<{
   index: SQLiteIndex;
   filename: string;

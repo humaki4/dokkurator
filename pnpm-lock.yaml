@@ -144,7 +144,7 @@ importers:
         specifier: ^8.3.0
         version: 8.3.0(@types/node@24.13.6)(esbuild@0.28.2)(yaml@2.9.1)
 
-  examples/validator:
+  examples/documentation:
     dependencies:
       '@dokkurator/cli':
         specifier: workspace:*
@@ -157,7 +157,7 @@ importers:
         specifier: 8.0.3
         version: 8.0.3
 
-  examples/validator-eslint:
+  examples/eslint:
     dependencies:
       '@dokkurator/core':
         specifier: workspace:*
@@ -168,6 +168,12 @@ importers:
       eslint:
         specifier: 10.10.0
         version: 10.10.0
+
+  examples/minimal-validation:
+    dependencies:
+      '@dokkurator/cli':
+        specifier: workspace:*
+        version: link:../../apps/cli
 
   packages/config:
     dependencies:

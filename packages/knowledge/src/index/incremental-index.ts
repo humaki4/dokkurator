@@ -75,13 +75,12 @@ export async function indexDocumentChanges(
   const documents = await Promise.all(
     changed.map(async (change) =>
       buildKnowledgeDocument(
-        await loadDocument(
-          source,
-          change.path,
-          diff.state.revision.type === "git-commit"
+        await loadDocument(source, change.path, {
+          parseErrors: "collect",
+          ...(diff.state.revision.type === "git-commit"
             ? { revision: diff.state.revision.id }
-            : undefined,
-        ),
+            : {}),
+        }),
       ),
     ),
   );

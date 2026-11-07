@@ -65,3 +65,42 @@ async function temporaryDirectory(): Promise<string> {
   temporaryDirectories.push(directory);
   return directory;
 }
+
+test("rebuilds mixed frontmatter but preserves the index on a read failure", async () => {
+  const { SQLiteIndex } =
+    await import("../index-adapter/sqlite/sqlite-index.js");
+  const root = await temporaryDirectory();
+  const index = new SQLiteIndex({
+    filename: join(root, ".dokkurator/index.db"),
+  });
+  try {
+    for (const [name, metadata] of Object.entries({
+      valid: "doctype: unknown\nstatus: accepted",
+      syntax: "doctype: guide\nstatus: [",
+      alias: "doctype: guide\nvalue: *missing",
+    })) {
+      await writeFile(
+        join(root, `${name}.md`),
+        `---\n${metadata}\n---\n# Searchable\n`,
+      );
+    }
+    const source = new FileSystemSource({ root, sourceId: "docs" });
+    expect(await indexDocuments({ source, index })).toEqual({
+      indexedDocuments: 3,
+    });
+    expect(await index.search({ text: "Searchable" })).toHaveLength(3);
+    for (const name of ["syntax", "alias"]) {
+      expect((await index.get(`docs:${name}.md`))?.metadata).toEqual({});
+      expect((await index.get(`docs:${name}.md`))?.type).toBeUndefined();
+    }
+    const replace = vi.spyOn(index, "replaceAll");
+    vi.spyOn(source, "read").mockRejectedValueOnce(new Error("read failed"));
+    await expect(indexDocuments({ source, index })).rejects.toThrow(
+      "read failed",
+    );
+    expect(replace).not.toHaveBeenCalled();
+    expect(await index.search({ text: "Searchable" })).toHaveLength(3);
+  } finally {
+    index.close();
+  }
+});

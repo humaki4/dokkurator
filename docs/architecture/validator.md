@@ -22,7 +22,7 @@ It has no runtime dependency on Knowledge and performs no cross-document queries
 `createDokkurator` and `app.validate()` coordinate these steps for a project
 without opening a Knowledge index. Direct ESLint integration is also supported.
 The [Validator README](../../packages/validator/README.md) documents the public
-APIs; the [examples](../../examples/validator/README.md) demonstrate both paths.
+APIs; the [examples](../../examples/documentation/README.md) demonstrate both paths.
 
 ## Responsibilities
 

@@ -1,7 +1,8 @@
 import { spawnSync } from "node:child_process";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { afterEach, expect, test } from "vitest";
 
 const roots: string[] = [];
@@ -39,7 +40,13 @@ async function project(severity = "off", missing = false, empty = false) {
 function run(root: string, ...args: string[]) {
   const result = spawnSync(
     process.execPath,
-    [resolve("dist/index.js"), "--project", root, "validate", ...args],
+    [
+      fileURLToPath(new URL("../dist/index.js", import.meta.url)),
+      "--project",
+      root,
+      "validate",
+      ...args,
+    ],
     { encoding: "utf8", env: { ...process.env, INIT_CWD: root } },
   );
   if (result.error) throw result.error;
@@ -99,4 +106,32 @@ test("invalid configuration fails", async () => {
   const result = run(root);
   expect(result.status).toBe(1);
   expect(result.stderr).toContain("error:");
+});
+
+test("indexes and searches malformed frontmatter while validate still fails", async () => {
+  const root = await project();
+  await writeFile(
+    join(root, "repo/docs/broken.md"),
+    "---\ntitle: [\n---\n# Recoverable\n",
+  );
+  const invoke = (...args: string[]) => {
+    const result = spawnSync(
+      process.execPath,
+      [
+        fileURLToPath(new URL("../dist/index.js", import.meta.url)),
+        "--project",
+        root,
+        ...args,
+      ],
+      { encoding: "utf8", env: { ...process.env, INIT_CWD: root } },
+    );
+    if (result.error) throw result.error;
+    expect(result.status, result.stderr).toBe(0);
+    return result.stdout;
+  };
+  expect(invoke("index")).toContain("2 indexed");
+  expect(JSON.parse(invoke("search", "Recoverable"))).toHaveLength(1);
+  expect(invoke("diff")).toContain("0 changes");
+  expect(invoke("index")).toContain("0 indexed");
+  expect(run(root, "--format", "json").status).toBe(1);
 });

@@ -34,7 +34,7 @@ Hilfsdateien und Skripte sind ein ausdrückliches Abnahmekriterium.
   Formatter-Implementierung. Den bisherigen Minimalrunner entsprechend kürzen.
 - Das virtuelle Beispiel vollständig entfernen: `virtual.mjs`,
   `prepare-virtual-project.mjs`, `virtual.dokkurator.config.mjs`, zugehöriger
-  Test, Script und README-Abschnitt. Keine Ersatzdemo mit temporären Dateien.
+  Test, Script und Guide. Keine Ersatzdemo mit temporären Dateien.
 - Die erweiterte Konfiguration übersichtlich halten: JSON-Schema direkt mit
   der unterstützten Node-Importsyntax importieren, `prepare-resources.mjs`
   entfernen, Custom Rule unter `rules/no-todo.mjs` verständlich ablegen.

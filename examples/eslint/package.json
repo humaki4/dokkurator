@@ -1,9 +1,9 @@
 {
-  "name": "@dokkurator/example-validator-eslint",
+  "name": "@dokkurator/example-eslint",
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "cd ../validator && eslint --config ../validator-eslint/eslint.config.mjs documents",
+    "start": "cd ../documentation && eslint --config ../eslint/eslint.config.mjs documents",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.check.json",
     "lint": "eslint --config ../../eslint.config.mjs *.mjs *.ts"

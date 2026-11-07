@@ -1,0 +1,14 @@
+{
+  "name": "@dokkurator/example-minimal-validation",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "dokkurator --project . validate",
+    "validate": "dokkurator --project . validate",
+    "typecheck": "tsc -p tsconfig.check.json",
+    "lint": "eslint --config ../../eslint.config.mjs *.mjs"
+  },
+  "dependencies": {
+    "@dokkurator/cli": "workspace:*"
+  }
+}

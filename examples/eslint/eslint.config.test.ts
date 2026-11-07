@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
 import config from "./eslint.config.mjs";
 
-const root = fileURLToPath(new URL("../validator/", import.meta.url));
+const root = fileURLToPath(new URL("../documentation/", import.meta.url));
 
 const expectedRule = {
   "api-auth": "dokkurator/metadata-schema",
@@ -27,7 +27,7 @@ const expectedRule = {
   "unknown-doctype": "dokkurator/doctype",
 };
 
-describe("runnable Validator examples", () => {
+describe("shared documentation example", () => {
   test("compares Core findings with the shared ESLint configuration", async () => {
     const app = createDokkurator({ root });
     await app.open();

@@ -6,5 +6,5 @@
     "checkJs": true,
     "types": ["node"]
   },
-  "include": ["*.mjs", "*.ts", "rules/*.mjs", "minimal/dokkurator.config.mjs"]
+  "include": ["*.mjs", "*.ts"]
 }
