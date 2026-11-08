@@ -8,3 +8,4 @@ local
 .dokkurator/index.db*
 generated/
 .vscode/
+.agents/
